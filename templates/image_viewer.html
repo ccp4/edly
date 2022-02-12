@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+ <html lang="en">
+
+ <head>
+     <meta charset="utf-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <meta name="description" content="">
+     <meta name="author" content="">
+     <title> Image viewer </title>
+     <link href="/static/css/buttons.css" rel="stylesheet">
+     <link href="/static/css/omsstyle.css" rel="stylesheet">
+     <link href="/static/css/mh.css" rel="stylesheet">
+     <!-- <script src="http://localhost:8001/static/js/script.js"> </script> -->
+     <!-- <link href="static/css/button.css" rel="stylesheet"> -->
+     <script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+ </head>
+
+
+
+
+
+ <body>
+   <header class="header">
+      <h2> Electron diffraction viewer </h2>
+      <p> This is a simple viewer to compare with plotly</p>
+   </header>
+
+   <div class="row">
+     <div class="leftcolumn">
+       <!-- Mode settings -->
+       <div class="settings">
+          <table style="display: inline-table;">
+            <tbody>
+              <tr>
+                <td style="text-align: right;">Mode:</td>
+                <td style="text-align: left;">
+                  <label><input id="rb_frames" onclick="set_mode(0)" type="radio" name="mode" value="frames" title="frames mode" checked=false>frames</label>&nbsp;
+                  <label><input id="rb_rotate" onclick="set_mode(1)" type="radio" name="mode" value="rotate" title="rotate mode" checked=true>rotate</label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="settings">
+          <form id="bloch-form">
+            <input type="hidden" name="theta" id="theta" value="0"/>
+            <input type="hidden" name="phi" id="phi" value="0"/>
+            <input type="hidden" name="thick" id="thick" value="100"/>
+            <table style="display: inline-table;">
+              <tbody>
+                <tr><td style="text-align: left;">Bloch simulation:</td></tr>
+                <tr><td style='text-align: left;'>keV:</td><td style='text-align: left;'><input id='keV' class='txt' type='text' value='200' size='12'></td></tr>
+                <tr><td style="text-align: left;" id="theta">theta:10</td><td style="text-align: left;" id="phi">phi:10</td></tr>
+                <tr>
+                  <td style='text-align: left;'>Nmax : </td><td style='text-align: left;'><input id='Nmax' class='txt' type='text' value='6' size='12'></td>
+                  <td style='text-align: left;'>Smax : </td><td style='text-align: left;'><input id='Smax' class='txt' type='text' value='0.1' size='12'></td>
+                </tr>
+                <tr><td style="text-align: left;">thickness:10</td></tr>
+                <tr>
+                  <td><input type="submit" value="Solve"></td>
+                  <td style='text-align: left;' >Number of beams : </td>
+                  <td style='text-align: left;' id="n_beams" > None </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+        </div>
+
+        <!-- Mode dependent -->
+        <div style="display: none;" id="rotate_settings"></div>
+        <div style="display: none;" id="frame_settings" ></div>
+    </div>
+
+    <div class="rightcolumn" id="display">
+        <a id="frame_ref"     href="/static/png/00001.png" >
+          <img id="frame_img" src ="/static/png/00001.png" >
+        </a>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <h2>Footer</h2>
+  </div>
+</body>
+
+
+
+
+
+<!--
+#################################################################################
+The script
+#################################################################################
+ -->
+<script type="text/javascript">
+  var frame_settings="";
+  var rotate_settings="";
+  var hold_settings="";
+  var hold_mode=true;
+  var labels=["Lattice","potential","Excitation Error","Bloch intensity","Kinematic intensity"];
+  var disp=new Array(["Bloch intensity"]);
+  var thickness=100;
+  var nbeams=0;
+  var gamma=new Array();
+
+  function set_mode(mode){
+    // document.getElementById("rb_frames").checked;
+    switch (mode)
+    {
+      case 0:
+        set_frame_mode();
+        break;
+      case 1:
+        set_rotate_mode();
+        break;
+      default:
+        break;
+    }
+  }
+
+  function set_frame_mode(){
+    rotate_settings="";
+    document.getElementById("rotate_settings").innerHTML = rotate_settings;
+    document.getElementById("rotate_settings").style.display = "none";
+
+    frame_settings="";
+    frame_settings+="<div class='settings'><table style='width: 100%;'><tbody>";
+
+    //frame
+    frame_settings+="<tr><td class='slvpart'><table><tbody>";
+    frame_settings+="<tr><td>Frame : </td><td style='width: 10px;'></td>"
+    frame_settings+="<td><input id='frame_input' class='txt' type='text' value='1' size='12'></td>"
+    frame_settings+="<td><input type = 'submit' value = 'submit' /></td>"
+    frame_settings+="<td><button onclick='increment(-1)' class='previous round'>&#8249;</button></td>"
+    frame_settings+="<td><button onclick='increment(1)'  class='next round'    >&#8250;</button></td>"
+    frame_settings+="</tr>"
+    frame_settings+="</tbody></table></td></tr>";
+    //
+
+    frame_settings+="</tbody></table></div>"
+    document.getElementById("frame_settings").innerHTML = frame_settings;
+    document.getElementById("frame_settings").style.display = "inline";
+  }
+
+  function set_rotate_mode(){
+    frame_settings="";
+    document.getElementById("frame_settings").innerHTML = frame_settings;
+    document.getElementById("frame_settings").style.display = "none";
+
+    rotate_settings="";
+    // rotate_settings+="<div class='settings'><p style='width: 90%;margin: 10px;'>test</p></div>";
+    rotate_settings+="<div class='settings'><table style='width: 100%;'><tbody>";
+    // Orientation
+    rotate_settings+="<tr><td class='slvpart'><table><tbody>";
+    rotate_settings+="<tr><td style='text-align: left; width: 15%;'>Orientation :</td></tr>";
+    rotate_settings+="<tr><td style='width: 15%;'></td>";
+    rotate_settings+="<td style='text-align: left;'>theta : </td><td style='text-align: left;'><input id='theta_input' class='txt' type='text' value='0' size='12'></td>";
+    rotate_settings+="<td style='text-align: left;'>phi   : </td><td style='text-align: left;'><input id='phi_input'   class='txt' type='text' value='0' size='12'></td>";
+    rotate_settings+="</tbody></table></td></tr>";
+    // thickness
+    rotate_settings+="<tr><td class='slvpart'><table><tbody>";
+    rotate_settings+="<tr><td style='text-align: left; width: 15%;'>Thickness :</td><td style='text-align: left;'><input id='theta_input' class='txt' type='text' value='0' size='12'></td></tr>"
+    rotate_settings+="</tbody></table></td></tr>";
+    //display and hold mode
+    rotate_settings+="<tr><td class='slvpart'><table><tbody>";
+    rotate_settings+="<tr><td style='text-align: left;'>Display :</td></tr>"
+    rotate_settings+="<tr><td style='text-align: left;'> <button onclick='toggle_hold_mode()'> Hold </button></td></tr>"
+    rotate_settings+="<tr id='btns_display'></tr>"
+    rotate_settings+="</tbody></table></td></tr>";
+
+    rotate_settings+="</tbody></table></div>"
+
+    document.getElementById("rotate_settings").innerHTML = rotate_settings;
+    set_hold_mode()
+    document.getElementById("rotate_settings").style.display = "inline";
+  }
+
+
+  function set_hold_mode(){
+    hold_settings="";
+    //change button type
+    if ( hold_mode ){
+      for(var i=0; i<labels.length; ++i){
+        hold_settings += "<td style='text-align: left;'><label><input id='smi_"+labels[i]+"' type='checkbox' onchange='display()' title='display "+labels[i]+"'>&nbsp;&nbsp;&nbsp;"+labels[i]+"</label></td>";
+      }
+    }else
+    {
+      for(var i=0; i<labels.length; ++i){
+        hold_settings += "<td style='text-align: left;'><label><input id='smi_"+labels[i]+"' type='radio' name='display_btn' value='"+labels[i]+"' onchange='display()' title='display "+labels[i]+"'>&nbsp;&nbsp;&nbsp;"+labels[i]+"</label></td>";
+      }
+    }
+    // check last item in array
+    document.getElementById("btns_display").innerHTML = hold_settings;
+    if (disp.length >0){
+      disp=new Array(disp[disp.length-1]);
+    }
+    else{
+      disp=new Array(["Bloch intensity"]);
+    }
+    document.getElementById("smi_"+disp[0]).checked=true;
+    // display();
+  }
+
+  function toggle_hold_mode(){
+    hold_mode=!hold_mode;
+    set_hold_mode();
+  }
+
+  function display(){
+    // gather display list
+    disp=new Array();
+    for(var i=0; i<labels.length; ++i){
+      if (document.getElementById("smi_"+labels[i]).checked==true){
+        disp.push(labels[i])
+      }
+    }
+  }
+
+
+  function increment(inc){
+    var frame=parseInt(document.getElementById("frame_input").value);
+    var new_frame    =('00000'+(frame+inc)).slice(-5);
+    var src=document.getElementById("frame_img").src.toString();
+    var new_src="/static/png/"+new_frame+".png"
+    // var new_src="http://127.0.0.1:8001"+"/static/png/"+new_frame+".png"
+    // console.log(new_frame);
+    // console.log(new_src);
+    document.getElementById("frame_img").src=new_src;
+    document.getElementById("frame_ref").value=new_src;
+    document.getElementById("frame_input").value=frame+inc;
+    return;
+  }
+
+  set_mode(1);
+
+  $(document).on('submit','#bloch-form',function(e){
+    e.preventDefault();
+    $.ajax({
+      type:'POST',
+      url:'/solve_bloch',
+      data:{
+          keV:$('#keV').val(),
+          theta:$('#theta').val(),
+          phi:$('#phi').val(),
+          Nmax:$('#Nmax').val(),
+          Smax:$('#Smax').val(),
+          thick:$('#thick').val(),
+        // csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success: function(data){
+        // console.log(data);
+        const obj=JSON.parse(data)
+        const params=obj['params'];
+        nbeams = params[params.length-1]
+        document.getElementById("n_beams").innerHTML=nbeams;
+        gamma=obj['gamma'];
+        console.log(gamma[gamma.length-1]);
+      }
+    });
+  });
+</script>
+
+</html>
