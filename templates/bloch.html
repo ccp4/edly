@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+ <html lang="en" ng-app="app">
+
+ <head>
+     <meta charset="utf-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <meta name="description" content="">
+     <meta name="author" content="">
+     <title> Electron diffraction Dashboard </title>
+     <link rel="shortcut icon" href="static/favicon.ico" >
+     <link href="/static/css/buttons.css" rel="stylesheet">
+     <!-- <link href="/static/css/omsstyle.css" rel="stylesheet">
+     <link href="/static/css/mh.css" rel="stylesheet"> -->
+     <link rel="stylesheet" href="static/bower_components/bootstrap-css/css/bootstrap.min.css">
+     <script src="static/bower_components/angular/angular.min.js"></script>
+     <script src="static/bower_components/angular-aria/angular-aria.js"></script>
+     <script src="static/bower_components/angular-touch/angular-touch.js"></script>
+     <!-- <script src="static/bower_components/angular-route/angular-route.min.js"></script> -->
+     <!-- <script src="static/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script> -->
+     <script src="static/bower_components/jquery/dist/jquery.min.js"></script>
+     <!-- <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css"> -->
+     <script src="static/bower_components/plotlyjs/plotly.js"></script>
+     <!-- <script src="static/bower_components/chart.js/Chart.min.js"></script>
+     <script src="static/bower_components/angular-chart.js/dist/angular-chart.min.js"></script>      -->
+     <script src="static/js/app.js"></script>
+ </head>
+
+
+ <body>
+   <header class="header">
+      <h2> Electron diffraction dashboard </h2>
+   </header>
+
+   <div class="container-fluid mt-3" style="margin:0px;padding-left:0px">
+     <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
+
+      <div class="col-sm-2">
+        <div class="row">
+          frame:<input ng-model="frame" style="width: 50px">
+          <a class="btn btn-primary"  ng-click="dec_frame()">
+            <span class="glyphicon glyphicon-chevron-left"></span >
+          </a>
+          <a class="btn btn-primary"  ng-click="inc_frame()">
+            <span class="glyphicon glyphicon-chevron-right"></span >
+          </a>
+        </div>
+      </div>
+
+      <!-- Simulated image  -->
+      <div class="col-sm-5">
+          <!-- <img src="{{sim_frame}}" > -->
+          <!-- <line-plot width=250, height=800> -->
+          <canvas id="myCanvas" width="240" height="297"
+            style="border:1px solid #d3d3d3;">            
+          </canvas>
+      </div>
+
+      <!-- Experimental image  -->
+      <div class="col-sm-5">
+        <a ng-href="{a exp_frame a}">
+         <img ng-src="{a exp_frame a}" style="width:100%" />
+       </a>
+      </div>
+    </div>
+  </div>
+
+
+</body>
+</html>
