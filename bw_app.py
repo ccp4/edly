@@ -48,8 +48,12 @@ def solve_bloch():
     b0 = bloch.Bloch('diamond',path='dat/',keV=200,u=[1,0,1],Nmax=5,Smax=0.1,
         opts='svt',thick=10)
     b0.df_G['I']*=100
-    fig=px.scatter(b0.df_G,x='px',y='py',size='I')
-    data=fig.to_json()
+    b0.df_G['Vga']*=100
+    toplot=b0.df_G[['px','py','I','Vga']]
+    # fig=px.scatter(b0.df_G,x='px',y='py',size='I',)
+    toplot=toplot.melt(value_vars=['I','Vga'],id_vars=['px','py'])
+    fig=px.scatter(toplot,x='px',y='py',color='variable',size='value')
+    data = fig.to_json()
     return data
 # data={'params':[keV,theta,phi,Nmax,Smax,thick,b0.gammaj.shape[0] ]}
     # return b0.df_G.to_json()
