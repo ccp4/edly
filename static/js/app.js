@@ -4,25 +4,25 @@ app.config(['$interpolateProvider', function($interpolateProvider) {
   $interpolateProvider.endSymbol('a}');
 }]);
 
-//
-// app.directive('linePlot', function () {
-//   // Create a link function
-//   function linkFunc(scope, element, attrs) {
-//       scope.$watch('var_data', function (plots) {
-//           var layout = {
-//               'width': attrs.width,
-//               'height': attrs.height,
-//           };
-//
-//           Plotly.newPlot(element[0], plots, layout);
-//       }, true);
-//   }
-//
-//   // Return this function for linking ...
-//   return {
-//       link: linkFunc
-//   };
-// });
+
+app.directive('linePlot', function () {
+  // Create a link function
+  function linkFunc(scope, element, attrs) {
+      scope.$watch('var_data', function (plots) {
+          var layout = {
+              'width': attrs.width,
+              'height': attrs.height,
+          };
+
+          Plotly.newPlot(element[0], plots, layout);
+      }, true);
+  }
+
+  // Return this function for linking ...
+  return {
+      link: linkFunc
+  };
+});
 
 app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', function ($scope,$rootScope,$log,$http,$interval) {
 
@@ -38,10 +38,11 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.update_frame=function(){
     var pad_frame = ('00000'+$scope.frame).slice(-5)+'.png';
     $scope.exp_frame=fig_path+$scope.structure+'/exp/'+pad_frame;
-    $log.log($scope.exp_frame);
+    // $log.log($scope.exp_frame);
     $http.post('/get_frame',JSON.stringify({'frame':$scope.frame}))
       .then(function(response){
         $scope.plot_data = response.data.im;
+        $log.log('ok');
     });
 
     $scope.var_data=[
@@ -49,6 +50,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
         z:[],//$scope.plot_data,
         type: 'heatmap',
         colorscale: 'Greys',
+        zauto:false,
+        zmin:0,
+        zmax:100,
       }
     ];
     // $scope.exp_frame=fig_path+$scope.structure+'/exp/'+pad_frame;

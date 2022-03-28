@@ -20,10 +20,15 @@ def image_viewer():
 @app.route('/get_frame', methods=['POST'])
 def get_frame():
     data=json.loads(request.data.decode())
+    print('fetching frame')
     frame = data['frame']
-    frame_str=str(frame).zfill(3)
-    tiff_file=os.path.join(mol_path(mol),'sim','tiff','sum','%s.tiff' %frame_str)
-    im=[] #tifffile.imread(tiff_file).tolist()
+    # frame_str=str(frame).zfill(3)
+    frame_str=str(frame).zfill(5)
+    tiff_file=os.path.join(mol_path(mol),'dat','pets','tiff','%s.tiff' %frame_str)
+    # tiff_file=os.path.join(mol_path(mol),'sim','tiff','sum','%s.tiff' %frame_str)
+    # static/data/glycine/dat/pets/tiff/
+    im=tifffile.imread(tiff_file).tolist()
+    print('finished')
     return json.dumps({'im':im})
 
 @app.route('/get_info', methods=['GET'])

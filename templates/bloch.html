@@ -37,7 +37,7 @@
 
       <div class="col-sm-2">
         <div class="row">
-          frame:<input ng-model="frame" style="width: 50px">
+          frame:<input ng-model="frame" ng-click=update_frame() style="width: 50px">
           <a class="btn btn-primary"  ng-click="dec_frame()">
             <span class="glyphicon glyphicon-chevron-left"></span >
           </a>
@@ -50,10 +50,10 @@
       <!-- Simulated image  -->
       <div class="col-sm-5">
           <!-- <img src="{{sim_frame}}" > -->
-          <!-- <line-plot width=250, height=800> -->
-          <canvas id="myCanvas" width="240" height="297"
-            style="border:1px solid #d3d3d3;">            
-          </canvas>
+          <line-plot width=250, height=800>
+          <!-- <canvas id="myCanvas" width="240" height="297"
+            style="border:1px solid #d3d3d3;">
+          </canvas> -->
       </div>
 
       <!-- Experimental image  -->

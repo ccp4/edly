@@ -5,3 +5,5 @@ bower install jquery angular angular-aria angular-touch angular-bootstrap bootst
 <!-- plotly -->
 
 ln -s <your_tiff_folder_location> static/tiff
+cd static
+ln -s ../bower_components .
