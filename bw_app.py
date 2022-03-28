@@ -7,7 +7,7 @@ from blochwave import bloch
 from EDutils import utilities as ut
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
-import plotly.express as px
+import plotly as px
 app = Flask(__name__)
 mol_path=lambda mol:'static/data/%s' %mol
 
@@ -48,12 +48,7 @@ def solve_bloch():
     b0 = bloch.Bloch('diamond',path='dat/',keV=200,u=[1,0,1],Nmax=5,Smax=0.1,
         opts='svt',thick=10)
     b0.df_G['I']*=100
-    fig=px.scatter(b0.df_G,x='px',y='py',size='I')
-    data=fig.to_json()
-    return data
-# data={'params':[keV,theta,phi,Nmax,Smax,thick,b0.gammaj.shape[0] ]}
-    # return b0.df_G.to_json()
-    # return json.dumps(data)#jsonify(data)
+    return b0.df_G.to_json()
 
 
 @app.route('/get_info', methods=['GET'])

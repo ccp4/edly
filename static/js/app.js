@@ -8,10 +8,13 @@ app.config(['$interpolateProvider', function($interpolateProvider) {
 app.directive('linePlot', function () {
   // Create a link function
   function linkFunc(scope, element, attrs) {
-      scope.$watch('var_data', function (fig) {
-          fig.layout.width=attrs.width,
-          fig.layout.height=attrs.height,
-          Plotly.newPlot(element[0], fig.data, fig.layout);
+      scope.$watch('var_data', function (plots) {
+          var layout = {
+              'width': attrs.width,
+              'height': attrs.height,
+          };
+
+          Plotly.newPlot(element[0], plots, layout);
       }, true);
   }
 
@@ -43,9 +46,42 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
 
     $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame}))
       .then(function(response){
-        $scope.var_data = response.data;
+        $scope.ly_data = response.data;
+        $log.log(Object.values($scope.ly_data.I));
+        $scope.var_data=[
+          {
+            x:Object.values($scope.ly_data.px),
+            y:Object.values($scope.ly_data.py),
+            mode: 'markers',
+            marker:{
+              // size:Object.values($scope.ly_data.I)*1,
+              size:Object.values($scope.ly_data.I),
+            }
+          }
+        ];
+        // $scope.var_data=[
+        //   {
+        //     x:Object.values($scope.ly_data.px),
+        //     y:Object.values($scope.ly_data.py),
+        //     mode: 'markers',
+        //     marker:{
+        //       // size:Object.values($scope.ly_data.I)*1,
+        //       size:Object.values($scope.ly_data.I),
+        //     }
+        //   }
+        // ];
     });
 
+    // $scope.var_data=[
+    //   {
+    //     z:$scope.plot_data,
+    //     type: 'scatter',
+    //     colorscale: 'Greys',
+    //     zauto:false,
+    //     zmin:0,
+    //     zmax:100,
+    //   }
+    // ];
     // $scope.exp_frame=fig_path+$scope.structure+'/exp/'+pad_frame;
     // $scope.sim_frame=fig_path+$scope.structure+'/sim/'+pad_frame;
   };
