@@ -7,7 +7,7 @@ from blochwave import bloch
 from EDutils import utilities as ut
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
-
+import plotly.express as px
 app = Flask(__name__)
 mol_path=lambda mol:'static/data/%s' %mol
 
@@ -24,12 +24,37 @@ def get_frame():
     frame = data['frame']
     # frame_str=str(frame).zfill(3)
     frame_str=str(frame).zfill(5)
-    tiff_file=os.path.join(mol_path(mol),'dat','pets','tiff','%s.tiff' %frame_str)
+    tiff_file=os.path.join(mol_path(mol),'pets','tiff','%s.tiff' %frame_str)
     # tiff_file=os.path.join(mol_path(mol),'sim','tiff','sum','%s.tiff' %frame_str)
     # static/data/glycine/dat/pets/tiff/
     im=tifffile.imread(tiff_file).tolist()
     print('finished')
     return json.dumps({'im':im})
+
+
+@app.route('/solve_bloch', methods=['POST'])
+def solve_bloch():
+    # keV =  float(request.form['keV'])
+    # theta,phi = np.array([request.form['theta'],request.form['phi']],dtype=float)
+    # Smax,Nmax = float(request.form['Smax']),int(request.form['Nmax'])
+    # thick = float(request.form['thick'])
+    # thick=100
+    # print(keV,theta,phi,Nmax,Smax,thick)
+
+    # u = ut.u_from_theta_phi(theta,phi)
+    # b0 = bloch.Bloch('diamond',path='dat/',keV=keV,u=u,Nmax=Nmax,Smax=Smax,
+    #     opts='svt',thick=thick)
+
+    b0 = bloch.Bloch('diamond',path='dat/',keV=200,u=[1,0,1],Nmax=5,Smax=0.1,
+        opts='svt',thick=10)
+    b0.df_G['I']*=100
+    fig=px.scatter(b0.df_G,x='px',y='py',size='I')
+    data=fig.to_json()
+    return data
+# data={'params':[keV,theta,phi,Nmax,Smax,thick,b0.gammaj.shape[0] ]}
+    # return b0.df_G.to_json()
+    # return json.dumps(data)#jsonify(data)
+
 
 @app.route('/get_info', methods=['GET'])
 def get_info():

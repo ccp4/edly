@@ -8,13 +8,10 @@ app.config(['$interpolateProvider', function($interpolateProvider) {
 app.directive('linePlot', function () {
   // Create a link function
   function linkFunc(scope, element, attrs) {
-      scope.$watch('var_data', function (plots) {
-          var layout = {
-              'width': attrs.width,
-              'height': attrs.height,
-          };
-
-          Plotly.newPlot(element[0], plots, layout);
+      scope.$watch('var_data', function (fig) {
+          fig.layout.width=attrs.width,
+          fig.layout.height=attrs.height,
+          Plotly.newPlot(element[0], fig.data, fig.layout);
       }, true);
   }
 
@@ -42,19 +39,13 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     $http.post('/get_frame',JSON.stringify({'frame':$scope.frame}))
       .then(function(response){
         $scope.plot_data = response.data.im;
-        $log.log('ok');
     });
 
-    $scope.var_data=[
-      {
-        z:[],//$scope.plot_data,
-        type: 'heatmap',
-        colorscale: 'Greys',
-        zauto:false,
-        zmin:0,
-        zmax:100,
-      }
-    ];
+    $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame}))
+      .then(function(response){
+        $scope.var_data = response.data;
+    });
+
     // $scope.exp_frame=fig_path+$scope.structure+'/exp/'+pad_frame;
     // $scope.sim_frame=fig_path+$scope.structure+'/sim/'+pad_frame;
   };
@@ -68,6 +59,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.frame=1;
   $scope.structure='glycine';
   $scope.exp_frame='';
+
   // $scope.sim_frame=fig_path+'dummy.png';
   $scope.update_frame()
 }]);
