@@ -37,13 +37,16 @@
 
       <div class="col-sm-2">
         <div class="row">
-          frame:<input ng-model="frame" ng-click=update_frame() style="width: 50px">
+          frame:<input type="number" ng-model="frame" ng-keypress=update_frame($event) style="width: 80px">
           <a class="btn btn-primary"  ng-click="dec_frame()">
             <span class="glyphicon glyphicon-chevron-left"></span >
           </a>
           <a class="btn btn-primary"  ng-click="inc_frame()">
             <span class="glyphicon glyphicon-chevron-right"></span >
           </a>
+        </div>
+        <div class="row">
+          zmax:<input type="number" ng-model="zmax" ng-keypress=update_zmax($event) style="width: 80px">
         </div>
       </div>
 

@@ -5,61 +5,81 @@ app.config(['$interpolateProvider', function($interpolateProvider) {
 }]);
 
 
+// Plotly directive
 app.directive('linePlot', function () {
-  // Create a link function
   function linkFunc(scope, element, attrs) {
-      scope.$watch('var_data', function (fig) {
-          fig.layout.width=attrs.width,
-          fig.layout.height=attrs.height,
-          Plotly.newPlot(element[0], fig.data, fig.layout);
+      scope.$watch('var_data', function (new_fig,fig) {
+          // console.log(fig.layout);
+          // console.log(new_fig.layout);
+          new_fig.layout.width =attrs.width;
+          new_fig.layout.height=attrs.height;
+          Plotly.newPlot(element[0], new_fig.data, new_fig.layout);
       }, true);
   }
-
-  // Return this function for linking ...
   return {
       link: linkFunc
   };
 });
 
+
 app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', function ($scope,$rootScope,$log,$http,$interval) {
 
-  var fig_path='/static/data/'
   $scope.inc_frame=function(){
     $scope.frame=Math.min($scope.max_frame,$scope.frame+1);
-    $scope.update_frame();
+    $scope.update();
   };
   $scope.dec_frame=function(){
     $scope.frame=Math.max(1,$scope.frame-1);
-    $scope.update_frame();
+    $scope.update();
   };
-  $scope.update_frame=function(){
-    var pad_frame = ('00000'+$scope.frame).slice(-5)+'.png';
-    $scope.exp_frame=fig_path+$scope.structure+'/exp/'+pad_frame;
-    // $log.log($scope.exp_frame);
-    $http.post('/get_frame',JSON.stringify({'frame':$scope.frame}))
-      .then(function(response){
-        $scope.plot_data = response.data.im;
-    });
+  $scope.update_frame=function(event){
+    if (event.key=='Enter'){
+      if ($scope.frame<$scope.max_frame && $scope.frame>=0){
+        $scope.update();
+      }
+    }
+  }
+  $scope.update_zmax=function(event){
+    if (event.key=='Enter'){
+      if ($scope.zmax>0){
+        $scope.update_img();
+        // $http.get($scope.exp_frame);
+        $scope.exp_frame='';
+        $scope.exp_frame=$scope.exp_frame;
+      }
+    }
+  }
 
+  $scope.update=function(){
+    $scope.update_img();
+    $scope.update_bloch();
+  }
+
+  $scope.update_img=function(){
+    $http.post('/get_frame',JSON.stringify({'frame':$scope.frame,'zmax':$scope.zmax}))
+      .then(function(response){
+        $scope.exp_frame = response.data.png_file;
+
+    });
+  };
+
+  $scope.update_bloch=function(){
     $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame}))
       .then(function(response){
         $scope.var_data = response.data;
     });
-
-    // $scope.exp_frame=fig_path+$scope.structure+'/exp/'+pad_frame;
-    // $scope.sim_frame=fig_path+$scope.structure+'/sim/'+pad_frame;
   };
 
 
-  $http.get('/get_info')
+  $scope.var_data={'width':250,'height':800};
+  $http.get('/init')
     .then(function(response){
+      $scope.structure = response.data.mol;
       $scope.max_frame = response.data.max_frame;
+      $scope.zmax      = response.data.zmax;
+      $scope.frame     = response.data.frame;
+      $log.log($scope.frame);
+      $scope.update()
     });
 
-  $scope.frame=1;
-  $scope.structure='glycine';
-  $scope.exp_frame='';
-
-  // $scope.sim_frame=fig_path+'dummy.png';
-  $scope.update_frame()
 }]);
