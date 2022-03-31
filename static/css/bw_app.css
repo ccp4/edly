@@ -9,6 +9,27 @@
   background: #c0c0f0;
 }
 
+.row{
+  padding-left: 10px;
+}
+.panel{
+  background-color: #83aec9;
+  padding: 5px;
+  margin-top: 5px;
+}
+.frame{
+  width:95%;
+  border-color: #467582;
+  border-style: solid;
+  border-width: 3px;
+  margin: 5px;
+  margin-top:15px;
+}
+.myBtn {
+  width:25px;
+  background-color: #00f;
+}
+
 .header h1 {
   font-size: 50px;
 }
