@@ -7,6 +7,8 @@ __pycache__/
 *.so
 **/bower_components
 
+static/jmol
+jmol_ex.html
 dat/*
 **/png
 **/tiff

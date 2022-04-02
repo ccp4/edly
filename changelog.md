@@ -1,4 +1,13 @@
 ## 0.0.1
+
+## issue#31 (Sat  2 Apr 11:41:22 BST 2022)
+- button JSmol to visualise the structure
+- buttons (with popups):
+    - upload : exp tiffs data
+    - upload : simulated data  
+    - upload : pets/dials processed data
+
+
 ### issue#4 (Thu 31 Mar 15:58:14 BST 2022)
 - simu vs exp avec refl side by side
 - toggle button to pass to single analysis mode

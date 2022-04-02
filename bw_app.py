@@ -82,17 +82,35 @@ def solve_bloch():
     # b0 = bloch.Bloch('diamond',path='dat/',keV=keV,u=u,Nmax=Nmax,Smax=Smax,
     #     opts='svt',thick=thick)
     b_args = session['bloch']
-    b0 = bloch.Bloch(session['cif'],path='dat/',**b_args)
-    b0.df_G['I']    *=200
-    b0.df_G['Vga']  *=200
-    b0.df_G['Swa']  *=200
+    b0 = bloch.Bloch(session['cif_file'],path='dat/',**b_args)
+    b0.df_G['I']   *=200
+    b0.df_G['Vga'] *=200
+    b0.df_G['Swa'] *=200
     toplot=b0.df_G[['px','py','I','Vga','Swa']]
     # fig=px.scatter(b0.df_G,x='px',y='py',size='I',)
     toplot=toplot.melt(value_vars=['I','Vga','Swa'],id_vars=['px','py'])
-    fig=px.scatter(toplot,x='px',y='py',color='variable',size='value')
+    fig=px.scatter(toplot,x='px',y='py',color='variable',size='value',
+        width=780, height=780)
+
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=20, b=20),
+        paper_bgcolor="LightSteelBlue",
+    )
     data = fig.to_json()
     return data
 
+@bw_app.route('/toggle_molecule', methods=['GET'])
+def toggle_molecule():
+    session['show_molecule']=not session['show_molecule']
+    return json.dumps({'show_molecule':session['show_molecule']})
+
+@bw_app.route('/set_structure', methods=['POST'])
+def set_structure():
+    data=json.loads(request.data.decode())
+    cif_file=os.path.join(mol_path(session['mol']),'pets',data['cif'])
+    session['cif'] = data['cif']
+    session['cif_file'] = cif_file
+    return session['cif_file']
 
 @bw_app.route('/init', methods=['GET'])
 def init():
@@ -128,18 +146,21 @@ def init():
         session['id']    = id
         session['path']  = session_path
         session['mol']   = mol
-        session['cif']   = os.path.join(mol_path(mol),'pets','alpha_glycine.cif')
+        session['cif']      = 'alpha_glycine.cif'
+        # session['cif'] = '1ejg.pdb'
+        session['cif_file'] = os.path.join(mol_path(mol),'pets',session['cif'])
         session['frame'] = 1
         session['sim']   = sim
         session['exp']   = exp
         session['analysis_mode'] = False
-        session['zm_counter']=0 #dummy variable
-        session['bloch']=bloch_args
-        session['last_time'] =now
+        session['show_molecule'] = False
+        session['zm_counter'] = 0 #dummy variable
+        session['bloch']      = bloch_args
+        session['last_time']  = now
         # print(session['cif'],session.get('exp'+'tmp'))
 
     print('send init info')
-    session_data = {k:session[k] for k in ['mol','frame','analysis_mode','bloch']}
+    session_data = {k:session[k] for k in ['mol','frame','cif','cif_file','analysis_mode','show_molecule','bloch']}
     session_data['max_frame']=session['exp']['max_frame']
     for k in ['zmax']:
         session_data[k] = dict(zip(['sim','exp'],[session['sim'][k],session['exp'][k]]))

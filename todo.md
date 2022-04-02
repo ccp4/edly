@@ -4,14 +4,8 @@
 - visualisation de df_G.[I,Swa,Vga]
 - fleche directionnelle droite gauche -> changer de frame
 - changer directionelle haut/bas --> changer luminosite (zmax du heatmap )
-- tab JSmol to visualise the structure
 - little window for seeing orientation setup
 - menu containing :file,simulation,help
-- buttons :
-    - upload cif file 
-    - upload : exp tiffs data
-    - upload : pets/dials processed data
-    - upload : simulated data  
     - display b0.beam_vs_thickness in either another window or aside of analysis
     - display rocking curve
 

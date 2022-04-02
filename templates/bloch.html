@@ -11,6 +11,7 @@
      <link rel="shortcut icon" href="static/favicon.ico" >
      <link rel="stylesheet" href="static/bower_components/bootstrap-css/css/bootstrap.min.css">
      <link href="/static/css/bw_app.css" rel="stylesheet">
+     <link href="/static/css/popup.css" rel="stylesheet">
      <script src="static/bower_components/angular/angular.min.js"></script>
      <script src="static/bower_components/angular-aria/angular-aria.js"></script>
      <script src="static/bower_components/angular-touch/angular-touch.js"></script>
@@ -22,10 +23,18 @@
      <!-- <script src="static/bower_components/chart.js/Chart.min.js"></script>
      <script src="static/bower_components/angular-chart.js/dist/angular-chart.min.js"></script>      -->
      <script src="static/js/app.js"></script>
+
+     <!-- <script src="static/bower_components/jsmol/src/JSmol.min.js"></script> -->
+     <!-- <script src="static/bower_components/jsmol/src/js/Jmol2.js"></script> -->
+     <script src="static/jmol/jsmol/JSmol.min.js"></script>
+     <script src="static/jmol/jsmol/js/Jmol2.js"></script>
+     <!-- <script > jmolInitialize("static/bower_components/jsmol/src");</script> -->
+     <script > jmolInitialize("/static/jmol/jsmol");</script>
  </head>
 
 
  <body>
+
    <header class="header">
       <h2> Electron diffraction dashboard </h2>
    </header>
@@ -33,24 +42,60 @@
    <div class="container-fluid mt-3" style="margin:0px;padding-left:0px">
      <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
 
-      <div class="col-sm-2">
+      <!-- Panel -->
+      <div class="col-sm-2" style="padding-left:5px;padding-right:0px;">
         <div class="panel" style="background-color:#b5ccda">
-          <!-- <div class="panel">
-            <a class="btn myBtn"  ng-click="upload('exp')">
-              <img src="/static/images/exp_button.png"  style="width:90%" />
+          <!-- Structure -->
+          <div class="panel">
+            <p style="font-size:25px">  {a structure a} </p>
+            <div class="row">
+              <div class="col-sm-8">
+                <div ng-click="set_structure()" style="text-align: center;">
+                  <a ng-href="" onclick="load_cif(1)" >
+                    <span style="font-size:18px;text-align:center" ng-bind="cif"> </span>
+                    <span style="display:none" id="cif_file" ng-bind="cif_file"> </span>
+                  </a>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_molecule()" ng-mouseenter="toggle_popup('mol')" ng-mouseleave="toggle_popup('mol')">
+                  <img ng-hide="show_molecule" src="/static/images/jsmol.png"/>
+                  <img ng-show="show_molecule" src="/static/images/edly.png"/>
+                  <span class="popuptext" ng-show="popup['mol']"> show/hide molecule </span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Buttons -->
+          <div class="panel" ng-show="show_buttons">
+            <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="toggle_popup('exp')" ng-mouseleave="toggle_popup('exp')">
+              <img src="/static/images/exp_button.png" />
+              <span class="popuptext" ng-show="popup['exp']"> Upload experimental dataset </span>
             </a>
-            <a class="btn myBtn"  ng-click="upload('mol')">
-              <img src="/static/images/mol_button.png"  style="width:90%" />
+            <a class="btn btn-primary myBtn popup" ng-click="upload('sim')" ng-mouseenter="toggle_popup('sim')" ng-mouseleave="toggle_popup('sim')">
+              <img src="/static/images/bloch_button.png" />
+              <span class="popuptext" ng-show="popup['sim']"> Upload simulated dataset </span>
             </a>
-          </div> -->
-          <h3> Structure : </h3>
-          <div ng-click="set_structure()" style="text-align: center;">
-            <a ng-href="">
-              <span style="font-size:18px;text-align:center"> {a structure a}</span>
+            <a class="btn btn-primary myBtn popup" ng-click="upload('pets')" ng-mouseenter="toggle_popup('pets')" ng-mouseleave="toggle_popup('pets')">
+              <img src="/static/images/proc_button.png" />
+              <span class="popuptext" ng-show="popup['pets']"> Import processed data from pets/dials </span>
             </a>
           </div>
+
+          <!-- Frames panel -->
           <div class="panel">
-            <h4>Frames : </h4>
+            <div class="row">
+              <div class="col-sm-8">
+                <h4>Frames : </h4>
+              </div>
+              <div class="col-sm-4">
+                <a style="float:right" class="btn btn-primary popup" ng-click="show_buttons=!show_buttons" ng-mouseenter="toggle_popup('btns')" ng-mouseleave="toggle_popup('btns')">
+                  <span class="glyphicon glyphicon-upload" />
+                  <span class="popuptext" ng-show="popup['btns']"> Show upload buttons </span>
+                </a>
+              </div>
+            </div>
             No:<input type="number" ng-model="frame" ng-keypress=update_frame($event) style="width: 80px">
             <a class="btn-sm btn-primary"  ng-click="dec_frame()">
               <span class="glyphicon glyphicon-chevron-left"></span >
@@ -61,40 +106,41 @@
           </div>
 
           <!-- analyis_mode -->
-          <!-- <div class="row"> -->
-            <a class="btn btn-primary"  ng-click="toggle_analysis_mode()">
-              <span class="glyphicon glyphicon-stats"></span >
-            </a>
-          <!-- </div> -->
-          <!-- <div class="row"> -->
+          <a class="btn btn-primary popup"  ng-click="toggle_analysis_mode()" ng-mouseenter="toggle_popup('ana')" ng-mouseleave="toggle_popup('ana')">
+            <span ng-class="{'glyphicon glyphicon-stats':!analysis_mode,'glyphicon glyphicon-picture':analysis_mode}"></span >
+            <span class="popuptext" ng-show="popup['ana']"> Toggle frames/analysis mode </span>
+          </a>
           <div class="panel" ng-show="analysis_mode">
             <h4>Bloch solver mode</h4>
             Nmax:<input type="number" ng-model="bloch['Nmax']" style="width: 60px">
           </div>
-          <!-- </div> -->
+        </div>
+      </div><!-- Panel -->
+
+
+
+      <!-- molecule viewer -->
+      <div class="col-sm-10" ng-show="show_molecule">
+        <div class="panel">
+          <div cif_file="cif_file" id="myJmol" ></div>
         </div>
       </div>
 
 
-
-      <div class="col-sm-10" ng-show=analysis_mode>
-        <!-- <div class="col-sm-5" style="text-align=center;border-style:solid;" > -->
-        <div style="margin:5px;border-style:solid;float:left" >
-          <line-plot fig="fig">
-            <!-- width=250, height=800> -->
-          <!-- <canvas id="myCanvas" width="240" height="297"
-            style="border:1px solid #d3d3d3;">
-          </canvas> -->
+      <!-- Frame/analysis viewer -->
+      <div class="col-sm-10" ng-hide="show_molecule">
+        <!-- Analysis figure -->
+        <div class="col-sm-12" ng-show="analysis_mode">
+          <div style="width:100%;margin:5px;border-style:solid;float:left" >
+            <line-plot fig="fig">
+          </div>
         </div>
-      </div>
 
-      <!-- Frames -->
-      <div class="col-sm-10" ng-hide=analysis_mode>
         <!-- Simulated frame  -->
-        <div class="col-sm-6" >
+        <div class="col-sm-6" ng-hide=analysis_mode>
           <h3> Simulated Frames </h3>
           <div class="row">
-            Brightness:<input type="number" ng-model="zmax['sim']" ng-keypress=update_zmax($event,'sim') style="width: 70px">
+            <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['sim']" ng-keypress=update_zmax($event,'sim') style="width: 70px"></div>
           </div>
           <div class="row">
             <div class="frame">
@@ -105,10 +151,10 @@
           </div>
         </div>
         <!-- Experimental frame  -->
-        <div class="col-sm-6" >
+        <div class="col-sm-6" ng-hide=analysis_mode>
           <h3> Experimental Frames </h3>
           <div class="row" >
-            Brightness:<input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px">
+            <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px"></div>
           </div>
           <div class="row">
             <div class="frame">
@@ -118,11 +164,43 @@
             </div>
           </div>
         </div>
-      </div>
+      </div><!-- Frame/analysis viewer -->
 
-    </div>
+    </div><!-- ng-controller -->
   </div>
 
+
+
+  <script>
+    var myJmol = 'myJmol';
+    var JmolInfo = {
+      color: "#FFFFFF", // white background (note this changes legacy default which was black)
+      height: 500,      // pixels (but it may be in percent, like "100%")
+      width: "95%",
+      use: "HTML5",     // "HTML5" or "Java" (case-insensitive)
+      j2sPath: "/static/jmol/jsmol/j2s",          // only used in the HTML5 modality
+      // j2sPath: "/static/bower_components/jsmol/src/j2s",          // only used in the HTML5 modality
+      src: '/static/data/test/pets/alpha_glycine.cif',          // file to load
+      // src: '{a cif a}',          // file to load
+    };
+    Jmol.setXHTML('myJmol');
+    Jmol.getApplet("myJmol",JmolInfo);
+    // jmolApplet(400,"myJmol","0");
+    // var cif='/static/data/test/pets/1ejg.pdb';
+    // load_cif(0);
+    // var
+    // function load_cif(val){
+    //   if (val==0){
+    //     var cif='/static/data/test/pets/1ejg.pdb'
+    //   }
+    //   else{
+    //     var cif=document.getElementById("cif_file").innerHTML;
+    //   }
+    //   console.log(cif);
+    //   $('#myJmol').html( Jmol.getAppletHtml(myJmol, JmolInfo) )
+    //   Jmol.script(myJmol, 'load cif')
+    // }
+  </script>
 
 </body>
 </html>
