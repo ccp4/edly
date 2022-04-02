@@ -6,18 +6,20 @@
 .header {
   padding: 10px;
   text-align: center;
-  background: #c0c0f0;
+  background: #c9d6ee;
 }
 
 .row{
   padding-left: 10px;
 }
-
+.btn-sm{
+  margin-left: 3px;
+}
 
 .panel{
   background-color: #83aec9;
   padding: 5px;
-  margin-top: 5px;
+  margin: 5px;
 }
 .frame{
   width:95%;
@@ -91,13 +93,13 @@
 }
 
 img {
-  display: block;
-  margin: auto;
+  /* display: block; */
+  /* margin: auto; */
   /* margin-left: auto;
   margin-right: auto; */
   /* padding-top: 10px;
   padding-bottom: 10px; */
-  width: 95%;
+  width: 100%;
 }
 
 
@@ -154,4 +156,28 @@ img {
     width: 100%;
   }
 }
+
+.bloch_param{
+  margin:5px;
+}
+.bloch_input{
+  width: 60px
+}
+.bloch_solve_param{
+  margin: 10px;
+  margin-right: 20px;
+  font-size: 15px;
+  text-align: center;
+}
+.bloch_solver{
+  background-color: #a1c2c2;
+  padding: 8px;
+  margin: 0px;
+  margin-left: 5px;
+  font-size: 20px;
+  border-radius: 3px;
+  border-color: #5b8686;
+  border-style: solid;
+}
+
 </style>

@@ -5,16 +5,32 @@ import numpy as np
 from blochwave import bloch
 from EDutils import utilities as ut
 from utils import displayStandards as dsp
+from EDutils import pets as pt              #;imp.reload(pt)
 from utils import glob_colors as colors
 import plotly.express as px
+import plotly.graph_objects as go
 from string import ascii_letters,digits
 bw_app = Blueprint('bw_app', __name__)
 
+chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol
 get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,'%s.tiff' %frame_str)
 png_path=lambda path,frame_str:os.path.join(path,'%s.png' %frame_str)
-# tmp_path=lambda path,tmp:os.path.join(path,'%d.png' %tmp)
-chars = ascii_letters+digits
+def b_str(x,i):
+    if i:
+        n=100**i
+        return str(tuple(np.round(np.array(x)*n)/n))[1:-1]
+    else:
+        return str(tuple(x))[1:-1]
+    return
+def b_arr(x,x0):
+    try :
+        y = np.array(x.split(","), dtype=float)
+        if not y.size==3:y=x0
+        return y
+    except:
+        return x0
+fig_wh=780
 
 @bw_app.route('/')
 def image_viewer():
@@ -70,34 +86,65 @@ def get_img_frame(frame,zmax,key):
 
 @bw_app.route('/solve_bloch', methods=['POST'])
 def solve_bloch():
-    session['analysis_mode']=True
-    # keV =  float(request.form['keV'])
-    # theta,phi = np.array([request.form['theta'],request.form['phi']],dtype=float)
-    # Smax,Nmax = float(request.form['Smax']),int(request.form['Nmax'])
-    # thick = float(request.form['thick'])
-    # thick=100
-    # print(keV,theta,phi,Nmax,Smax,thick)
-
+    data=json.loads(request.data.decode())
+    frame = data['frame']
+    pets_path = glob.glob(os.path.join(mol_path(session['mol']),'pets','*.pts'))
+    pets = pt.Pets(pets_path[0],gen=False,dyn=1)
+    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %frame )]
+    # rpx,rpy,Ipets=df_pets[['rpx,rpy,I']]
+    # print(data)
+    b_args = data['bloch']
+    thicks  = np.array(b_arr(data['bloch']['thicks'],(0,100,100)),dtype=int)
+    u       = pets.uvw0[frame-1]
     # u = ut.u_from_theta_phi(theta,phi)
-    # b0 = bloch.Bloch('diamond',path='dat/',keV=keV,u=u,Nmax=Nmax,Smax=Smax,
-    #     opts='svt',thick=thick)
-    b_args = session['bloch']
+    keV     = 200
+    if data['manual_mode']:
+        u = eval(data['bloch']['u'],pets.uvw0[frame-1])
+    b_args.update({'keV':keV,'u':u,'thicks':thicks})
+
+    # print(b_args)
     b0 = bloch.Bloch(session['cif_file'],path='dat/',**b_args)
-    b0.df_G['I']   *=200
-    b0.df_G['Vga'] *=200
-    b0.df_G['Swa'] *=200
+    # b0.df_G[['I','Vga','Swa']]*=200
+    b0.df_G['hkl'] = b0.df_G.index
+    b0.df_G['I']   *=1000
+    b0.df_G['Vga'] *=1000
+    b0.df_G['Swa'] *=400
+
+    ## plot
     toplot=b0.df_G[['px','py','I','Vga','Swa']]
     # fig=px.scatter(b0.df_G,x='px',y='py',size='I',)
     toplot=toplot.melt(value_vars=['I','Vga','Swa'],id_vars=['px','py'])
-    fig=px.scatter(toplot,x='px',y='py',color='variable',size='value',
-        width=780, height=780)
+    frame_str=str(session['frame']).zfill(session['exp']['pad'])
+    tiff_file=get_path(session['mol'],'exp',frame_str)
+    # im = tifffile.imread(tiff_file)
 
+    # fig = go.Figure()
+    # fig=px.imshow(im)
+    fig=px.scatter(toplot,x='px',y='py',
+        color="variable",size='value')
+    # fig.add_trace(go.scatter(toplot,x='px',y='py',
+    #     color="species", symbol="species",size='value'))
+    # fig.add_trace(go.scatter(x=rpx,y=rpy,size=Ipets))
     fig.update_layout(
-        margin=dict(l=20, r=20, t=20, b=20),
+        title="Diffraction pattern thick=%d A " %b0.thick,
+        hovermode='closest',
+        # margin=dict(l=20, r=20, t=20, b=20),
         paper_bgcolor="LightSteelBlue",
+        width=fig_wh, height=fig_wh,
     )
-    data = fig.to_json()
-    return data
+
+    # fig.update_traces(marker_size=10)
+
+
+    fig_data = fig.to_json()
+
+
+    b_args.update({'u':b_str(u,3),'thicks':b_str(thicks,0)})
+    session['bloch'] = b_args
+    session['manual_mode']   = data['manual_mode']
+    session['analysis_mode'] = True
+    # print(session['bloch'])
+    return json.dumps({'fig':fig_data,'bloch':session['bloch'],'nbeams':b0.nbeams})
 
 @bw_app.route('/toggle_molecule', methods=['GET'])
 def toggle_molecule():
@@ -140,8 +187,8 @@ def init():
             'pad':len(os.path.basename(sim_frames[0]).replace('.tiff','')),
             'offset':10,
             }
-        bloch_args={'keV':200,'u':[1,0,1],'Nmax':5,'Smax':0.1,
-            'thick':10,'opts':'svt'}
+        bloch_args={'keV':200,'u':b_str([0,0,1],2),'Nmax':6,'Smax':0.05,
+            'thick':10,'thicks':b_str([0,10,100],0),'opts':'svt'}
 
         session['id']    = id
         session['path']  = session_path
@@ -153,6 +200,7 @@ def init():
         session['sim']   = sim
         session['exp']   = exp
         session['analysis_mode'] = False
+        session['manual_mode']   = False
         session['show_molecule'] = False
         session['zm_counter'] = 0 #dummy variable
         session['bloch']      = bloch_args
@@ -160,7 +208,9 @@ def init():
         # print(session['cif'],session.get('exp'+'tmp'))
 
     print('send init info')
-    session_data = {k:session[k] for k in ['mol','frame','cif','cif_file','analysis_mode','show_molecule','bloch']}
+    info=['mol','frame','cif','cif_file','show_molecule',
+        'analysis_mode','bloch','manual_mode']
+    session_data = {k:session[k] for k in info}
     session_data['max_frame']=session['exp']['max_frame']
     for k in ['zmax']:
         session_data[k] = dict(zip(['sim','exp'],[session['sim'][k],session['exp'][k]]))

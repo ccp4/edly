@@ -1,12 +1,11 @@
 ## 0.0.1
 
-## issue#31 (Sat  2 Apr 11:41:22 BST 2022)
+## issue#3 (Sat  2 Apr 11:41:22 BST 2022)
 - button JSmol to visualise the structure
 - buttons (with popups):
     - upload : exp tiffs data
     - upload : simulated data  
     - upload : pets/dials processed data
-
 
 ### issue#4 (Thu 31 Mar 15:58:14 BST 2022)
 - simu vs exp avec refl side by side
@@ -18,6 +17,12 @@
     - to install it : ```cd static/data/; ln -s ../../test test```
 - clear a session : ```rm -rf static/data/tmp/<session_id> ```
 - initial bloch param setup
+
+# issue#2
+- update zmax
+
+# issue#1
+- visualisation de df_G.[I,Swa,Vga]
 
 ### resave png image when updating zmax ('Tue Mar 29 18:56:50 2022')
 - server must now be run with  `./serve.py` (`bw_app` registered with  `Blueprint`)

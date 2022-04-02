@@ -84,6 +84,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   }
 
   $scope.update=function(){
+    // $log.log($scope.analysis_mode)
     if ($scope.analysis_mode){
       $scope.update_bloch();
     }
@@ -99,20 +100,28 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     });
   };
 
+  $scope.solve_bloch=function(){
+    $scope.update_bloch();
+  }
   $scope.update_bloch=function(){
-    $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame}))
+    $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.manual_mode}))
       .then(function(response){
-        $scope.fig = response.data;
+        $scope.fig    = JSON.parse(response.data.fig);
+        $scope.bloch  = response.data.bloch;
+        $scope.nbeams = response.data.nbeams;
     });
   };
 
   $scope.toggle_popup=function(key){
     $scope.popup[key]=!$scope.popup[key];
+    // $log.log(key,$scope.popup[key]);
   }
+  $scope.popup={'pets':false,'mol':false,'exp':false,'sim':false,'ana':false,
+    'keV':false, 'u':false,'Smax':false, 'Nmax':false,'thicks':false,'thick':false,
+    'nbms':false};
 
   $scope.analyis_mode=false;
-  $scope.fig={};
-
+  // $scope.fig={};
   // $scope.var_data={'width':250,'height':800};
   $http.get('/init')
     .then(function(response){
@@ -129,6 +138,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     });
     // $log.log($scope.structure);
 
-    $scope.popup={'pets':false,'mol':false,'exp':false,'sim':false,'ana':false};
+    $scope.nbeams=0;
     $scope.show_buttons=false;
+    $scope.manual_mode=false;
 }]);

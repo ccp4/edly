@@ -39,12 +39,13 @@
       <h2> Electron diffraction dashboard </h2>
    </header>
 
-   <div class="container-fluid mt-3" style="margin:0px;padding-left:0px">
+   <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
      <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
 
       <!-- Panel -->
       <div class="col-sm-2" style="padding-left:5px;padding-right:0px;">
         <div class="panel" style="background-color:#b5ccda">
+
           <!-- Structure -->
           <div class="panel">
             <p style="font-size:25px">  {a structure a} </p>
@@ -68,7 +69,7 @@
           </div>
 
           <!-- Upload Buttons -->
-          <div class="panel" ng-show="show_buttons">
+          <div class="panel" ng-show="show_buttons && !show_molecule">
             <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="toggle_popup('exp')" ng-mouseleave="toggle_popup('exp')">
               <img src="/static/images/exp_button.png" />
               <span class="popuptext" ng-show="popup['exp']"> Upload experimental dataset </span>
@@ -84,7 +85,7 @@
           </div>
 
           <!-- Frames panel -->
-          <div class="panel">
+          <div class="panel" ng-hide="show_molecule">
             <div class="row">
               <div class="col-sm-8">
                 <h4>Frames : </h4>
@@ -92,7 +93,7 @@
               <div class="col-sm-4">
                 <a style="float:right" class="btn btn-primary popup" ng-click="show_buttons=!show_buttons" ng-mouseenter="toggle_popup('btns')" ng-mouseleave="toggle_popup('btns')">
                   <span class="glyphicon glyphicon-upload" />
-                  <span class="popuptext" ng-show="popup['btns']"> Show upload buttons </span>
+                  <span class="popuptext" style="font-family:sans-serif" ng-show="popup['btns']"> Show upload buttons </span>
                 </a>
               </div>
             </div>
@@ -105,17 +106,75 @@
             </a>
           </div>
 
-          <!-- analyis_mode -->
-          <a class="btn btn-primary popup"  ng-click="toggle_analysis_mode()" ng-mouseenter="toggle_popup('ana')" ng-mouseleave="toggle_popup('ana')">
-            <span ng-class="{'glyphicon glyphicon-stats':!analysis_mode,'glyphicon glyphicon-picture':analysis_mode}"></span >
-            <span class="popuptext" ng-show="popup['ana']"> Toggle frames/analysis mode </span>
-          </a>
-          <div class="panel" ng-show="analysis_mode">
-            <h4>Bloch solver mode</h4>
-            Nmax:<input type="number" ng-model="bloch['Nmax']" style="width: 60px">
+          <div class="panel" ng-hide="show_molecule">
+            <a class="btn btn-primary popup"  ng-click="toggle_analysis_mode()" ng-mouseenter="toggle_popup('ana')" ng-mouseleave="toggle_popup('ana')">
+              <span ng-class="{'glyphicon glyphicon-stats':!analysis_mode,'glyphicon glyphicon-picture':analysis_mode}"></span >
+              <span class="popuptext" ng-show="popup['ana']"> Toggle frames/bloch_solver mode </span>
+            </a>
           </div>
-        </div>
-      </div><!-- Panel -->
+
+          <!-- Bloch solver -->
+          <div class="panel" ng-show="analysis_mode && !show_molecule">
+            <div class="row">
+              <div class="col-sm-9 bloch_solver">
+                Bloch solver
+              </div>
+              <div class="col-sm-2" style="float:right">
+                <a style="float:right" class="btn btn-primary popup" ng-click="manual_mode=!manual_mode" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')">
+                  <span class="glyphicon glyphicon-cog" />
+                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['manual']"> Pass to manual mode : u and keV can be manually set </span>
+                </a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('keV')" ng-mouseleave="toggle_popup('keV')"> keV :
+                <input ng-show="manual_mode" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" >
+                <span class="popuptext" ng-show="popup['keV']"> beam energy </span>
+                <span  ng-hide="manual_mode" ng-bind="bloch['keV']" >
+              </div>
+            </div>
+            <div class="row">
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')"> u :
+                <input ng-show="manual_mode" type="text" ng-model="bloch['u']" class="bloch_input" style="width:200px">
+                <span class="popuptext" ng-show="popup['u']"> real space beam orientation (cartesian reference frame) </span>
+                <span  ng-hide="manual_mode" ng-bind="bloch['u']" >
+              </div>
+            </div>
+            <div class="row">
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')"> Nmax:
+                <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input">
+                <span class="popuptext" ng-show="popup['Nmax']"> Maximum resolution : reflection index would be (Nmax,Nmax,Nmax) </span>
+              </div>
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')"> Smax:
+                <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input">
+                <span class="popuptext" ng-show="popup['Smax']"> Maximum excitation error </span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('thick')" ng-mouseleave="toggle_popup('thick')"> Thickness:
+                <input type="number" min="0" ng-model="bloch['thick']" class="bloch_input">
+                <span class="popuptext" ng-show="popup['thick']"> sample thickness (Angstrom)</span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('thicks')" ng-mouseleave="toggle_popup('thicks')"> Thick range:
+                <input type="text" ng-model="bloch['thicks']" class="bloch_input" style="width: 150px">
+                <span class="popuptext" ng-show="popup['thicks']"> Thickness range for beam vs thickness (t0,t1,nb_points) </span>
+              </div>
+            </div>
+            <div class="row " >
+              <div class="btn-sm btn-primary bloch_solve_param"  ng-click="solve_bloch()"> Solve </div>
+            </div>
+            <div class="row">
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('nbms')" ng-mouseleave="toggle_popup('nbms')"> nbeams:
+                <span ng-bind="nbeams" >
+                <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
+              </div>
+            </div>
+          </div><!-- Bloch solver -->
+
+        </div><!-- Main Panel -->
+      </div><!-- col-sm-2 -->
 
 
 
@@ -128,79 +187,60 @@
 
 
       <!-- Frame/analysis viewer -->
-      <div class="col-sm-10" ng-hide="show_molecule">
+      <div class="col-sm-10" ng-hide="show_molecule" >
         <!-- Analysis figure -->
         <div class="col-sm-12" ng-show="analysis_mode">
-          <div style="width:100%;margin:5px;border-style:solid;float:left" >
+          <div id="plotly_div" style="width:100%;margin:5px;border-style:solid;float:left" >
             <line-plot fig="fig">
           </div>
         </div>
 
-        <!-- Simulated frame  -->
-        <div class="col-sm-6" ng-hide=analysis_mode>
-          <h3> Simulated Frames </h3>
-          <div class="row">
-            <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['sim']" ng-keypress=update_zmax($event,'sim') style="width: 70px"></div>
-          </div>
-          <div class="row">
-            <div class="frame">
-              <a ng-href="{a img['sim'] a}">
-                <img ng-src="{a img['sim'] a}" />
-              </a>
-            </div>
-          </div>
-        </div>
-        <!-- Experimental frame  -->
-        <div class="col-sm-6" ng-hide=analysis_mode>
-          <h3> Experimental Frames </h3>
-          <div class="row" >
-            <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px"></div>
-          </div>
-          <div class="row">
-            <div class="frame">
-              <a  ng-href="{a img['exp'] a}">
-                <img  ng-src="{a img['exp'] a}" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div><!-- Frame/analysis viewer -->
 
+        <div class="panel" ng-hide="analysis_mode" style="background-color: #80a6c7;">
+          <div class="row"  >
+            <!-- Simulated frame  -->
+            <div class="col-sm-6" >
+              <h3> Simulated Frames </h3>
+              <div class="row">
+                <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['sim']" ng-keypress=update_zmax($event,'sim') style="width: 70px"></div>
+              </div>
+              <div class="row">
+                <div class="frame">
+                  <a ng-href="{a img['sim'] a}">
+                    <img ng-src="{a img['sim'] a}" />
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Experimental frame  -->
+            <div class="col-sm-6">
+              <h3> Experimental Frames </h3>
+              <div class="row" >
+                <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px"></div>
+              </div>
+              <div class="row">
+                <div class="frame">
+                  <a  ng-href="{a img['exp'] a}">
+                    <img  ng-src="{a img['exp'] a}" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div><!-- panel-->
+        </div><!-- col-sm-12 -->
+
+      </div><!-- Frame/analysis viewer -->
     </div><!-- ng-controller -->
   </div>
 
 
 
-  <script>
-    var myJmol = 'myJmol';
-    var JmolInfo = {
-      color: "#FFFFFF", // white background (note this changes legacy default which was black)
-      height: 500,      // pixels (but it may be in percent, like "100%")
-      width: "95%",
-      use: "HTML5",     // "HTML5" or "Java" (case-insensitive)
-      j2sPath: "/static/jmol/jsmol/j2s",          // only used in the HTML5 modality
-      // j2sPath: "/static/bower_components/jsmol/src/j2s",          // only used in the HTML5 modality
-      src: '/static/data/test/pets/alpha_glycine.cif',          // file to load
-      // src: '{a cif a}',          // file to load
-    };
-    Jmol.setXHTML('myJmol');
-    Jmol.getApplet("myJmol",JmolInfo);
-    // jmolApplet(400,"myJmol","0");
-    // var cif='/static/data/test/pets/1ejg.pdb';
-    // load_cif(0);
-    // var
-    // function load_cif(val){
-    //   if (val==0){
-    //     var cif='/static/data/test/pets/1ejg.pdb'
-    //   }
-    //   else{
-    //     var cif=document.getElementById("cif_file").innerHTML;
-    //   }
-    //   console.log(cif);
-    //   $('#myJmol').html( Jmol.getAppletHtml(myJmol, JmolInfo) )
-    //   Jmol.script(myJmol, 'load cif')
-    // }
-  </script>
-
+<script src="static/js/jsmol.js"></script>
+<script text="javascript">
+  var myPlot = document.getElementById('plotly_div')
+  myPlot.on('plotly_click', function(){
+      alert('You clicked this Plotly chart!');
+    });
+</script>
 </body>
 </html>
