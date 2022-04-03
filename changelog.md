@@ -2,6 +2,7 @@
 ## issue#5 (Sun  3 Apr 19:12:17 BST 2022)
 - add all parameters inputs to Bloch solver
 - import processed data
+- update u,keV
 
 
 ## issue#3 (Sat  2 Apr 11:41:22 BST 2022)
