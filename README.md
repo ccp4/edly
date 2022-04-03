@@ -13,7 +13,8 @@ ln -s ../bower_components .
 ```
 cd static
 wget https://sourceforge.net/projects/jmol/files/latest/download
-unzip jmol
+unzip download
+mv jmol<version> jmol
 cd jmol;unzip jsmol
 ```
 

@@ -18,7 +18,7 @@ get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,'%s.tiff' %fram
 png_path=lambda path,frame_str:os.path.join(path,'%s.png' %frame_str)
 def b_str(x,i):
     if i:
-        n=100**i
+        n=10**i
         return str(tuple(np.round(np.array(x)*n)/n))[1:-1]
     else:
         return str(tuple(x))[1:-1]
@@ -91,7 +91,7 @@ def solve_bloch():
     pets_path = glob.glob(os.path.join(mol_path(session['mol']),'pets','*.pts'))
     pets = pt.Pets(pets_path[0],gen=False,dyn=1)
     df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %frame )]
-    # rpx,rpy,Ipets=df_pets[['rpx,rpy,I']]
+    rpx,rpy,Ipets=df_pets[['rpx','rpy','I']].values.T
     # print(data)
     b_args = data['bloch']
     thicks  = np.array(b_arr(data['bloch']['thicks'],(0,100,100)),dtype=int)
@@ -139,7 +139,7 @@ def solve_bloch():
     fig_data = fig.to_json()
 
 
-    b_args.update({'u':b_str(u,3),'thicks':b_str(thicks,0)})
+    b_args.update({'u':b_str(u,4),'thicks':b_str(thicks,0)})
     session['bloch'] = b_args
     session['manual_mode']   = data['manual_mode']
     session['analysis_mode'] = True
@@ -187,7 +187,7 @@ def init():
             'pad':len(os.path.basename(sim_frames[0]).replace('.tiff','')),
             'offset':10,
             }
-        bloch_args={'keV':200,'u':b_str([0,0,1],2),'Nmax':6,'Smax':0.05,
+        bloch_args={'keV':200,'u':b_str([0,0,1],4),'Nmax':6,'Smax':0.05,
             'thick':10,'thicks':b_str([0,10,100],0),'opts':'svt'}
 
         session['id']    = id

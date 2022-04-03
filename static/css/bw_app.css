@@ -158,7 +158,8 @@ img {
 }
 
 .bloch_param{
-  margin:5px;
+  padding:0px;
+  margin:3px;
 }
 .bloch_input{
   width: 60px

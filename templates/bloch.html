@@ -52,7 +52,7 @@
             <div class="row">
               <div class="col-sm-8">
                 <div ng-click="set_structure()" style="text-align: center;">
-                  <a ng-href="" onclick="load_cif(1)" >
+                  <a ng-href="" > <!-- onclick="load_cif(1)" > -->
                     <span style="font-size:18px;text-align:center" ng-bind="cif"> </span>
                     <span style="display:none" id="cif_file" ng-bind="cif_file"> </span>
                   </a>
@@ -127,39 +127,59 @@
               </div>
             </div>
             <div class="row">
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('keV')" ng-mouseleave="toggle_popup('keV')"> keV :
-                <input ng-show="manual_mode" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" >
+              <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('keV')" ng-mouseleave="toggle_popup('keV')">
+                keV
                 <span class="popuptext" ng-show="popup['keV']"> beam energy </span>
-                <span  ng-hide="manual_mode" ng-bind="bloch['keV']" >
+              </div>
+              <div class="col-sm-8 bloch_param">
+                <input ng-show="manual_mode" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" >
+                <span  ng-hide="manual_mode" ng-bind="bloch['keV']" ></span>
               </div>
             </div>
             <div class="row">
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')"> u :
-                <input ng-show="manual_mode" type="text" ng-model="bloch['u']" class="bloch_input" style="width:200px">
+              <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')">
+                u
                 <span class="popuptext" ng-show="popup['u']"> real space beam orientation (cartesian reference frame) </span>
-                <span  ng-hide="manual_mode" ng-bind="bloch['u']" >
+              </div>
+              <div class="col-sm-8 bloch_param">
+                <span  ng-hide="manual_mode" ng-bind="bloch['u']" ></span>
+                <input ng-show="manual_mode" type="text" ng-model="bloch['u']" class="bloch_input" style="width:180px">
               </div>
             </div>
             <div class="row">
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')"> Nmax:
-                <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input">
+              <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')">
+                Nmax
                 <span class="popuptext" ng-show="popup['Nmax']"> Maximum resolution : reflection index would be (Nmax,Nmax,Nmax) </span>
               </div>
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')"> Smax:
-                <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input">
+              <div class="col-sm-8 bloch_param">
+                <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')">
+                Smax
                 <span class="popuptext" ng-show="popup['Smax']"> Maximum excitation error </span>
               </div>
-            </div>
-            <div class="row">
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('thick')" ng-mouseleave="toggle_popup('thick')"> Thickness:
-                <input type="number" min="0" ng-model="bloch['thick']" class="bloch_input">
-                <span class="popuptext" ng-show="popup['thick']"> sample thickness (Angstrom)</span>
+              <div class="col-sm-8 bloch_param">
+                <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input">
               </div>
             </div>
             <div class="row">
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('thicks')" ng-mouseleave="toggle_popup('thicks')"> Thick range:
-                <input type="text" ng-model="bloch['thicks']" class="bloch_input" style="width: 150px">
+              <div class="col-sm-3 popup bloch_param" ng-mouseenter="toggle_popup('thick')" ng-mouseleave="toggle_popup('thick')">
+                Thickness
+                <span class="popuptext" ng-show="popup['thick']"> sample thickness (Angstrom)</span>
+              </div>
+              <div class="col-sm-8 bloch_param">
+                <input type="number" min="0" ng-model="bloch['thick']" class="bloch_input">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3 popup bloch_param" ng-mouseenter="toggle_popup('thicks')" ng-mouseleave="toggle_popup('thicks')">
+                Range
                 <span class="popuptext" ng-show="popup['thicks']"> Thickness range for beam vs thickness (t0,t1,nb_points) </span>
+              </div>
+              <div class="col-sm-8 bloch_param">
+                <input type="text" ng-model="bloch['thicks']" class="bloch_input" style="width: 150px">
               </div>
             </div>
             <div class="row " >
@@ -167,9 +187,9 @@
             </div>
             <div class="row">
               <div class="popup bloch_param" ng-mouseenter="toggle_popup('nbms')" ng-mouseleave="toggle_popup('nbms')"> nbeams:
-                <span ng-bind="nbeams" >
                 <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
               </div>
+              <span ng-bind="nbeams" ></span>
             </div>
           </div><!-- Bloch solver -->
 
