@@ -1,11 +1,20 @@
+# Version log
+
 ## 0.0.1
-## issue#5 (Sun  3 Apr 19:12:17 BST 2022)
+### issue#10 (Thu  7 Apr 14:46:11 BST 2022)
+- created `rotation_mode`
+- bw_app.py:solve_bloch split into 2 functions to accomodate for `bloch_rotation`
+- pets data loaded when sessions are created
+- arrows can be used to change orientation when the rotation panel is focused
+- library bloch.py modified to include `I` key even when not solved.
+
+
+### issue#5 (Sun  3 Apr 19:12:17 BST 2022)
 - add all parameters inputs to Bloch solver
 - import processed data
 - update u,keV
 
-
-## issue#3 (Sat  2 Apr 11:41:22 BST 2022)
+### issue#3 (Sat  2 Apr 11:41:22 BST 2022)
 - button JSmol to visualise the structure
 - buttons (with popups):
     - upload : exp tiffs data
@@ -23,13 +32,11 @@
 - clear a session : ```rm -rf static/data/tmp/<session_id> ```
 - initial bloch param setup
 
-# issue#2
-- update zmax
-
-# issue#1
-- visualisation de df_G.[I,Swa,Vga]
-
-### resave png image when updating zmax ('Tue Mar 29 18:56:50 2022')
+###  issue#2 ('Tue Mar 29 18:56:50 2022')
+- resave png image when updating zmax
 - server must now be run with  `./serve.py` (`bw_app` registered with  `Blueprint`)
 - introduced sessions to be cleaner
 - split in app.js `update` into `update_bloch` and `update_img`
+
+### issue#1
+- visualisation de df_G.[I,Swa,Vga]

@@ -16,6 +16,7 @@ chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol
 get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,'%s.tiff' %frame_str)
 png_path=lambda path,frame_str:os.path.join(path,'%s.png' %frame_str)
+pets_path=lambda mol:glob.glob(os.path.join(mol_path(mol),'pets','*.pts'))[0]
 def b_str(x,i):
     if i:
         n=10**i
@@ -31,6 +32,8 @@ def b_arr(x,x0):
     except:
         return x0
 fig_wh=780
+
+pets_data={}
 
 @bw_app.route('/')
 def image_viewer():
@@ -84,38 +87,56 @@ def get_img_frame(frame,zmax,key):
     return new_tmp
 
 
+@bw_app.route('/bloch_rotation', methods=['POST'])
+def bloch_rotation():
+    data=json.loads(request.data.decode())
+    theta,phi = data['theta_phi']
+    theta %=180
+    phi   %=360
+    session['bloch']['u'] = list(ut.u_from_theta_phi(theta,phi))
+    session['bloch']['solve'] = False
+    session['rotation_mode'] = True
+    session['manual_mode']   = True
+    return bloch_fig()
+
 @bw_app.route('/solve_bloch', methods=['POST'])
 def solve_bloch():
     data=json.loads(request.data.decode())
     frame = data['frame']
-    pets_path = glob.glob(os.path.join(mol_path(session['mol']),'pets','*.pts'))
-    pets = pt.Pets(pets_path[0],gen=False,dyn=1)
-    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %frame )]
-    rpx,rpy,Ipets=df_pets[['rpx','rpy','I']].values.T
-    # print(data)
     b_args = data['bloch']
-    thicks  = np.array(b_arr(data['bloch']['thicks'],(0,100,100)),dtype=int)
-    u       = pets.uvw0[frame-1]
-    # u = ut.u_from_theta_phi(theta,phi)
-    keV     = 200
+    ## handle
+    thicks = np.array(b_arr(data['bloch']['thicks'],(0,100,100)),dtype=int)
+    u = pets_data[session['mol']].uvw0[frame-1]
     if data['manual_mode']:
-        u = eval(data['bloch']['u'],pets.uvw0[frame-1])
-    b_args.update({'keV':keV,'u':u,'thicks':thicks})
+        u = b_arr(data['bloch']['u'],u)
 
-    # print(b_args)
+    b_args.update({'u':u.tolist(),'thicks':thicks.tolist(),'solve':True})
+    session['manual_mode'] = data['manual_mode']
+    session['bloch'] = b_args
+    # print(json.dumps(session['bloch']))
+    # print(json.dumps(session['theta_phi']))
+    return bloch_fig()
+
+def bloch_fig():
+    b_args = session['bloch']
     b0 = bloch.Bloch(session['cif_file'],path='dat/',**b_args)
-    # b0.df_G[['I','Vga','Swa']]*=200
+    # print(b0.df_G['I'])
     b0.df_G['hkl'] = b0.df_G.index
     b0.df_G['I']   *=1000
     b0.df_G['Vga'] *=1000
     b0.df_G['Swa'] *=400
 
+    ## pets
+    pets=pets_data[session['mol']]
+    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %session['frame'] )]
+    rpx,rpy,Ipets=df_pets[['rpx','rpy','I']].values.T
+
     ## plot
     toplot=b0.df_G[['px','py','I','Vga','Swa']]
     # fig=px.scatter(b0.df_G,x='px',y='py',size='I',)
     toplot=toplot.melt(value_vars=['I','Vga','Swa'],id_vars=['px','py'])
-    frame_str=str(session['frame']).zfill(session['exp']['pad'])
-    tiff_file=get_path(session['mol'],'exp',frame_str)
+    # frame_str=str(session['frame']).zfill(session['exp']['pad'])
+    # tiff_file=get_path(session['mol'],'exp',frame_str)
     # im = tifffile.imread(tiff_file)
 
     # fig = go.Figure()
@@ -134,17 +155,19 @@ def solve_bloch():
     )
 
     # fig.update_traces(marker_size=10)
-
-
     fig_data = fig.to_json()
 
-
-    b_args.update({'u':b_str(u,4),'thicks':b_str(thicks,0)})
-    session['bloch'] = b_args
-    session['manual_mode']   = data['manual_mode']
+    #### finalize
     session['analysis_mode'] = True
-    # print(session['bloch'])
-    return json.dumps({'fig':fig_data,'bloch':session['bloch'],'nbeams':b0.nbeams})
+    session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
+    bloch_args=b_args.copy()
+    bloch_args.update({'u':b_str(b_args['u'],4),'thicks':b_str(b_args['thicks'],0)})
+    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
+        'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
+    # print(info)
+
+    return info
+
 
 @bw_app.route('/toggle_molecule', methods=['GET'])
 def toggle_molecule():
@@ -187,13 +210,13 @@ def init():
             'pad':len(os.path.basename(sim_frames[0]).replace('.tiff','')),
             'offset':10,
             }
-        bloch_args={'keV':200,'u':b_str([0,0,1],4),'Nmax':6,'Smax':0.05,
-            'thick':10,'thicks':b_str([0,10,100],0),'opts':'svt'}
+        bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
+            'thick':10,'thicks':[0,10,100],'opts':'vt','solve':1}
 
-        session['id']    = id
-        session['path']  = session_path
-        session['mol']   = mol
-        session['cif']      = 'alpha_glycine.cif'
+        session['id']   = id
+        session['path'] = session_path
+        session['mol']  = mol
+        session['cif']  = 'alpha_glycine.cif'
         # session['cif'] = '1ejg.pdb'
         session['cif_file'] = os.path.join(mol_path(mol),'pets',session['cif'])
         session['frame'] = 1
@@ -201,17 +224,28 @@ def init():
         session['exp']   = exp
         session['analysis_mode'] = False
         session['manual_mode']   = False
+        session['rotation_mode'] = False
+        session['theta_phi']     = [0,0]
         session['show_molecule'] = False
         session['zm_counter'] = 0 #dummy variable
         session['bloch']      = bloch_args
         session['last_time']  = now
         # print(session['cif'],session.get('exp'+'tmp'))
 
+    if not session['mol'] in pets_data.keys():
+        pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=1)
+
+
     print('send init info')
     info=['mol','frame','cif','cif_file','show_molecule',
-        'analysis_mode','bloch','manual_mode']
+        'analysis_mode','manual_mode','rotation_mode']
     session_data = {k:session[k] for k in info}
     session_data['max_frame']=session['exp']['max_frame']
     for k in ['zmax']:
         session_data[k] = dict(zip(['sim','exp'],[session['sim'][k],session['exp'][k]]))
+    session_data['theta_phi']=b_str(session['theta_phi'],2)
+    session_data['bloch']=session['bloch'].copy()
+    session_data['bloch'].update({'u':b_str(session['bloch']['u'],4),
+        'thicks':b_str(session['bloch']['thicks'],0)})
+
     return json.dumps(session_data)

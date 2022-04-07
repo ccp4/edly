@@ -83,6 +83,15 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     }
   }
 
+
+
+  $scope.toggle_manual_mode=function(){
+    $scope.manual_mode=!$scope.manual_mode;
+    if (!$scope.manual_mode){
+        $scope.update();
+    }
+  }
+
   $scope.update=function(){
     // $log.log($scope.analysis_mode)
     if ($scope.analysis_mode){
@@ -98,19 +107,68 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
       .then(function(response){
         $scope.img = response.data;
     });
-  };
+  }
 
   $scope.solve_bloch=function(){
     $scope.update_bloch();
   }
+  $scope.update_theta_phi=function(e){
+    // $log.log(e.keyCode);
+    var updated = false;
+    var theta_phi=[Number($scope.theta_phi[0]),Number($scope.theta_phi[1])];
+    switch (e.keyCode) {
+        case 37:
+          theta_phi[1]-=$scope.dtheta_phi;
+          updated=true;
+          break;
+        case 38:
+          theta_phi[0]+=$scope.dtheta_phi;
+          updated=true;
+          break;
+        case 39:
+          theta_phi[1]+=$scope.dtheta_phi;
+          updated=true;
+          break;
+        case 40:
+          theta_phi[0]-=$scope.dtheta_phi;
+          updated=true;
+          break;
+        case 34:
+          $scope.dtheta_phi*=2;
+          break;
+        case 33:
+          $scope.dtheta_phi/=2;
+          break;
+        case 8:
+          $scope.dtheta_phi=0.1;
+          break;
+        case 13:
+          $scope.update_bloch();
+          break;
+    }
+    if (updated){
+      theta_phi[0]%=180;
+      theta_phi[1]%=360;
+      $http.post('/bloch_rotation',JSON.stringify({'theta_phi':theta_phi}))
+        .then(function(response){
+          $scope.load_bloch(response.data);
+        });
+    }
+  }
   $scope.update_bloch=function(){
     $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.manual_mode}))
       .then(function(response){
-        $scope.fig    = JSON.parse(response.data.fig);
-        $scope.bloch  = response.data.bloch;
-        $scope.nbeams = response.data.nbeams;
+        $scope.load_bloch(response.data);
     });
   };
+
+  $scope.load_bloch = function (data){
+    $scope.fig       = JSON.parse(data.fig);
+    $scope.bloch     = data.bloch;
+    $scope.nbeams    = data.nbeams;
+    $scope.theta_phi = data.theta_phi.split(',');
+  }
+
 
   $scope.toggle_popup=function(key){
     $scope.popup[key]=!$scope.popup[key];
@@ -121,7 +179,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     'nbms':false};
 
   $scope.analyis_mode=false;
-  // $scope.fig={};
+  $scope.fig={};
   // $scope.var_data={'width':250,'height':800};
   $http.get('/init')
     .then(function(response){
@@ -134,11 +192,14 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
       $scope.bloch     = response.data.bloch;
       $scope.cif       = response.data.cif;
       $scope.cif_file  = response.data.cif_file;
+      $scope.manual_mode  =response.data.manual_mode;
+      $scope.rotation_mode=response.data.rotation_mode;
+      $scope.theta_phi=response.data.theta_phi.split(',');
+
       $scope.update()
     });
-    // $log.log($scope.structure);
 
     $scope.nbeams=0;
     $scope.show_buttons=false;
-    $scope.manual_mode=false;
+    $scope.dtheta_phi=0.1;
 }]);

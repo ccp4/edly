@@ -120,12 +120,52 @@
                 Bloch solver
               </div>
               <div class="col-sm-2" style="float:right">
-                <a style="float:right" class="btn btn-primary popup" ng-click="manual_mode=!manual_mode" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')">
-                  <span class="glyphicon glyphicon-cog" />
-                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['manual']"> Pass to manual mode : u and keV can be manually set </span>
+                <a style="float:right" class="btn btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')">
+                  <span ng-class="{'glyphicon glyphicon-cog':!manual_mode,'glyphicon glyphicon-repeat':manual_mode}" />
+                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['manual']"> Toggle auto/manual mode for u and keV </span>
                 </a>
               </div>
             </div>
+            <!-- u -->
+            <div class="row">
+              <div class="col-sm-1 popup bloch_param" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')">
+                u
+                <span class="popuptext" ng-show="popup['u']"> real space beam orientation (cartesian reference frame) </span>
+              </div>
+              <div class="col-sm-10 bloch_param" >
+                <div >
+                  <span  ng-show="!manual_mode || (manual_mode && rotation_mode)" ng-bind="bloch['u']" ></span>
+                  <input ng-show=" manual_mode && !rotation_mode" ng-model="bloch['u']" type="text" class="bloch_input" style="width:160px">
+                  <a ng-show="manual_mode" class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="rotation_mode=!rotation_mode" ng-mouseenter="toggle_popup('rot')" ng-mouseleave="toggle_popup('rot')">
+                    <span ng-class="{'glyphicon glyphicon-move':!rotation_mode, 'glyphicon glyphicon-pencil':rotation_mode}" />
+                    <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rot']"> toggle rotation/edit mode </span>
+                  </a>
+                </div>
+              <!-- Theta, phi -->
+                <div class="theta_phi" ng-show="manual_mode && rotation_mode" tabindex="1" ng-click"" ng-keyup="update_theta_phi($event)">
+                  <span style="float:right;"class="popup glyphicon glyphicon-question-sign " ng-click="popup['rot_help']=true" ng-mouseleave="popup['rot_help']=false">
+                    <div class="popuptext" style="font-family: sans-serif;width:200px;text-align:left" ng-show="popup['rot_help']">
+                      <div> Use arrows after focusing the mouse onto this box  :
+                        <br> &nbsp left  : decrement phi
+                        <br> &nbsp right : increment phi
+                        <br> &nbsp down  : decrement theta
+                        <br> &nbsp up    : increment theta
+                        <br> &nbsp pagedown  : increase dt
+                        <br> &nbsp pageup    : decrease dt
+                        <br> &nbsp backspace : reset rate
+                        <br> &nbsp Enter : solve intensities
+                      </div>
+                    </div>
+                  </span>
+                  <div>
+                    theta = <span ng-bind="theta_phi[0]" ></span> deg <br>
+                    phi   = <span ng-bind="theta_phi[1]" ></span> deg <br>
+                    dt    = <span ng-bind="dtheta_phi"></span> deg
+                  </div>
+                </div>
+              </div>
+            </div><!-- u -->
+            <!-- keV -->
             <div class="row">
               <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('keV')" ng-mouseleave="toggle_popup('keV')">
                 keV
@@ -136,16 +176,7 @@
                 <span  ng-hide="manual_mode" ng-bind="bloch['keV']" ></span>
               </div>
             </div>
-            <div class="row">
-              <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')">
-                u
-                <span class="popuptext" ng-show="popup['u']"> real space beam orientation (cartesian reference frame) </span>
-              </div>
-              <div class="col-sm-8 bloch_param">
-                <span  ng-hide="manual_mode" ng-bind="bloch['u']" ></span>
-                <input ng-show="manual_mode" type="text" ng-model="bloch['u']" class="bloch_input" style="width:180px">
-              </div>
-            </div>
+            <!-- Nmax -->
             <div class="row">
               <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')">
                 Nmax
@@ -164,6 +195,16 @@
                 <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input">
               </div>
             </div>
+            <div class="row " >
+              <div class="btn-sm btn-primary bloch_solve_param"  ng-click="solve_bloch()"> Solve </div>
+            </div>
+            <div class="row">
+              <div class="popup bloch_param" ng-mouseenter="toggle_popup('nbms')" ng-mouseleave="toggle_popup('nbms')"> nbeams:
+                <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
+              </div>
+              <span ng-bind="nbeams" ></span>
+            </div>
+            <!-- thickness dependence-->
             <div class="row">
               <div class="col-sm-3 popup bloch_param" ng-mouseenter="toggle_popup('thick')" ng-mouseleave="toggle_popup('thick')">
                 Thickness
@@ -182,17 +223,8 @@
                 <input type="text" ng-model="bloch['thicks']" class="bloch_input" style="width: 150px">
               </div>
             </div>
-            <div class="row " >
-              <div class="btn-sm btn-primary bloch_solve_param"  ng-click="solve_bloch()"> Solve </div>
-            </div>
-            <div class="row">
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('nbms')" ng-mouseleave="toggle_popup('nbms')"> nbeams:
-                <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
-              </div>
-              <span ng-bind="nbeams" ></span>
-            </div>
-          </div><!-- Bloch solver -->
 
+          </div><!-- Bloch solver -->
         </div><!-- Main Panel -->
       </div><!-- col-sm-2 -->
 
@@ -262,5 +294,6 @@
       alert('You clicked this Plotly chart!');
     });
 </script>
+
 </body>
 </html>
