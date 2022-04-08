@@ -17,6 +17,7 @@ mol_path=lambda mol:'static/data/%s' %mol
 get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,'%s.tiff' %frame_str)
 png_path=lambda path,frame_str:os.path.join(path,'%s.png' %frame_str)
 pets_path=lambda mol:glob.glob(os.path.join(mol_path(mol),'pets','*.pts'))[0]
+get_pkl=lambda id:'static/data/tmp/%s/b.pkl' %id
 def b_str(x,i):
     if i:
         n=10**i
@@ -31,7 +32,7 @@ def b_arr(x,x0):
         return y
     except:
         return x0
-fig_wh=780
+fig_wh=650
 
 pets_data={}
 
@@ -39,6 +40,10 @@ pets_data={}
 def image_viewer():
     return render_template('bloch.html')
 
+
+########################
+#### frame
+########################
 @bw_app.route('/get_frame', methods=['POST'])
 def get_frame():
     data=json.loads(request.data.decode())
@@ -57,7 +62,7 @@ def update_zmax():
     return img
 
 def get_img_frame(frame,zmax,key):
-    session['analysis_mode']=False
+    session['modes']['analysis']=False
     if key=='sim':
         frame=min(max(1,frame-session['sim']['offset']),session['sim']['max_frame'])
     frame_str=str(frame).zfill(session[key]['pad'])
@@ -87,6 +92,9 @@ def get_img_frame(frame,zmax,key):
     return new_tmp
 
 
+########################
+#### Bloch
+########################
 @bw_app.route('/bloch_rotation', methods=['POST'])
 def bloch_rotation():
     data=json.loads(request.data.decode())
@@ -95,9 +103,9 @@ def bloch_rotation():
     phi   %=360
     session['bloch']['u'] = list(ut.u_from_theta_phi(theta,phi))
     session['bloch']['solve'] = False
-    session['rotation_mode'] = True
-    session['manual_mode']   = True
-    return bloch_fig()
+    session['modes']['rotation'] = True
+    session['modes']['manual']   = True
+    return update_bloch()
 
 @bw_app.route('/solve_bloch', methods=['POST'])
 def solve_bloch():
@@ -105,46 +113,53 @@ def solve_bloch():
     frame = data['frame']
     b_args = data['bloch']
     ## handle
-    thicks = np.array(b_arr(data['bloch']['thicks'],(0,100,100)),dtype=int)
+    thicks = update_thicks(data['bloch']['thicks'])
     u = pets_data[session['mol']].uvw0[frame-1]
     if data['manual_mode']:
         u = b_arr(data['bloch']['u'],u)
 
-    b_args.update({'u':u.tolist(),'thicks':thicks.tolist(),'solve':True})
-    session['manual_mode'] = data['manual_mode']
+    b_args.update({'u':u.tolist(),'thicks':thicks,'solve':True})
+    session['modes']['manual'] = data['manual_mode']
     session['bloch'] = b_args
-    # print(json.dumps(session['bloch']))
-    # print(json.dumps(session['theta_phi']))
-    return bloch_fig()
+    return update_bloch()
+
+def update_bloch():
+    b_args = session['bloch']
+    b0 = bloch.Bloch(session['cif_file'],path=session['path'],**b_args)
+    b0.save(get_pkl(session['id']))
+
+    fig_data = bloch_fig()
+
+    session['modes']['analysis'] = True
+    session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
+    bloch_args=b_args.copy()
+    bloch_args.update({'u':b_str(b_args['u'],4),'thicks':b_str(b_args['thicks'],0)})
+    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
+        'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
+    return info
 
 def bloch_fig():
-    b_args = session['bloch']
-    b0 = bloch.Bloch(session['cif_file'],path='dat/',**b_args)
-    # print(b0.df_G['I'])
+    b0 = ut.load_pkl(get_pkl(session['id']))
     b0.df_G['hkl'] = b0.df_G.index
     b0.df_G['I']   *=1000
+    # print(b0.thick,b0.df_G['I'].max())
     b0.df_G['Vga'] *=1000
     b0.df_G['Swa'] *=400
 
     ## pets
-    pets=pets_data[session['mol']]
-    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %session['frame'] )]
+    pets = pets_data[session['mol']]
+    df_pets = pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %session['frame'] )]
     rpx,rpy,Ipets=df_pets[['rpx','rpy','I']].values.T
 
     ## plot
     toplot=b0.df_G[['px','py','I','Vga','Swa']]
-    # fig=px.scatter(b0.df_G,x='px',y='py',size='I',)
     toplot=toplot.melt(value_vars=['I','Vga','Swa'],id_vars=['px','py'])
     # frame_str=str(session['frame']).zfill(session['exp']['pad'])
     # tiff_file=get_path(session['mol'],'exp',frame_str)
     # im = tifffile.imread(tiff_file)
 
-    # fig = go.Figure()
-    # fig=px.imshow(im)
     fig=px.scatter(toplot,x='px',y='py',
         color="variable",size='value')
-    # fig.add_trace(go.scatter(toplot,x='px',y='py',
-    #     color="species", symbol="species",size='value'))
     # fig.add_trace(go.scatter(x=rpx,y=rpy,size=Ipets))
     fig.update_layout(
         title="Diffraction pattern thick=%d A " %b0.thick,
@@ -155,24 +170,61 @@ def bloch_fig():
     )
 
     # fig.update_traces(marker_size=10)
-    fig_data = fig.to_json()
-
-    #### finalize
-    session['analysis_mode'] = True
-    session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
-    bloch_args=b_args.copy()
-    bloch_args.update({'u':b_str(b_args['u'],4),'thicks':b_str(b_args['thicks'],0)})
-    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
-        'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
-    # print(info)
-
-    return info
+    return fig.to_json()
 
 
-@bw_app.route('/toggle_molecule', methods=['GET'])
-def toggle_molecule():
-    session['show_molecule']=not session['show_molecule']
-    return json.dumps({'show_molecule':session['show_molecule']})
+########################
+#### Thickness stuffs
+########################
+@bw_app.route('/update_thickness', methods=['POST'])
+def update_thickness():
+    thick = json.loads(request.data.decode())['thick']
+    b0 = ut.load_pkl(get_pkl(session['id']))
+    b0.set_thickness(thick=thick)
+    b0.save(get_pkl(session['id']))
+    session['bloch']['thick'] = thick
+    return bloch_fig()
+
+def update_thicks(thicks):
+    thicks = tuple(np.array(b_arr(thicks,(0,100,100)),dtype=int).tolist())
+    session['bloch']['thicks'] = thicks
+    return thicks
+
+@bw_app.route('/beam_vs_thick', methods=['POST'])
+def beam_vs_thick():
+    data = json.loads(request.data.decode())
+    refl = data['refl']
+    thicks = update_thicks(data['thicks'])
+
+    b0  = ut.load_pkl(get_pkl(session['id']))
+    idx = b0.get_beam(refl=refl)
+    b0._set_beams_vs_thickness(thicks=thicks)
+    Iz  = b0.get_beams_vs_thickness(idx=idx)
+    b0.save(get_pkl(session['id']))
+
+    ### the figure
+    fig = px.scatter(x=b0.z,y=Iz[0,:])#,color="red")
+    fig.update_layout(
+        title="thickness dependent intensities",
+        hovermode='closest',
+        # margin=dict(l=20, r=20, t=20, b=20),
+        paper_bgcolor="LightSteelBlue",
+        width=fig_wh, height=fig_wh,
+    )
+    return fig.to_json()
+
+
+########################
+#### structure related
+########################
+@bw_app.route('/toggle_mode', methods=['POST'])
+def toggle_mode():
+    data = json.loads(request.data.decode())
+    key  = data['key']
+    # print(key)
+    session['modes'][key] = data['val']
+    session['mol']  = session['mol']
+    return json.dumps({key:session['modes'][key]})
 
 @bw_app.route('/set_structure', methods=['POST'])
 def set_structure():
@@ -182,6 +234,9 @@ def set_structure():
     session['cif_file'] = cif_file
     return session['cif_file']
 
+############################################################################
+#### Init
+############################################################################
 @bw_app.route('/init', methods=['GET'])
 def init():
     now = time.time()
@@ -211,7 +266,15 @@ def init():
             'offset':10,
             }
         bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
-            'thick':10,'thicks':[0,10,100],'opts':'vt','solve':1}
+            'thick':250,'thicks':[0,300,100],'opts':'vt','solve':1}
+
+        modes = {
+            'molecule'  :False,
+            'analysis'  :True,
+            'manual'    :False,
+            'rotation'  :False,
+            'single'    :False,
+        }
 
         session['id']   = id
         session['path'] = session_path
@@ -222,11 +285,8 @@ def init():
         session['frame'] = 1
         session['sim']   = sim
         session['exp']   = exp
-        session['analysis_mode'] = False
-        session['manual_mode']   = False
-        session['rotation_mode'] = False
-        session['theta_phi']     = [0,0]
-        session['show_molecule'] = False
+        session['modes'] = modes
+        session['theta_phi']  = [0,0]
         session['zm_counter'] = 0 #dummy variable
         session['bloch']      = bloch_args
         session['last_time']  = now
@@ -237,8 +297,7 @@ def init():
 
 
     print('send init info')
-    info=['mol','frame','cif','cif_file','show_molecule',
-        'analysis_mode','manual_mode','rotation_mode']
+    info=['mol','frame','cif','cif_file','modes']
     session_data = {k:session[k] for k in info}
     session_data['max_frame']=session['exp']['max_frame']
     for k in ['zmax']:

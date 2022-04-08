@@ -59,9 +59,9 @@
                 </div>
               </div>
               <div class="col-sm-4">
-                <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_molecule()" ng-mouseenter="toggle_popup('mol')" ng-mouseleave="toggle_popup('mol')">
-                  <img ng-hide="show_molecule" src="/static/images/jsmol.png"/>
-                  <img ng-show="show_molecule" src="/static/images/edly.png"/>
+                <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_mode('molecule')" ng-mouseenter="toggle_popup('mol')" ng-mouseleave="toggle_popup('mol')">
+                  <img ng-hide="modes['molecule']" src="/static/images/jsmol.png"/>
+                  <img ng-show="modes['molecule']" src="/static/images/edly.png"/>
                   <span class="popuptext" ng-show="popup['mol']"> show/hide molecule </span>
                 </a>
               </div>
@@ -69,7 +69,7 @@
           </div>
 
           <!-- Upload Buttons -->
-          <div class="panel" ng-show="show_buttons && !show_molecule">
+          <div class="panel" ng-show="show_buttons && !modes['molecule']">
             <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="toggle_popup('exp')" ng-mouseleave="toggle_popup('exp')">
               <img src="/static/images/exp_button.png" />
               <span class="popuptext" ng-show="popup['exp']"> Upload experimental dataset </span>
@@ -85,7 +85,7 @@
           </div>
 
           <!-- Frames panel -->
-          <div class="panel" ng-hide="show_molecule">
+          <div class="panel" ng-hide="modes['molecule']">
             <div class="row">
               <div class="col-sm-8">
                 <h4>Frames : </h4>
@@ -106,22 +106,22 @@
             </a>
           </div>
 
-          <div class="panel" ng-hide="show_molecule">
+          <div class="panel" ng-hide="modes['molecule']">
             <a class="btn btn-primary popup"  ng-click="toggle_analysis_mode()" ng-mouseenter="toggle_popup('ana')" ng-mouseleave="toggle_popup('ana')">
-              <span ng-class="{'glyphicon glyphicon-stats':!analysis_mode,'glyphicon glyphicon-picture':analysis_mode}"></span >
+              <span ng-class="{'glyphicon glyphicon-stats':!modes['analysis'],'glyphicon glyphicon-picture':modes['analysis']}"></span >
               <span class="popuptext" ng-show="popup['ana']"> Toggle frames/bloch_solver mode </span>
             </a>
           </div>
 
           <!-- Bloch solver -->
-          <div class="panel" ng-show="analysis_mode && !show_molecule">
+          <div class="panel" ng-show="modes['analysis'] && !modes['molecule']">
             <div class="row">
               <div class="col-sm-9 bloch_solver">
                 Bloch solver
               </div>
               <div class="col-sm-2" style="float:right">
                 <a style="float:right" class="btn btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')">
-                  <span ng-class="{'glyphicon glyphicon-cog':!manual_mode,'glyphicon glyphicon-repeat':manual_mode}" />
+                  <span ng-class="{'glyphicon glyphicon-cog':!modes['manual'],'glyphicon glyphicon-repeat':modes['manual']}" />
                   <span class="popuptext" style="font-family: sans-serif" ng-show="popup['manual']"> Toggle auto/manual mode for u and keV </span>
                 </a>
               </div>
@@ -134,15 +134,15 @@
               </div>
               <div class="col-sm-10 bloch_param" >
                 <div >
-                  <span  ng-show="!manual_mode || (manual_mode && rotation_mode)" ng-bind="bloch['u']" ></span>
-                  <input ng-show=" manual_mode && !rotation_mode" ng-model="bloch['u']" type="text" class="bloch_input" style="width:160px">
-                  <a ng-show="manual_mode" class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="rotation_mode=!rotation_mode" ng-mouseenter="toggle_popup('rot')" ng-mouseleave="toggle_popup('rot')">
-                    <span ng-class="{'glyphicon glyphicon-move':!rotation_mode, 'glyphicon glyphicon-pencil':rotation_mode}" />
+                  <span  ng-show="!modes['manual'] || (modes['manual'] && modes['rotation'])" ng-bind="bloch['u']" ></span>
+                  <input ng-show=" modes['manual'] && !modes['rotation']" ng-keypress="solve_bloch($event)" ng-model="bloch['u']" type="text" class="bloch_input" style="width:160px">
+                  <a ng-show="modes['manual']" class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('rotation')" ng-mouseenter="toggle_popup('rot')" ng-mouseleave="toggle_popup('rot')">
+                    <span ng-class="{'glyphicon glyphicon-move':!modes['rotation'], 'glyphicon glyphicon-pencil':modes['rotation']}" />
                     <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rot']"> toggle rotation/edit mode </span>
                   </a>
                 </div>
               <!-- Theta, phi -->
-                <div class="theta_phi" ng-show="manual_mode && rotation_mode" tabindex="1" ng-click"" ng-keyup="update_theta_phi($event)">
+                <div class="theta_phi" ng-show="modes['manual'] && modes['rotation']" tabindex="1" ng-click"" ng-keyup="update_theta_phi($event)">
                   <span style="float:right;"class="popup glyphicon glyphicon-question-sign " ng-click="popup['rot_help']=true" ng-mouseleave="popup['rot_help']=false">
                     <div class="popuptext" style="font-family: sans-serif;width:200px;text-align:left" ng-show="popup['rot_help']">
                       <div> Use arrows after focusing the mouse onto this box  :
@@ -172,8 +172,8 @@
                 <span class="popuptext" ng-show="popup['keV']"> beam energy </span>
               </div>
               <div class="col-sm-8 bloch_param">
-                <input ng-show="manual_mode" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" >
-                <span  ng-hide="manual_mode" ng-bind="bloch['keV']" ></span>
+                <input ng-show="modes['manual']" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" >
+                <span  ng-hide="modes['manual']" ng-bind="bloch['keV']" ></span>
               </div>
             </div>
             <!-- Nmax -->
@@ -195,32 +195,44 @@
                 <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input">
               </div>
             </div>
+            <!-- solve button -->
             <div class="row " >
-              <div class="btn-sm btn-primary bloch_solve_param"  ng-click="solve_bloch()"> Solve </div>
-            </div>
-            <div class="row">
-              <div class="popup bloch_param" ng-mouseenter="toggle_popup('nbms')" ng-mouseleave="toggle_popup('nbms')"> nbeams:
-                <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
+              <div class="col-sm-7" style="padding:0px">
+                <div class="btn-sm btn-primary bloch_solve_param" style="margin-right: 5px;"  ng-click="update_bloch()"> Solve </div>
               </div>
-              <span ng-bind="nbeams" ></span>
+              <div class="col-sm-4" style="font-size:14px;padding:0px;top:15px;margin-right:5px">
+                <div class="popup bloch_param" ng-mouseenter="toggle_popup('nbms')" ng-mouseleave="toggle_popup('nbms')">
+                  nbeams=<span ng-bind="nbeams" ></span>
+                  <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
+                </div>
+              </div>
             </div>
             <!-- thickness dependence-->
             <div class="row">
-              <div class="col-sm-3 popup bloch_param" ng-mouseenter="toggle_popup('thick')" ng-mouseleave="toggle_popup('thick')">
+              <div class="col-sm-3 popup bloch_param"  ng-mouseenter="toggle_popup('thick')" ng-mouseleave="toggle_popup('thick')">
                 Thickness
                 <span class="popuptext" ng-show="popup['thick']"> sample thickness (Angstrom)</span>
               </div>
               <div class="col-sm-8 bloch_param">
-                <input type="number" min="0" ng-model="bloch['thick']" class="bloch_input">
+                <input ng-keypress="update_thickness($event)" type="number" min="0" ng-model="bloch['thick']" class="bloch_input">
+                <a tabindex="1" ng-keydown="update_thickness($event)" class="btn-sm btn-primary popup" style="margin-right:0px;margin-left:0px" ng-click="popup['move_thick']=false" ng-mouseenter="popup['move_thick']=true" ng-mouseleave="popup['move_thick']=false">
+                  <span class='glyphicon glyphicon-move' />
+                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['move_thick']"> click and use arrows to change thickness.pageup/down to change rate </span>
+                </a>
+                <span style="font-size: 12px;">dthick=<span ng-bind="dthick"></span>A </span>
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-3 popup bloch_param" ng-mouseenter="toggle_popup('thicks')" ng-mouseleave="toggle_popup('thicks')">
+              <div class="col-sm-3 popup bloch_param" ng-mouseenter="popup['thicks']=true" ng-mouseleave="popup['thicks']=false">
                 Range
                 <span class="popuptext" ng-show="popup['thicks']"> Thickness range for beam vs thickness (t0,t1,nb_points) </span>
               </div>
               <div class="col-sm-8 bloch_param">
-                <input type="text" ng-model="bloch['thicks']" class="bloch_input" style="width: 150px">
+                <input ng-keypress="update_beam_vs_thickness($event)" type="text" ng-model="bloch['thicks']"  class="bloch_input" style="width: 100px">
+                <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;"  ng-click="beam_vs_thickness()" ng-mouseenter="toggle_popup('beams_thick')" ng-mouseleave="toggle_popup('beams_thick')">
+                  <img style="width: 90%;" src="/static/images/beam_vs_thick.png"/>
+                  <span class="popuptext" ng-show="popup['beams_thick']"> Show beam vs thickness </span>
+                </a>
               </div>
             </div>
 
@@ -231,7 +243,7 @@
 
 
       <!-- molecule viewer -->
-      <div class="col-sm-10" ng-show="show_molecule">
+      <div class="col-sm-10" ng-show="modes['molecule']">
         <div class="panel">
           <div cif_file="cif_file" id="myJmol" ></div>
         </div>
@@ -239,16 +251,29 @@
 
 
       <!-- Frame/analysis viewer -->
-      <div class="col-sm-10" ng-hide="show_molecule" >
+      <div class="col-sm-10" ng-hide="modes['molecule']" >
         <!-- Analysis figure -->
-        <div class="col-sm-12" ng-show="analysis_mode">
-          <div id="plotly_div" style="width:100%;margin:5px;border-style:solid;float:left" >
-            <line-plot fig="fig">
+        <div ng-show="modes['analysis']">
+          <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="toggle_popup('single_mode')" ng-mouseleave="toggle_popup('single_mode')">
+            <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
+            <span class="popuptext" style="font-family: sans-serif" ng-show="popup['single_mode']"> toggle single/dual mode </span>
+          </a>
+          <div class="row">
+            <div ng-class="{'col-sm-12':modes['single'],'col-sm-6':!modes['single']}" >
+              <div id="plotly_div" style="width:100%;margin:5px;border-style:solid;float:left" >
+                <line-plot fig="fig">
+              </div>
+            </div>
+            <div class="col-sm-6" ng-hide="modes['single']">
+              <div style="width:100%;margin:5px;border-style:solid;float:right" >
+                <line-plot fig="fig2">
+              </div>
+            </div>
           </div>
         </div>
 
 
-        <div class="panel" ng-hide="analysis_mode" style="background-color: #80a6c7;">
+        <div class="panel" ng-hide="modes['analysis']" style="background-color: #80a6c7;">
           <div class="row"  >
             <!-- Simulated frame  -->
             <div class="col-sm-6" >
@@ -288,12 +313,12 @@
 
 
 <script src="static/js/jsmol.js"></script>
-<script text="javascript">
+<!-- <script text="javascript">
   var myPlot = document.getElementById('plotly_div')
   myPlot.on('plotly_click', function(){
       alert('You clicked this Plotly chart!');
     });
-</script>
+</script> -->
 
 </body>
 </html>

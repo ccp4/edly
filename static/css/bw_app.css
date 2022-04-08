@@ -36,6 +36,13 @@
   padding:0px;
   background-color: #b9c7e3;
 }
+.myBtn-sm {
+  width: 30px;
+  height:30px;
+  top:-1px;
+  padding:0px;
+  background-color: #b9c7e3;
+}
 
 .jmol{
   float: right;

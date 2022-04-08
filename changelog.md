@@ -1,13 +1,21 @@
 # Version log
 
 ## 0.0.1
+### issue#7 (Fri  8 Apr 12:38:20 BST 2022)
+- display b0.beam_vs_thickness in either another window or aside of analysis
+- toggle button for dual view
+- updates on press enter for `thickness`, `range`, `u` inputs
+- arrows for changing `thickness` and dthick
+- grouped `show_molecule`,`analysis_mode`... into `session['modes'][mode]` for better control over saving session state and toggles
+- split `solve_bloch`  into `update_bloch` and `bloch_fig` for better update of `update_thick`
+
+
 ### issue#10 (Thu  7 Apr 14:46:11 BST 2022)
 - created `rotation_mode`
-- bw_app.py:solve_bloch split into 2 functions to accomodate for `bloch_rotation`
+- bw_app.py:solve_bloch split into 2 functions to accommodate for `bloch_rotation`
 - pets data loaded when sessions are created
 - arrows can be used to change orientation when the rotation panel is focused
 - library bloch.py modified to include `I` key even when not solved.
-
 
 ### issue#5 (Sun  3 Apr 19:12:17 BST 2022)
 - add all parameters inputs to Bloch solver
