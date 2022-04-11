@@ -178,7 +178,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
         $scope.rock_state='init';
         $scope.solve_rock_btn=$scope.rock_state;
         $scope.rock_style={'background-color':'red'};
-        $scope.rock_sim = 1;
         var interval;
         interval = $interval(function () {
           $http.get('/rock_state')
@@ -195,6 +194,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
           $scope.rock_style = {'background-color':'green'};
           $scope.rock_state = 'done';
           $scope.solve_rock_btn=$scope.rock_state;
+          $scope.set_rock_sim(1);
         })
       })
     }

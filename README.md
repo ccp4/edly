@@ -3,9 +3,15 @@
 pip install flask plotly wheel tarikDrevonUtils tarikED==1.0.7rc0
 
 ## development environment
-git clone https://github.com/ronandrevon/debloch
-git clone https://github.com/ronandrevon/debloch
+```
+python3 -m venv .env
+cd .env
+source bin/activate
+git clone git@github.com:ccp4/electron-diffraction.git
+cd electron-diffraction
 pip install -e .
+```
+Then a simple git pull on these dependencies will keep them up to date
 
 ## Installing the js dependencies
 bower install jquery angular angular-aria angular-touch angular-bootstrap bootstrap-css bootstrap angular-chart plotly
