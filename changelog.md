@@ -2,13 +2,17 @@
 
 ## 0.0.1
 
-### issue#8 rocking curve
+### issue#8 (Mon 11 Apr 16:53:08 BST 2022)
+- Rocking curve 
 - [x] compute and display rocking curve in side figure
 - [x] add panel for rocking curve parameters
 - [x] show computation evolution
 - [x] go through rocking patterns
 - [x] toggle rocking/overlay images
-- add figure for showing 3d orientation
+- [x] add figure for showing 3d orientation
+- created in_out.py
+- added gg-icons.css
+- use `modes['u']` to str (move,edit,rock)
 
 ### issue#7 (Fri  8 Apr 12:38:20 BST 2022)
 - display b0.beam_vs_thickness in either another window or aside of analysis

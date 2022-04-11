@@ -195,12 +195,12 @@
                         </div>
                       </div>
                     </span>
-                    <div>
-                      u     = <span  ng-bind="bloch['u']" ></span>
-                      theta = <span ng-bind="theta_phi[0]" ></span> deg <br>
-                      phi   = <span ng-bind="theta_phi[1]" ></span> deg <br>
-                      dt    = <span ng-bind="dtheta_phi"></span> deg
-                    </div>
+                    <table>
+                      <tr><td class="td-in"> u     </td><td> = </td><td class="td-in"> <span ng-bind="bloch['u']"   ></span>    </td></tr>
+                      <tr><td class="td-in"> theta </td><td> = </td><td class="td-in"> <span ng-bind="theta_phi[0]" ></span> deg</td></tr>
+                      <tr><td class="td-in"> phi   </td><td> = </td><td class="td-in"> <span ng-bind="theta_phi[1]" ></span> deg</td></tr>
+                      <tr><td class="td-in"> dt    </td><td> = </td><td class="td-in"> <span ng-bind="dtheta_phi"   ></span> deg</td></tr>
+                    </table>
                   </div>
                 </div>
                 <!-- rock mode -->
@@ -426,7 +426,7 @@
 
 
 
-<!-- <script src="static/js/jsmol.js"></script> -->
+<script src="static/js/jsmol.js"></script>
 <!-- <script text="javascript">
   var myPlot = document.getElementById('plotly_div')
   myPlot.on('plotly_click', function(){

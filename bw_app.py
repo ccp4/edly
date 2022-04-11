@@ -1,7 +1,7 @@
 from flask import Flask,Blueprint,request,jsonify,session,render_template
 from subprocess import check_output,Popen,PIPE
 import json,tifffile,os,sys,glob,time,datetime #,base64,hashlib
-import numpy as np
+import numpy as np,pandas as pd
 from blochwave import bloch
 from blochwave import bloch_pp as bl #;imp.reload(bl)
 from EDutils import utilities as ut
@@ -114,7 +114,8 @@ def update_bloch():
     # b_args['thicks']=None
     b0 = bloch.Bloch(session['cif_file'],
         path=session['path'],name='b',**b_args)
-
+    b0.save()
+    
     fig_data = bloch_fig()
 
     session['modes']['analysis'] = True
@@ -162,6 +163,31 @@ def bloch_fig(b0_path=''):
     # fig.update_traces(marker_size=10)
     return fig.to_json()
 
+@bw_app.route('/show_u', methods=['POST'])
+def show_u():
+    data = json.loads(request.data.decode())
+    if session['modes']['u']=='rock':
+        r_args = get_rock(data)
+        uvw = ut.get_uvw_rock(**r_args)
+    else:
+        uvw = np.array(b_arr(data['u'],session['bloch']['u']))[None,:]
+
+    ui = np.arange(uvw.shape[0])[:,None]
+    uvw = np.vstack([np.hstack([uvw,ui]),np.hstack([0*uvw,ui])])
+    df = pd.DataFrame(uvw,columns=['u0','u1','u2','ui']) #; print(df)
+    df['ui'] = np.array(df['ui'],dtype=int)
+    # df = px.data.gapminder().query("continent=='Europe'")
+    fig = px.line_3d(df, x="u0", y="u1", z="u2", color='ui')
+
+    fig.update_layout(
+        title="3d view of orientation vector ",
+        hovermode='closest',
+        # margin=dict(l=20, r=20, t=20, b=20),
+        paper_bgcolor="LightSteelBlue",
+        width=fig_wh, height=fig_wh,
+    )
+    return fig.to_json()
+
 ##############################
 #### Rocking curve stuffs
 ##############################
@@ -174,6 +200,7 @@ def rock_state():
             session['rock_state'] = '%d/%d' %(n_simus,npts)
         else:
             session['rock_state'] = 'postprocess'
+    print(session['rock_state'])
     return json.dumps(session['rock_state'])
 
 @bw_app.route('/set_rock_frame', methods=['POST'])
@@ -196,11 +223,7 @@ def set_rock_frame():
 @bw_app.route('/set_rock', methods=['POST'])
 def set_rock():
     data=json.loads(request.data.decode())
-    r_args = data['rock']
-    r_args.update({
-        'e0' : b_arr(data['rock']['e0'],session['rock']['e0']),
-        'e1' : b_arr(data['rock']['e1'],session['rock']['e1']),
-    })
+    r_args = get_rock(data)
 
     p=Popen('rm %s/u_*.pkl' %session['path'],shell=True,stderr=PIPE,stdout=PIPE)
     print(p.communicate())
@@ -210,6 +233,14 @@ def set_rock():
     session['bloch'].update({k:data['bloch'][k] for k in ['keV','Nmax','Smax','thick']})
     data = {s : get_session_data(s) for s in ['rock']}
     return json.dumps(data)
+
+def get_rock(data):
+    r_args = data['rock']
+    r_args.update({
+        'e0' : b_arr(data['rock']['e0'],session['rock']['e0']),
+        'e1' : b_arr(data['rock']['e1'],session['rock']['e1']),
+    })
+    return r_args
 
 @bw_app.route('/solve_rock', methods=['POST'])
 def solve_rock():
@@ -250,6 +281,7 @@ def show_rock():
     refl0 = str(tuple(refl[0]))
     Sw = rock.beams.loc[refl0].Sw
     I  = [rock.load(i).df_G.loc[refl0,'I'] for i in range(rock.n_simus)]
+    # print(Sw,I)
 
     ### the figure
     fig = px.scatter(x=Sw,y=I)

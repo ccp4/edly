@@ -1,6 +1,11 @@
 # edly
 
-pip install flask plotly tarikDrevonUtils tarikED==1.0.7rc0 wheel  
+pip install flask plotly wheel tarikDrevonUtils tarikED==1.0.7rc0
+
+## development environment
+git clone https://github.com/ronandrevon/debloch
+git clone https://github.com/ronandrevon/debloch
+pip install -e .
 
 ## Installing the js dependencies
 bower install jquery angular angular-aria angular-touch angular-bootstrap bootstrap-css bootstrap angular-chart plotly

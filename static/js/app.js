@@ -136,7 +136,11 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
 
 
   $scope.show_u=function(){
-    $log.log('showing u')
+    $http.post('/show_u',JSON.stringify({'rock':$scope.rock,'u':$scope.bloch['u']}))
+      .then(function(response){
+        $scope.fig2 = response.data;
+        // $log.log()
+    });
   }
 
   $scope.set_u_mode=function(val){
@@ -181,6 +185,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
           .then(function(response) {
             $scope.rock_state = response.data;
             $scope.solve_rock_btn=$scope.rock_state;
+            $log.log($scope.rock_state);
           });
         }, 100);
         $http.post('/solve_rock')
@@ -342,7 +347,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   ////////////////////////////////////////////////////////////////////////////////////////////////
   $scope.update = function(){
     if ($scope.modes['analysis']){
-      $scope.update_bloch();
+      if ( $scope.modes['u'] != 'rock'){
+        $scope.update_bloch();
+      }
     }
     else{
       $scope.update_img();
