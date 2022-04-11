@@ -215,9 +215,16 @@ img {
   padding: 4px;
 }
 
+
 .set_rock{
   float: right;
   bottom: 50px;
   right: 15px;
+}
+
+.table_miller{
+  overflow-y: scroll;
+  height: 50px;
+  background-color: blue:
 }
 </style>

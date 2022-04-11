@@ -20,7 +20,9 @@
      <!-- <script src="static/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script> -->
      <script src="static/bower_components/jquery/dist/jquery.min.js"></script>
      <!-- <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css"> -->
-     <script src="static/bower_components/plotlyjs/plotly.js"></script>
+     <!-- <script src="static/bower_components/plotlyjs/plotly.js"></script> -->
+     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
      <!-- <script src="static/bower_components/chart.js/Chart.min.js"></script>
      <script src="static/bower_components/angular-chart.js/dist/angular-chart.min.js"></script>      -->
      <script src="static/js/app.js"></script>
@@ -373,12 +375,12 @@
           <div class="row">
             <div ng-class="{'col-sm-12':modes['single'],'col-sm-6':!modes['single']}" >
               <div id="plotly_div" style="width:100%;margin:5px;border-style:solid;float:left" >
-                <line-plot fig="fig1">
+                <line-plot id=fig1 fig="fig1">
               </div>
             </div>
             <div class="col-sm-6" ng-hide="modes['single']">
               <div style="width:100%;margin:5px;border-style:solid;float:right" >
-                <line-plot fig="fig2">
+                <line-plot id=fig2 fig="fig2">
               </div>
             </div>
           </div>
@@ -423,9 +425,57 @@
     </div><!-- ng-controller -->
   </div>
 
+  <!-- miller indices table -->
+  <h2>Table miller indices</h2>
+  <!-- <div id=table_div class="div_table"> -->
+  <table id="table_Miller_indices" class='table_miller' border="1" cellpadding="2">
+    <tr>
+        <td>delete</td>
+        <td><b>miller_indices</b></td>
+    </tr>
+  </table>
+  <!-- </div> -->
 
+<script>
+var TABLE_MILLER=document.getElementById('table_Miller_indices')
+var datapts
 
-<script src="static/js/jsmol.js"></script>
+function addRow_tagTable(miller_indices) {
+    if (!extract_list_indices_from_table().includes(miller_indices)) {
+      var row = TABLE_MILLER.insertRow(TABLE_MILLER.rows.length);
+      row.insertCell(0).innerHTML= '<input style="width:35px" type="button" value = "X" onClick="deleteRow(this)">';
+      // row.insertCell(1).innerHTML= '<b>'+miller_indices+'</b>';
+      row.insertCell(1).innerHTML= miller_indices;
+  }
+}
+function extract_list_indices_from_table() {
+  let listTags=[]
+  let listrows= TABLE_MILLER.children[0].children
+  for (let row of listrows) {
+    // console.log(row.children[1].innerHTML);
+    listTags.push(row.children[1].innerHTML)
+  }
+  return listTags.slice(1,)
+}
+
+function deleteRow(obj) {
+    var index = obj.parentNode.parentNode.rowIndex;
+    TABLE_MILLER.deleteRow(index);
+}
+//////// function hover row point table miller
+function on_hover_highlight(indice_miller){
+  // identifiy the curve
+  curveNumber=1
+  let sizes=fig1.data[curveNumber].marker.size
+  let sym=fig1.data[curveNumber].marker.symbol
+  // identifiy the correct idx miller
+  let idxMiller = 6
+  sizes[idxMiller]*=5
+  Plotly.restyle('fig1',{'marker':{'size':sizes,'symbol':sym}},[curveNumber])
+}
+
+</script>
+<!-- <script src="static/js/jsmol.js"></script> -->
 <!-- <script text="javascript">
   var myPlot = document.getElementById('plotly_div')
   myPlot.on('plotly_click', function(){

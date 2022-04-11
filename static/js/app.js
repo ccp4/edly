@@ -9,7 +9,18 @@ app.config(['$interpolateProvider', function($interpolateProvider) {
 app.directive('linePlot', function () {
   function linkFunc(scope, element, attrs) {
       scope.$watch(attrs.fig, function (new_fig,fig) {
-          Plotly.newPlot(element[0], new_fig.data, new_fig.layout);
+          Plotly.newPlot(element[0].id, new_fig.data, new_fig.layout);
+          if (element[0].id=='fig1'){
+            console.log("here");
+            // console.log(element[0].id);
+            scope.initPlotly=true
+            document.getElementById(element[0].id).on('plotly_click', function(data){
+            // console.log(data.points);
+            let datapts=data.points[0]
+            addRow_tagTable(datapts.customdata)
+            // console.log(element[0].id);
+          })
+        }
       }, true);
   }
   return {
@@ -19,11 +30,14 @@ app.directive('linePlot', function () {
 
 
 
+
+
 app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', function ($scope,$rootScope,$log,$http,$interval) {
 
   ///////////////////////////////////////////////////////////////////
   // uploads
   ///////////////////////////////////////////////////////////////////
+  $scope.initPlotly=false
   $scope.set_structure=function(){
     $http.post('/set_structure',JSON.stringify({'cif':$scope.cif}))
     .then(function(response){
@@ -391,7 +405,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
       $scope.rock      = response.data.rock;
       $scope.theta_phi=response.data.theta_phi.split(',');
       $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
-      $log.log($scope.rock);
+      // $log.log($scope.rock);
       $scope.update()
     });
 

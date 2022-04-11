@@ -23,6 +23,82 @@ def image_viewer():
 
 
 ########################
+#### functions
+########################
+def normalize(s):
+    '''to use it as marker size data are positive and the mean should be around 30'''
+    s+=-s.min()
+    s/=s.max()
+    s*=30
+    return s
+
+def bloch_plotly_figure(b0,pets_path=None,frame=10):
+    if pets_path is None:
+        pets_path=['static/data/test/pets/glycine.pts']
+    pets = pt.Pets(pets_path[0],gen=False,dyn=1)
+    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %frame )]
+
+    b0.df_G['hkl'] = b0.df_G.index
+
+    toplot=b0.df_G[['px','py','I','Vga','Swa']]
+    toplot.loc[toplot.I.idxmax(),'I']/=500
+
+    for k in ['I','Vga','Swa']:toplot[k]=normalize(toplot[k])
+
+    toplot=toplot.melt(value_vars=['I','Vga','Swa'],id_vars=['px','py'],ignore_index=False)
+    toplot.index.name='miller indices'
+    fig=px.scatter(toplot,x='px',y='py',
+      color="variable",size='value',
+      hover_name='variable',
+      # hover_data=['px','py','value',toplot.index],
+      )
+
+    fig.update_traces(
+        customdata=toplot.index.to_numpy(),
+        hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{marker.size:.3f}<br>miller indices=%{customdata}<extra></extra>'
+    )
+    # fig.update_traces(marker_sizeref=4)
+    fig.data[1].marker.symbol='diamond'
+    fig.data[2].marker.symbol='triangle-up'
+    # fig.update_traces(hovertemplate='%{y:.2f}<br>{}')
+
+    ###### add the df_pets info as new trace
+    col_2axis='red'
+    yaxis2 ={
+      'title':'rpy',
+      'titlefont_color':col_2axis,'tickfont_color':col_2axis,'gridcolor':col_2axis,
+      'anchor':'free','position':1,
+      'overlaying':'y','side':'right',
+    }
+
+    xaxis2 ={
+      'title':'rpx',
+      'titlefont_color':col_2axis,'tickfont_color':col_2axis,'gridcolor':col_2axis,
+      'anchor':'free','position':1,
+      'overlaying':'x','side':'top'
+    }
+    # fig.layout['xaxis2']=xaxis2
+    # fig.layout['yaxis2']=yaxis2
+
+    to_add_plot=df_pets[['rpx','rpy','I','hkl']]
+    to_add_plot['rpx']*=pets.aper
+    to_add_plot['rpy']*=pets.aper
+    to_add_plot['I']=normalize(to_add_plot['I'])
+    fig.add_trace(go.Scatter(x=to_add_plot['rpx'],y=to_add_plot['rpy'],marker_symbol='square',
+                    marker_size=to_add_plot['I'],name='I_pets',
+                    # xaxis='x2',yaxis='y2',
+                    hovertext=['I_pets']*len(to_add_plot),
+                    customdata=to_add_plot['hkl'].to_numpy(),
+                    hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{marker.size:.3f}<br>miller indices=%{customdata}<extra></extra>'
+                    ))
+
+    fig.update_layout(
+        paper_bgcolor='#cdcfd1',
+        plot_bgcolor='#79a3f7',
+    )
+    fig.update_traces(mode='markers')
+    return fig
+########################
 #### frame
 ########################
 @bw_app.route('/get_frame', methods=['POST'])
@@ -115,9 +191,9 @@ def update_bloch():
     b0 = bloch.Bloch(session['cif_file'],
         path=session['path'],name='b',**b_args)
     b0.save()
-
-    fig_data = bloch_fig()
-
+    fig_data = bloch_plotly_figure(b0)
+    # fig_data.show()
+    fig_data=fig_data.to_json()
     session['modes']['analysis'] = True
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
     bloch_args=b_args.copy()
@@ -125,43 +201,6 @@ def update_bloch():
     info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
         'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
     return info
-
-
-def bloch_fig(b0_path=''):
-    if not b0_path:
-        b0_path=get_pkl(session['id'])
-    b0 = ut.load_pkl(b0_path)
-    b0.df_G['hkl'] = b0.df_G.index
-    b0.df_G['I']   *=1000
-    # print(b0.thick,b0.df_G['I'].max())
-    b0.df_G['Vga'] *=1000
-    b0.df_G['Swa'] *=400
-
-    ## pets
-    pets = pets_data[session['mol']]
-    df_pets = pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %session['frame'] )]
-    rpx,rpy,Ipets=df_pets[['rpx','rpy','I']].values.T
-
-    ## plot
-    toplot=b0.df_G[['px','py','I','Vga','Swa']]
-    toplot=toplot.melt(value_vars=['I','Vga','Swa'],id_vars=['px','py'])
-    # frame_str=str(session['frame']).zfill(session['exp']['pad'])
-    # tiff_file=get_path(session['mol'],'exp',frame_str)
-    # im = tifffile.imread(tiff_file)
-
-    fig=px.scatter(toplot,x='px',y='py',
-        color="variable",size='value')
-    # fig.add_trace(go.scatter(x=rpx,y=rpy,size=Ipets))
-    fig.update_layout(
-        title="Diffraction pattern thick=%d A " %b0.thick,
-        hovermode='closest',
-        # margin=dict(l=20, r=20, t=20, b=20),
-        paper_bgcolor="LightSteelBlue",
-        width=fig_wh, height=fig_wh,
-    )
-
-    # fig.update_traces(marker_size=10)
-    return fig.to_json()
 
 @bw_app.route('/show_u', methods=['POST'])
 def show_u():
