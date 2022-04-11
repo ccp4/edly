@@ -18,6 +18,10 @@ mv jmol<version> jmol
 cd jmol;unzip jsmol
 ```
 
+```
+wget -O static/css/all.css https://css.gg/css
+```
+
 ### installing the test dataset
 ```
 cd static/data/; ln -s ../../test test

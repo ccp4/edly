@@ -3,42 +3,23 @@ from subprocess import check_output,Popen,PIPE
 import json,tifffile,os,sys,glob,time,datetime #,base64,hashlib
 import numpy as np
 from blochwave import bloch
+from blochwave import bloch_pp as bl #;imp.reload(bl)
 from EDutils import utilities as ut
-from utils import displayStandards as dsp
 from EDutils import pets as pt              #;imp.reload(pt)
+from utils import displayStandards as dsp
 from utils import glob_colors as colors
 import plotly.express as px
 import plotly.graph_objects as go
-from string import ascii_letters,digits
+from in_out import*
 bw_app = Blueprint('bw_app', __name__)
 
-chars = ascii_letters+digits
-mol_path=lambda mol:'static/data/%s' %mol
-get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,'%s.tiff' %frame_str)
-png_path=lambda path,frame_str:os.path.join(path,'%s.png' %frame_str)
-pets_path=lambda mol:glob.glob(os.path.join(mol_path(mol),'pets','*.pts'))[0]
-get_pkl=lambda id:'static/data/tmp/%s/b.pkl' %id
-def b_str(x,i):
-    if i:
-        n=10**i
-        return str(tuple(np.round(np.array(x)*n)/n))[1:-1]
-    else:
-        return str(tuple(x))[1:-1]
-    return
-def b_arr(x,x0):
-    try :
-        y = np.array(x.split(","), dtype=float)
-        if not y.size==3:y=x0
-        return y
-    except:
-        return x0
-fig_wh=650
-
+fig_wh=725
 pets_data={}
 
 @bw_app.route('/')
 def image_viewer():
     return render_template('bloch.html')
+
 
 
 ########################
@@ -116,17 +97,23 @@ def solve_bloch():
     thicks = update_thicks(data['bloch']['thicks'])
     u = pets_data[session['mol']].uvw0[frame-1]
     if data['manual_mode']:
+        # print(data['bloch']['u'])
         u = b_arr(data['bloch']['u'],u)
 
-    b_args.update({'u':u.tolist(),'thicks':thicks,'solve':True})
+    b_args.update({'u':list(u),'thicks':list(thicks),'solve':True})
     session['modes']['manual'] = data['manual_mode']
     session['bloch'] = b_args
+    # session['last_req'] = 'solve_bloch:%s' %(time.time())
+    # print({k:type(v) for k,v in session['bloch'].items()})
     return update_bloch()
 
+
 def update_bloch():
-    b_args = session['bloch']
-    b0 = bloch.Bloch(session['cif_file'],path=session['path'],**b_args)
-    b0.save(get_pkl(session['id']))
+    b_args = session['bloch']#.copy()
+    # print(b_args['u'])
+    # b_args['thicks']=None
+    b0 = bloch.Bloch(session['cif_file'],
+        path=session['path'],name='b',**b_args)
 
     fig_data = bloch_fig()
 
@@ -138,8 +125,11 @@ def update_bloch():
         'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
     return info
 
-def bloch_fig():
-    b0 = ut.load_pkl(get_pkl(session['id']))
+
+def bloch_fig(b0_path=''):
+    if not b0_path:
+        b0_path=get_pkl(session['id'])
+    b0 = ut.load_pkl(b0_path)
     b0.df_G['hkl'] = b0.df_G.index
     b0.df_G['I']   *=1000
     # print(b0.thick,b0.df_G['I'].max())
@@ -172,6 +162,104 @@ def bloch_fig():
     # fig.update_traces(marker_size=10)
     return fig.to_json()
 
+##############################
+#### Rocking curve stuffs
+##############################
+@bw_app.route('/rock_state', methods=['GET'])
+def rock_state():
+    if not session['rock_state'] == 'done':
+        n_simus=len(glob.glob(os.path.join(session['path'],'u_*.pkl')))
+        npts=session['rock']['npts']
+        if not n_simus==npts:
+            session['rock_state'] = '%d/%d' %(n_simus,npts)
+        else:
+            session['rock_state'] = 'postprocess'
+    return json.dumps(session['rock_state'])
+
+@bw_app.route('/set_rock_frame', methods=['POST'])
+def set_rock_frame():
+    data = json.loads(request.data.decode())
+    frame = data['frame']
+    uvw = pets_data[session['mol']].uvw0
+    u0 = uvw[max(0,frame-2)]
+    u1 = uvw[frame-1]
+    u2 = uvw[min(frame,frame-1)]
+    e0 = (u0 + u1)/2
+    e1 = (u1 + u2)/2
+    e0/=np.linalg.norm(e0)
+    e1/=np.linalg.norm(e1)
+
+    session['rock'].update({'e0':e0.tolist(),'e1':e1.tolist()})
+    session['frame'] = frame
+    return json.dumps({'rock':get_session_data('rock')})
+
+@bw_app.route('/set_rock', methods=['POST'])
+def set_rock():
+    data=json.loads(request.data.decode())
+    r_args = data['rock']
+    r_args.update({
+        'e0' : b_arr(data['rock']['e0'],session['rock']['e0']),
+        'e1' : b_arr(data['rock']['e1'],session['rock']['e1']),
+    })
+
+    p=Popen('rm %s/u_*.pkl' %session['path'],shell=True,stderr=PIPE,stdout=PIPE)
+    print(p.communicate())
+
+    session['rock_state'] = 'init'
+    session['rock'] = r_args
+    session['bloch'].update({k:data['bloch'][k] for k in ['keV','Nmax','Smax','thick']})
+    data = {s : get_session_data(s) for s in ['rock']}
+    return json.dumps(data)
+
+@bw_app.route('/solve_rock', methods=['POST'])
+def solve_rock():
+    Sargs = {k:session['bloch'][k] for k in ['keV','Nmax','Smax','thick']}
+    Sargs['cif_file'] = session['cif_file']
+
+    uvw  = ut.get_uvw_rock(**session['rock'])
+    rock = bl.Bloch_cont(path=session['path'],tag='',uvw=uvw,Sargs=Sargs)
+    session['rock_state'] = 'done'
+
+    nbeams = np.array([rock.load(i).nbeams for i  in range(rock.n_simus)] )
+    nbs='%d-%d' %(nbeams.min(),nbeams.max())
+    return json.dumps({'nbeams':nbs})
+
+@bw_app.route('/overlay_rock', methods=['POST'])
+def overlay_rock():
+    sim = glob.glob(os.path.join(session['path'],'u_*.pkl'))[0]
+    return bloch_fig(b0_path=sim)
+
+@bw_app.route('/get_rock_sim', methods=['POST'])
+def get_rock_sim():
+    data = json.loads(request.data.decode())
+    rock_sim = int(data['sim'])
+    print(rock_sim)
+    sims = glob.glob(os.path.join(session['path'],'u_*.pkl'))
+    i    = max(min(rock_sim,len(sims)),1)-1
+    sim  = sims[i];print(i,sim)
+    fig = bloch_fig(b0_path=sim)
+    return json.dumps({'fig':fig, 'sim':i+1})
+
+@bw_app.route('/show_rock', methods=['POST'])
+def show_rock():
+    data = json.loads(request.data.decode())
+    refl = data['refl']
+    rock = ut.load_pkl(file=rock_path(session['id']))
+
+    # z,I  = rock.get_rocking(refl=refl)
+    refl0 = str(tuple(refl[0]))
+    Sw = rock.beams.loc[refl0].Sw
+    I  = [rock.load(i).df_G.loc[refl0,'I'] for i in range(rock.n_simus)]
+
+    ### the figure
+    fig = px.scatter(x=Sw,y=I)
+    fig.update_layout(
+        title="Rocking curve",
+        hovermode='closest',
+        paper_bgcolor="LightSteelBlue",
+        width=fig_wh, height=fig_wh,
+    )
+    return fig.to_json()
 
 ########################
 #### Thickness stuffs
@@ -217,11 +305,11 @@ def beam_vs_thick():
 ########################
 #### structure related
 ########################
-@bw_app.route('/toggle_mode', methods=['POST'])
-def toggle_mode():
+@bw_app.route('/set_mode', methods=['POST'])
+def set_mode():
     data = json.loads(request.data.decode())
+    # print(data)
     key  = data['key']
-    # print(key)
     session['modes'][key] = data['val']
     session['mol']  = session['mol']
     return json.dumps({key:session['modes'][key]})
@@ -242,9 +330,10 @@ def init():
     now = time.time()
     if session.get('id') and os.path.exists(session.get('path')):
         if (now-session['last_time'])>24*3600:
-            print(check_output('rm %s/*' %session.get('path'),shell=True).decode())
+            print('warning:session create at %s has expired ' %session['last_time'])
+            print(check_output('rm -rf %s/*' %session.get('path'),shell=True).decode())
     else:
-        id=''.join([chars[s] for s in np.random.randint(0,len(chars),10)])
+        id = create_id()
         session_path=os.path.join('static','data','tmp',id)
         print(check_output('mkdir -p %s' %session_path,shell=True).decode())
 
@@ -266,15 +355,16 @@ def init():
             'offset':10,
             }
         bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
-            'thick':250,'thicks':[0,300,100],'opts':'vt','solve':1}
+            'thick':250,'thicks':[0,300,100],'opts':'vts','solve':1}
 
         modes = {
             'molecule'  :False,
             'analysis'  :True,
             'manual'    :False,
-            'rotation'  :False,
+            'u'         :'edit',
             'single'    :False,
         }
+        rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
 
         session['id']   = id
         session['path'] = session_path
@@ -286,10 +376,12 @@ def init():
         session['sim']   = sim
         session['exp']   = exp
         session['modes'] = modes
-        session['theta_phi']  = [0,0]
         session['zm_counter'] = 0 #dummy variable
+        session['theta_phi']  = [0,0]
         session['bloch']      = bloch_args
+        session['rock']       = rock_args
         session['last_time']  = now
+        session['time'] = now
         # print(session['cif'],session.get('exp'+'tmp'))
 
     if not session['mol'] in pets_data.keys():
@@ -303,8 +395,19 @@ def init():
     for k in ['zmax']:
         session_data[k] = dict(zip(['sim','exp'],[session['sim'][k],session['exp'][k]]))
     session_data['theta_phi']=b_str(session['theta_phi'],2)
-    session_data['bloch']=session['bloch'].copy()
-    session_data['bloch'].update({'u':b_str(session['bloch']['u'],4),
-        'thicks':b_str(session['bloch']['thicks'],0)})
-
+    session_data['bloch']=get_session_data('bloch')
+    session_data['rock']=get_session_data('rock')
     return json.dumps(session_data)
+
+def get_session_data(key):
+    if key=='bloch':
+        data=session['bloch'].copy()
+        data.update({'u':b_str(session['bloch']['u'],4),
+            'thicks':b_str(session['bloch']['thicks'],0)})
+    elif key == 'rock':
+        data=session['rock'].copy()
+        data.update({
+            'e0':b_str(session['rock']['e0'],4),
+            'e1':b_str(session['rock']['e1'],4),
+        })
+    return data

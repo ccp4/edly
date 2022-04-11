@@ -168,9 +168,20 @@ img {
   padding:0px;
   margin:3px;
 }
+.vlong_input{
+  width: 160px
+}
+
+.long_input{
+  width: 120px
+}
+.mid_input{
+  width: 100px
+}
 .bloch_input{
   width: 60px
 }
+
 .bloch_solve_param{
   margin: 10px;
   margin-right: 20px;
@@ -179,9 +190,9 @@ img {
 }
 .bloch_solver{
   background-color: #a1c2c2;
-  padding: 8px;
-  margin: 0px;
-  margin-left: 5px;
+  padding: 5px;
+  margin: 5px;
+  /* margin-left: 5px; */
   font-size: 20px;
   border-radius: 3px;
   border-color: #5b8686;
@@ -190,8 +201,23 @@ img {
 .theta_phi{
   border-style: solid;
   padding: 3px;
-  width: 70%;
+  width: 90%;
+  margin-bottom: 5px;
+  margin-left: 10px;
   border-radius: 3px;
   border-color: #18327c;
+}
+.gg-icon{
+  display:inline-block;
+}
+
+.td-in{
+  padding: 4px;
+}
+
+.set_rock{
+  float: right;
+  bottom: 50px;
+  right: 15px;
 }
 </style>

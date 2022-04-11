@@ -8,7 +8,9 @@ __pycache__/
 **/bower_components
 
 static/jmol
-jmol_ex.html
+static/node_modules/
+static/css.gg/
+**/sandbox
 dat/*
 **/png
 **/tiff

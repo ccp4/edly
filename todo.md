@@ -6,15 +6,16 @@
 - include processed data to main viewer
 ### issue#9 graph selector
 - plotly menu for the curves to show
-### issue#8 rocking curve
-- rocking curve panel
-- little figure for seeing orientation setup
 
 ### misc
+- generate frame/integrated frame settings 
 - python console
+- accounts
+- help menu links to : help, theory, documentation, tests
+- menu containing : file,simulation,help
+- run with FELIX
 - button to create a new project
 - cif file upload/selection
-- menu containing : file,simulation,help
 - fleche directionnelle droite gauche -> changer de frame
 - changer directionelle haut/bas --> changer luminosite (zmax du heatmap )
 
