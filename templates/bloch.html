@@ -143,7 +143,7 @@
                   <span class="popuptext" style="font-family: sans-serif" ng-show="popup['u_move']"> Change Euler angles of u using arrows  </span>
                 </a>
                 <a class="btn-sm btn-primary popup" ng-style="u_style['rock']" ng-click="set_u_mode('rock')" ng-mouseenter="toggle_popup('u_rock')" ng-mouseleave="toggle_popup('u_rock')">
-                  <span class="gg-icon gg-spectrum" />
+                  <span class="gg-icon gg-spectrum" ></span>
                   <!-- <span class="glyphicon glyphicon-move" /> -->
                   <span class="popuptext" style="font-family: sans-serif" ng-show="popup['u_rock']"> Set rocking curve for u </span>
                 </a>
@@ -159,25 +159,20 @@
             //////////////////////////////////////////// -->
             <!-- u -->
             <div class="row">
-              <div ng-hide="modes['manual']">
-                <div class="col-sm-1 popup bloch_param" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')">
+              <!-- auto or edit mode-->
+              <div ng-hide="modes['manual'] && modes['u']!='edit'">
+                <div class="col-sm-1 bloch_param">
                   u
-                  <span class="popuptext" ng-show="popup['u']"> real space beam orientation (cartesian reference frame) </span>
+                  <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')" style="float:right;top:-5px;">
+                    <span class="popuptext" ng-show="popup['u']"> real space beam orientation (cartesian reference frame) </span>
+                  </span>
                 </div>
                 <div class="col-sm-10 bloch_param">
-                  <span  ng-bind="bloch['u']" ></span>
+                  <span  ng-show="!modes['manual']"                      ng-bind="bloch['u']" ></span>
+                  <input ng-show="modes['manual'] && modes['u']=='edit'" ng-model="bloch['u']" ng-keypress="solve_bloch($event)"  type="text" class="bloch_input" style="width:180px">
                 </div>
               </div>
               <div ng-show="modes['manual']">
-                <!-- edit mode-->
-                <div ng-show="modes['u']=='edit'">
-                  <div  class="col-sm-1 popup bloch_param" ng-mouseenter="toggle_popup('u')" ng-mouseleave="toggle_popup('u')">
-                    u
-                  </div>
-                  <div class="col-sm-10 bloch_param">
-                    <input  ng-keypress="solve_bloch($event)" ng-model="bloch['u']" type="text" class="bloch_input" style="width:180px">
-                  </div>
-                </div>
                 <!-- move mode-->
                 <div ng-show="modes['u']=='move'" >
                   <div class="theta_phi" tabindex="1" ng-click"" ng-keyup="update_theta_phi($event)">
@@ -258,10 +253,12 @@
               </div><!-- manual mode -->
             </div><!-- u -->
             <!-- keV -->
-            <div class="row">
-              <div class="col-sm-1 popup bloch_param" ng-mouseenter="toggle_popup('keV')" ng-mouseleave="toggle_popup('keV')">
+            <div class="row" style="margin-top: 5px;">
+              <div class="col-sm-1 bloch_param">
                 keV
-                <span class="popuptext" ng-show="popup['keV']"> beam energy </span>
+                <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="toggle_popup('keV')" ng-mouseleave="toggle_popup('keV')" style="float:right;top:-30px;left:5px;">
+                  <span class="popuptext" ng-show="popup['keV']"> beam energy </span>
+                </span>
               </div>
               <div class="col-sm-8 bloch_param">
                 <input ng-show="modes['manual']" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" >
@@ -270,8 +267,9 @@
             </div>
             <!-- Nmax -->
             <div class="row">
-              <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')">
+              <div class="col-sm-2 bloch_param">
                 Nmax
+                <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')" style="float:right;top:-25px;">
                 <span class="popuptext" ng-show="popup['Nmax']"> Maximum resolution : reflection index would be (Nmax,Nmax,Nmax) </span>
               </div>
               <div class="col-sm-8 bloch_param">
@@ -279,8 +277,9 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-2 popup bloch_param" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')">
+              <div class="col-sm-2 bloch_param" >
                 Smax
+                <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')" style="float:right;top:-25px;">
                 <span class="popuptext" ng-show="popup['Smax']"> Maximum excitation error </span>
               </div>
               <div class="col-sm-8 bloch_param">

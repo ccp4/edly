@@ -1,21 +1,21 @@
 # TODO
 
 ## visu donnees
-### issue#6 plotly
+### issue#6 enhance plotly
 - beam selection from plotly
 - include processed data to main viewer
 ### issue#9 graph selector
 - plotly menu for the curves to show
 
-### misc
-- generate frame/integrated frame settings 
+### important
+- generate frame/integrated frame settings
+- long time chrome violation warning
 - python console
+- help menu links to : file(cif files, other projects, ...), help, theory, documentation, tests
+- FELIX option
+
+### cosmetic
 - accounts
-- help menu links to : help, theory, documentation, tests
-- menu containing : file,simulation,help
-- run with FELIX
-- button to create a new project
-- cif file upload/selection
 - fleche directionnelle droite gauche -> changer de frame
 - changer directionelle haut/bas --> changer luminosite (zmax du heatmap )
 

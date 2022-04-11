@@ -120,7 +120,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.modes['manual']}))
       .then(function(response){
         $scope.load_bloch(response.data);
-        $log.log($scope.bloch['u'])
+        // $log.log($scope.bloch['u'])
         if (!$scope.modes['single']){
           $scope.beam_vs_thickness()
         }
@@ -190,9 +190,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
         }, 100);
         $http.post('/solve_rock')
         .then(function(response){
-          $scope.nrock_beams = response.data.nbeams;
-          $scope.rock_style={'background-color':'green'};
           $interval.cancel(interval);
+          $scope.nrock_beams = response.data.nbeams;
+          $scope.rock_style = {'background-color':'green'};
           $scope.rock_state = 'done';
           $scope.solve_rock_btn=$scope.rock_state;
         })
@@ -211,7 +211,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     switch (s){
       case 'i':$scope.rock_sim  = 1;break;
       case '-':$scope.rock_sim -= 1;break;
-      case '+':$scope.rock_sim += 1;$log.log('ok');break;
+      case '+':$scope.rock_sim += 1;break;
       case 'f':$scope.rock_sim  = 100;break;
     }
     $log.log($scope.rock_sim);
@@ -347,7 +347,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   ////////////////////////////////////////////////////////////////////////////////////////////////
   $scope.update = function(){
     if ($scope.modes['analysis']){
-      if ( $scope.modes['u'] != 'rock'){
+      if ( ! ($scope.modes['manual'] && $scope.modes['u']=='rock')){
         $scope.update_bloch();
       }
     }

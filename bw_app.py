@@ -115,7 +115,7 @@ def update_bloch():
     b0 = bloch.Bloch(session['cif_file'],
         path=session['path'],name='b',**b_args)
     b0.save()
-    
+
     fig_data = bloch_fig()
 
     session['modes']['analysis'] = True
@@ -199,7 +199,10 @@ def rock_state():
         if not n_simus==npts:
             session['rock_state'] = '%d/%d' %(n_simus,npts)
         else:
-            session['rock_state'] = 'postprocess'
+            if not os.path.exists(rock_path(session['id'])):
+                session['rock_state'] = 'postprocess'
+            else:
+                session['rock_state'] = 'done'
     print(session['rock_state'])
     return json.dumps(session['rock_state'])
 
@@ -225,7 +228,8 @@ def set_rock():
     data=json.loads(request.data.decode())
     r_args = get_rock(data)
 
-    p=Popen('rm %s/u_*.pkl' %session['path'],shell=True,stderr=PIPE,stdout=PIPE)
+    cmd = 'rm %s/u_*.pkl %s' %(session['path'],rock_path(session['id']))
+    p=Popen(cmd,shell=True,stderr=PIPE,stdout=PIPE)
     print(p.communicate())
 
     session['rock_state'] = 'init'
@@ -250,9 +254,8 @@ def solve_rock():
     uvw  = ut.get_uvw_rock(**session['rock'])
     rock = bl.Bloch_cont(path=session['path'],tag='',uvw=uvw,Sargs=Sargs)
     session['rock_state'] = 'done'
-
     nbeams = np.array([rock.load(i).nbeams for i  in range(rock.n_simus)] )
-    nbs='%d-%d' %(nbeams.min(),nbeams.max())
+    nbs = '%d-%d' %(nbeams.min(),nbeams.max())
     return json.dumps({'nbeams':nbs})
 
 @bw_app.route('/overlay_rock', methods=['POST'])
