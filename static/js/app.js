@@ -338,7 +338,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     if (updated){
       theta_phi[0]%=180;
       theta_phi[1]%=360;
-      $log.log(theta_phi);
+      // $log.log(theta_phi);
       $http.post('/bloch_rotation',JSON.stringify({'theta_phi':theta_phi}))
         .then(function(response){
           $scope.load_bloch(response.data);

@@ -8,15 +8,14 @@
 - add a callback which adds/removes in a javascript array the selected hkl
 - use and show proper markers
 - add a background color (light blue) to the graph
-- add px and py labels to the axes
 - persistent xylims
 - persistent data visibility
 - adding MathJax dependency
 - added structure info in `crys`
 - bloch solver layout with expandable parameters
-- bug fix when updating frame orientation vector  
 - added rotation parameter omega
 - added selected beams to rocking curve and thickness dep
+- bug fix when updating frame orientation vector  
 
 ### issue#8 (Mon 11 Apr 16:53:08 BST 2022)
 - Rocking curve
