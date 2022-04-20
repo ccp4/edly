@@ -183,13 +183,19 @@ img {
 }
 
 .bloch_solve_param{
-  margin: 10px;
-  margin-right: 20px;
+  padding:3px;
+  font-size: 15px;
+  text-align: center;
+}
+.rock_solve_param{
+  padding: 5px;
+  margin: 3px;
   font-size: 15px;
   text-align: center;
 }
 .bloch_solver{
-  background-color: #a1c2c2;
+  /* background-color: #a1c2c2; */
+  background-color: #95bd97;
   padding: 5px;
   margin: 5px;
   /* margin-left: 5px; */

@@ -11,15 +11,17 @@ app.directive('linePlot', function () {
       scope.$watch(attrs.fig, function (new_fig,fig) {
           Plotly.newPlot(element[0].id, new_fig.data, new_fig.layout);
           if (element[0].id=='fig1'){
-            console.log("here");
+            // console.log("here");
             // console.log(element[0].id);
             scope.initPlotly=true
-            document.getElementById(element[0].id).on('plotly_click', function(data){
+            document.getElementById(element[0].id).on('plotly_click', scope.addRow_tagTable);
+            document.getElementById(element[0].id).on('plotly_legendclick', scope.leg_click);
+            // document.getElementById(element[0].id).on('plotly_click', function(data){
             // console.log(data.points);
-            let datapts=data.points[0]
-            addRow_tagTable(datapts.customdata)
+            // let datapts=data.points[0]
+            // addRow_tagTable(datapts.customdata)
             // console.log(element[0].id);
-          })
+          // })
         }
       }, true);
   }
@@ -28,18 +30,58 @@ app.directive('linePlot', function () {
   };
 });
 
-
+app.directive('ngKeyEnter', function() {
+  function linkFunc(scope, element, attrs) {
+    element.bind("keydown keypress", function(event) {
+      if (event.which === 13) {
+        scope.$apply(function() {
+            scope.$eval(attrs.ngKeyEnter);
+        });
+      }
+    });
+  }
+  return {
+    link:linkFunc
+  };
+});
 
 
 
 app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', function ($scope,$rootScope,$log,$http,$interval) {
+
+  /////////////////////////////////
+  //// plotly cb
+  /////////////////////////////////
+  $scope.update_refl = function(){
+    $scope.refl = extract_list_indices_from_table();
+  }
+  $scope.addRow_tagTable=function(data){
+    let h=data.points[0].customdata[1];
+    addRow_tagTable(h);
+  }
+
+  $scope.leg_click=function(data){
+    let dat = data.data[data.curveNumber];
+    if (dat.visible==true){
+      var update={'visible':'legendonly'};
+    }
+    else{
+      var update={'visible':true};
+    }
+    $http.post('/set_visible',JSON.stringify({'key':dat.name,'v':update.visible}))
+    .then(function(response){
+      // $log.log(response.data);
+      Plotly.restyle('fig1', update,[data.curveNumber]);
+    });
+    return false;
+  }
 
   ///////////////////////////////////////////////////////////////////
   // uploads
   ///////////////////////////////////////////////////////////////////
   $scope.initPlotly=false
   $scope.set_structure=function(){
-    $http.post('/set_structure',JSON.stringify({'cif':$scope.cif}))
+    $http.post('/set_structure',JSON.stringify({'cif':$scope.crys['file']}))
     .then(function(response){
       $scope.cif_file=response.data;
       // $log.log(response.data);
@@ -82,6 +124,10 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
 
   $scope.toggle_popup=function(key){
     $scope.popup[key]=!$scope.popup[key];
+  }
+
+  $scope.set_input=function(key){
+    $scope.input[key]=false;
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -215,6 +261,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   }
 
   $scope.show_rock=function(){
+    $scope.update_refl();
     $http.post('/show_rock',JSON.stringify({'refl':$scope.refl}))
       .then(function(response){
         $scope.fig2 = response.data;
@@ -257,6 +304,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     // $log.log(e.keyCode);
     var updated = false;
     var theta_phi=[Number($scope.theta_phi[0]),Number($scope.theta_phi[1])];
+    $scope.dtheta_phi=Number($scope.dtheta_phi);
     switch (e.keyCode) {
         case 37:
           theta_phi[1]-=$scope.dtheta_phi;
@@ -290,6 +338,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     if (updated){
       theta_phi[0]%=180;
       theta_phi[1]%=360;
+      $log.log(theta_phi);
       $http.post('/bloch_rotation',JSON.stringify({'theta_phi':theta_phi}))
         .then(function(response){
           $scope.load_bloch(response.data);
@@ -297,6 +346,14 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     }
   }
 
+  $scope.update_omega = function (e) {
+    if (event.key=='Enter') {
+      $http.post('/update_omega',JSON.stringify({'omega':$scope.omega}))
+      .then(function(response){
+        $scope.fig1 = response.data;
+      })
+    }
+  }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Thickness
@@ -348,6 +405,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   }
 
   $scope.beam_vs_thickness = function () {
+    $scope.update_refl();
     $http.post('/beam_vs_thick',JSON.stringify({'thicks':$scope.bloch['thicks'],'refl':$scope.refl}))
       .then(function(response){
         $scope.modes['single']=false;
@@ -391,7 +449,10 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.popup={}
   $scope.sim_rock = 1;
   $scope.rock_sim = 1;
+  $scope.input={'theta':false,'phi':false,'dtp':false};
 
+  $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}
+  $scope.expand_str={false:'expand',true:'minimize'};
   $http.get('/init')
     .then(function(response){
       $scope.structure = response.data.mol;
@@ -399,14 +460,16 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
       $scope.max_frame = response.data.max_frame;
       $scope.zmax      = response.data.zmax;
       $scope.bloch     = response.data.bloch;
-      $scope.cif       = response.data.cif;
+      $scope.crys      = response.data.crys;
       $scope.cif_file  = response.data.cif_file;
       $scope.modes     = response.data.modes;
       $scope.rock      = response.data.rock;
-      $scope.theta_phi=response.data.theta_phi.split(',');
+      $scope.theta_phi = response.data.theta_phi.split(',');
+      $scope.omega     = response.data.omega;
+      // $scope.expand    = response.data.expand;
       $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
-      // $log.log($scope.rock);
       $scope.update()
     });
+
 
 }]);

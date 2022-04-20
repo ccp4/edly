@@ -11,7 +11,7 @@
 
 /* The actual popup */
 .popup .popuptext {
-  /* width: 160px; */
+  width: 160px;
   background-color: #74789b;
   color: #11196c;
   text-align: center;
@@ -52,4 +52,9 @@
 @keyframes fadeIn {
   from {opacity: 0;}
   to {opacity:1 ;}
+}
+
+
+.bloch_info{
+  top:-5px;
 }

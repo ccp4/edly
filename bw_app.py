@@ -1,11 +1,12 @@
-from flask import Flask,Blueprint,request,jsonify,session,render_template
+import importlib as imp
 from subprocess import check_output,Popen,PIPE
 import json,tifffile,os,sys,glob,time,datetime #,base64,hashlib
+from flask import Flask,Blueprint,request,jsonify,session,render_template
 import numpy as np,pandas as pd
 from blochwave import bloch
-from blochwave import bloch_pp as bl #;imp.reload(bl)
+from blochwave import bloch_pp as bl        #;imp.reload(bl)
 from EDutils import utilities as ut
-from EDutils import pets as pt              #;imp.reload(pt)
+from EDutils import pets as pt              ;imp.reload(pt)
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
 import plotly.express as px
@@ -30,74 +31,78 @@ def normalize(s):
     s+=-s.min()
     s/=s.max()
     s*=30
+    # s = (s-s.min())/s.max()*30
     return s
 
-def bloch_plotly_figure(b0,pets_path=None,frame=10):
-    if pets_path is None:
-        pets_path=['static/data/test/pets/glycine.pts']
-    pets = pt.Pets(pets_path[0],gen=False,dyn=1)
-    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) &(I>2)' %frame )]
+def bloch_fig(b0_path=None):
+    if not b0_path:
+        b0_path=get_pkl(session['id'])
+    b0 = ut.load_pkl(b0_path)
+    # b0.df_G['hkl'] = b0.df_G.index
 
-    b0.df_G['hkl'] = b0.df_G.index
+    toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
+    # toplot.loc[str((0,0,0)),'I']=0
 
-    toplot=b0.df_G[['px','py','I','Vga','Swa']]
-    toplot.loc[toplot.I.idxmax(),'I']/=500
+    omega=session['omega']
+    session['vis']
+    if omega:
+        ct,st = np.cos(np.deg2rad(omega)),np.sin(np.deg2rad(omega))
+        qx_b,qy_b = toplot[['px','py']].values.T
+        # print(qy_b[0])
+        qx,qy = ct*qx_b-st*qy_b,st*qx_b+ct*qy_b
+        toplot['px'],toplot['py'] = qx,qy
 
-    for k in ['I','Vga','Swa']:toplot[k]=normalize(toplot[k])
-
-    toplot=toplot.melt(value_vars=['I','Vga','Swa'],id_vars=['px','py'],ignore_index=False)
+    plts = {
+        'I'  :['Ix','blue' ,'circle'     ],
+        'Vga':['Vx','green','triangle-up'],
+        'Sw' :['Sx','red'  ,'diamond'    ],
+    }
+    toplot['Ix']=normalize( np.log10(np.maximum(abs(toplot['I'])  ,1e-5)))
+    toplot['Vx']=normalize( np.log10(np.maximum(abs(toplot['Vga']),1e-5)))
+    toplot['Sx']=normalize(-np.log10(np.maximum(abs(toplot['Sw']) ,1e-5)))
     toplot.index.name='miller indices'
-    fig=px.scatter(toplot,x='px',y='py',
-      color="variable",size='value',
-      hover_name='variable',
-      # hover_data=['px','py','value',toplot.index],
-      )
 
-    fig.update_traces(
-        customdata=toplot.index.to_numpy(),
-        hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{marker.size:.3f}<br>miller indices=%{customdata}<extra></extra>'
-    )
-    # fig.update_traces(marker_sizeref=4)
-    fig.data[1].marker.symbol='diamond'
-    fig.data[2].marker.symbol='triangle-up'
-    # fig.update_traces(hovertemplate='%{y:.2f}<br>{}')
+    fig=go.Figure()
+    for k,(v,c,m) in plts.items():
+        customdata=np.array([toplot[k].values, toplot.index.to_numpy()]).T
+        fig.add_trace(go.Scatter(
+            x=toplot['px'],y=toplot['py'],marker_size=toplot[v],
+            name=k,
+            visible=session['vis'][k],
+            hovertext=[k]*len(toplot),
+            marker_symbol=m,marker_color=c,
+            customdata=customdata,
+            hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{customdata[0]:.2e}<br>miller indices=%{customdata[1]}<extra></extra>'
+        ))
 
-    ###### add the df_pets info as new trace
-    col_2axis='red'
-    yaxis2 ={
-      'title':'rpy',
-      'titlefont_color':col_2axis,'tickfont_color':col_2axis,'gridcolor':col_2axis,
-      'anchor':'free','position':1,
-      'overlaying':'y','side':'right',
-    }
+    #### pets
+    pets = pets_data[session['mol']]
+    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
+    pt_plot=df_pets[['qx','qy','I','hkl','F']].copy()
+    pt_plot['Ix']=normalize(np.log10(np.maximum(abs(pt_plot['I']),1e-2)))
 
-    xaxis2 ={
-      'title':'rpx',
-      'titlefont_color':col_2axis,'tickfont_color':col_2axis,'gridcolor':col_2axis,
-      'anchor':'free','position':1,
-      'overlaying':'x','side':'top'
-    }
-    # fig.layout['xaxis2']=xaxis2
-    # fig.layout['yaxis2']=yaxis2
-
-    to_add_plot=df_pets[['rpx','rpy','I','hkl']]
-    to_add_plot['rpx']*=pets.aper
-    to_add_plot['rpy']*=pets.aper
-    to_add_plot['I']=normalize(to_add_plot['I'])
-    fig.add_trace(go.Scatter(x=to_add_plot['rpx'],y=to_add_plot['rpy'],marker_symbol='square',
-                    marker_size=to_add_plot['I'],name='I_pets',
-                    # xaxis='x2',yaxis='y2',
-                    hovertext=['I_pets']*len(to_add_plot),
-                    customdata=to_add_plot['hkl'].to_numpy(),
-                    hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{marker.size:.3f}<br>miller indices=%{customdata}<extra></extra>'
-                    ))
+    fig.add_trace(go.Scatter(
+        x=pt_plot['qx'],y=pt_plot['qy'],marker_size=pt_plot['Ix'],
+        name='I_pets',
+        visible=session['vis']['I_pets'],
+        hovertext=['I_pets']*len(pt_plot),
+        marker_symbol='square',marker_color='purple',
+        customdata=np.array([pt_plot['I'].values, pt_plot['hkl'].to_numpy()]).T,
+        hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>'
+    ))
 
     fig.update_layout(
-        paper_bgcolor='#cdcfd1',
-        plot_bgcolor='#79a3f7',
+        title="diffraction pattern z=%d A" %b0.thick,
+        paper_bgcolor='LightSteelBlue',#cdcfd1',
+        # plot_bgcolor ='LightSteelBlue',#79a3f7',
+        width=fig_wh, height=fig_wh,
     )
+    xm = b0.df_G.q.max()
     fig.update_traces(mode='markers')
-    return fig
+    fig.update_xaxes(range=[-xm,xm])
+    fig.update_yaxes(range=[-xm,xm])
+    return fig.to_json()
+
 ########################
 #### frame
 ########################
@@ -167,21 +172,30 @@ def bloch_rotation():
 @bw_app.route('/solve_bloch', methods=['POST'])
 def solve_bloch():
     data=json.loads(request.data.decode())
-    frame = data['frame']
     b_args = data['bloch']
     ## handle
     thicks = update_thicks(data['bloch']['thicks'])
-    u = pets_data[session['mol']].uvw0[frame-1]
+    u = pets_data[session['mol']].uvw0[data['frame']-1]
+    # u = pets_data[session['mol']].uvw[data['frame']-1]
     if data['manual_mode']:
         # print(data['bloch']['u'])
         u = b_arr(data['bloch']['u'],u)
+    # print(data['frame'],u)
+    # print(pets_data[session['mol']].uvw[data['frame']-1])
 
     b_args.update({'u':list(u),'thicks':list(thicks),'solve':True})
+    session['frame'] = data['frame']
     session['modes']['manual'] = data['manual_mode']
     session['bloch'] = b_args
     # session['last_req'] = 'solve_bloch:%s' %(time.time())
     # print({k:type(v) for k,v in session['bloch'].items()})
     return update_bloch()
+
+@bw_app.route('/update_omega', methods=['POST'])
+def update_omega(b0_path=None):
+    data=json.loads(request.data.decode())
+    session['omega']=data['omega']
+    return bloch_fig()
 
 
 def update_bloch():
@@ -191,9 +205,9 @@ def update_bloch():
     b0 = bloch.Bloch(session['cif_file'],
         path=session['path'],name='b',**b_args)
     b0.save()
-    fig_data = bloch_plotly_figure(b0)
+    fig_data = bloch_fig()
     # fig_data.show()
-    fig_data=fig_data.to_json()
+    # fig_data=fig_data.to_json()
     session['modes']['analysis'] = True
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
     bloch_args=b_args.copy()
@@ -319,14 +333,14 @@ def show_rock():
     refl = data['refl']
     rock = ut.load_pkl(file=rock_path(session['id']))
 
-    # z,I  = rock.get_rocking(refl=refl)
-    refl0 = str(tuple(refl[0]))
-    Sw = rock.beams.loc[refl0].Sw
-    I  = [rock.load(i).df_G.loc[refl0,'I'] for i in range(rock.n_simus)]
-    # print(Sw,I)
+    df=pd.concat([
+        b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']]
+            for b0 in map(lambda i:rock.load(i), range(rock.n_simus))
+        ])
+    df['hkl']=df.index
 
     ### the figure
-    fig = px.scatter(x=Sw,y=I)
+    fig = px.line(df,x='Sw',y='I',color='hkl',markers=True)
     fig.update_layout(
         title="Rocking curve",
         hovermode='closest',
@@ -361,11 +375,23 @@ def beam_vs_thick():
     b0  = ut.load_pkl(get_pkl(session['id']))
     idx = b0.get_beam(refl=refl)
     b0._set_beams_vs_thickness(thicks=thicks)
-    Iz  = b0.get_beams_vs_thickness(idx=idx)
+    Iz  = b0.get_beams_vs_thickness(idx=idx,dict_opt=True)
     b0.save(get_pkl(session['id']))
 
+    df = pd.DataFrame(columns=['z','I','hkl'])
+    for hkl,I in Iz.items():
+        df_hkl = pd.DataFrame(np.array([b0.z,I]).T,columns=['z','I'])
+        df_hkl['hkl'] = hkl
+        df = pd.concat([df,df_hkl])
+    # df=df.melt(value_vars=Iz.keys(),id_vars=['z'],ignore_index=False)
     ### the figure
-    fig = px.scatter(x=b0.z,y=Iz[0,:])#,color="red")
+    fig = px.line(df, x='z', y='I', color='hkl',markers=True)
+    # fig=px.scatter(df,x='z',y='py',
+    #   color="variable",size='value',
+    #   hover_name='variable',
+    #   # hover_data=['px','py','value',toplot.index],
+    #   )
+    # fig = px.scatter(x=b0.z,y=Iz[0,:])#,color="red")
     fig.update_layout(
         title="thickness dependent intensities",
         hovermode='closest',
@@ -374,7 +400,6 @@ def beam_vs_thick():
         width=fig_wh, height=fig_wh,
     )
     return fig.to_json()
-
 
 ########################
 #### structure related
@@ -387,6 +412,14 @@ def set_mode():
     session['modes'][key] = data['val']
     session['mol']  = session['mol']
     return json.dumps({key:session['modes'][key]})
+
+@bw_app.route('/set_visible', methods=['POST'])
+def set_visible():
+    data=json.loads(request.data.decode())
+    key = data['key']
+    session['time']=time.time()
+    session['vis'][key]=data['v']
+    return json.dumps({key:session['vis'][key]})
 
 @bw_app.route('/set_structure', methods=['POST'])
 def set_structure():
@@ -410,6 +443,7 @@ def init():
         id = create_id()
         session_path=os.path.join('static','data','tmp',id)
         print(check_output('mkdir -p %s' %session_path,shell=True).decode())
+        print(colors.green+'creating session %s' %id+colors.black)
 
         mol='test'
         exp_frames = glob.glob(get_path(mol,'exp','*'))
@@ -440,16 +474,27 @@ def init():
         }
         rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
 
+        cif_file = os.path.join(mol_path(mol),'pets',session['cif'])
+        crys = ut.import_crys(cif_file)
+        crys_dat = {'file':'alpha_glycine.cif'}
+        crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
+        crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
+            b_str(crys.lattice_parameters,2).split(',') )))
+        expand_bloch = {'omega':False,'thick':False,'refl':False,'sim':False,'u':True,}
+
         session['id']   = id
         session['path'] = session_path
         session['mol']  = mol
-        session['cif']  = 'alpha_glycine.cif'
+        session['omega'] = 203 #in-plane rotation angle
         # session['cif'] = '1ejg.pdb'
-        session['cif_file'] = os.path.join(mol_path(mol),'pets',session['cif'])
+        session['cif_file'] = cif_file
+        session['crys']  = crys_dat
         session['frame'] = 1
         session['sim']   = sim
         session['exp']   = exp
         session['modes'] = modes
+        session['expand'] = expand_bloch
+        session['vis']    = {k:True for k in ['I','Vga','I_pets','Sw']}
         session['zm_counter'] = 0 #dummy variable
         session['theta_phi']  = [0,0]
         session['bloch']      = bloch_args
@@ -459,11 +504,11 @@ def init():
         # print(session['cif'],session.get('exp'+'tmp'))
 
     if not session['mol'] in pets_data.keys():
-        pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=1)
+        pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
 
 
     print('send init info')
-    info=['mol','frame','cif','cif_file','modes']
+    info=['mol','frame','crys','cif_file','modes','omega','expand']
     session_data = {k:session[k] for k in info}
     session_data['max_frame']=session['exp']['max_frame']
     for k in ['zmax']:
