@@ -1,6 +1,13 @@
 # Version log
 
 ## 0.0.1
+### issue#9 graph selector
+- plotly menu for the curves to show
+- use `b0_path` to fix beam_vs_thickness update in rock mode
+- `show_u` includes all orientation in auto mode (very slow)
+- click enter on rock frame for specifying input
+- change graphs layout to align dropdown menu nicely
+
 ### issue#6 (Tue 19 Apr 15:42:37 BST 2022)
 - beam selection from plotly
 - add rpx,rpy,Ipets data to the plotly graph

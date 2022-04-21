@@ -179,7 +179,7 @@
                       </span>
                     </td>
                     <td class="td-in popup">
-                      <input ng-show="show_keV" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" >
+                      <input ng-show="show_keV" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" ng-key-enter="update_bloch()" >
                       <span  ng-hide="show_keV" ng-bind="bloch['keV']" ng-dblclick="show_keV=true"></span>
                     </td>
                     <td class="td-in" ng-show="show_keV">
@@ -194,7 +194,7 @@
                   <tr>
                     <td class="td-in">
                       <span>Nmax</span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')" >
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')" ng-key-enter="update_bloch()">
                         <span class="popuptext" ng-show="popup['Nmax']"> Maximum resolution : reflection index would be (Nmax,Nmax,Nmax) </span>
                       </span>
                     </td>
@@ -206,7 +206,7 @@
                   <tr>
                     <td class="td-in">
                       <span> Smax </span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')">
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')" ng-key-enter="update_bloch()">
                         <span class="popuptext" ng-show="popup['Smax']"> Maximum excitation error </span>
                       </span>
                     </td>
@@ -265,7 +265,7 @@
                       </span>
                       <span> = </span>
                       <span  ng-show="!modes['manual']"                      ng-bind="bloch['u']" ></span>
-                      <input ng-show="modes['manual'] && modes['u']=='edit'" ng-model="bloch['u']" ng-keypress="solve_bloch($event)"  type="text" class="bloch_input" style="width:180px">
+                      <input ng-show="modes['manual'] && modes['u']=='edit'" ng-model="bloch['u']" ng-key-enter="update_bloch()"  type="text" class="bloch_input" style="width:180px">
                   </div>
 
                   <!-- move mode-->
@@ -288,15 +288,15 @@
                       </div>
                     </span>
                     <div style="font-size:14px;margin-bottom:5px;">Orientation tweaking :
-                      <a tabindex="1" ng-keydown="update_theta_phi($event)" class="btn-sm btn-primary" style="margin-right:0px;margin-left:0px" ng-click="popup['move_thick']=false" >
+                      <a tabindex="1" ng-keydown="theta_phi_cb($event)" class="btn-sm btn-primary" style="margin-right:0px;margin-left:0px" ng-click="popup['move_thick']=false" >
                         <span class='glyphicon glyphicon-hand-down' />
                       </a>
                     </div>
                     <table style="margin-left: 20px;" >
                       <tr><td class="td-in"> u     </td><td> = </td><td class="td-in"> <span ng-bind="bloch['u']"></span></td></tr>
-                      <tr><td class="td-in"> theta </td><td> = </td><td class="td-in"> <span ng-hide="input['theta']" ng-bind="theta_phi[0]" ng-dblclick="input['theta']=true">deg</span> <input class="long_input" ng-show="input['theta']" ng-model="theta_phi[0]" ng-key-enter="set_input('theta')"></td></tr>
-                      <tr><td class="td-in"> phi   </td><td> = </td><td class="td-in"> <span ng-hide="input['phi']"   ng-bind="theta_phi[1]" ng-dblclick="input['phi']=true"  >deg</span> <input class="long_input" ng-show="input['phi']"   ng-model="theta_phi[1]" ng-key-enter="set_input('phi')"  ></td></tr>
-                      <tr><td class="td-in"> dt    </td><td> = </td><td class="td-in"> <span ng-hide="input['dtp']"   ng-bind="dtheta_phi"   ng-dblclick="input['dtp']=true"  >deg</span> <input class="long_input" ng-show="input['dtp']"   ng-model="dtheta_phi"   ng-key-enter="set_input('dtp')"  ></td></tr>
+                      <tr><td class="td-in"> theta </td><td> = </td><td class="td-in"> <span ng-hide="input['theta']" ng-bind="theta_phi[0]" ng-dblclick="input['theta']=true">deg</span> <input class="long_input" ng-show="input['theta']" ng-model="theta_phi[0]" ng-key-enter="set_input('theta','move')"></td></tr>
+                      <tr><td class="td-in"> phi   </td><td> = </td><td class="td-in"> <span ng-hide="input['phi']"   ng-bind="theta_phi[1]" ng-dblclick="input['phi']=true"  >deg</span> <input class="long_input" ng-show="input['phi']"   ng-model="theta_phi[1]" ng-key-enter="set_input('phi'  ,'move')"  ></td></tr>
+                      <tr><td class="td-in"> dt    </td><td> = </td><td class="td-in"> <span ng-hide="input['dtp']"   ng-bind="dtheta_phi"   ng-dblclick="input['dtp']=true"  >deg</span> <input class="long_input" ng-show="input['dtp']"   ng-model="dtheta_phi"   ng-key-enter="set_input('dtp'  ,'move')"  ></td></tr>
                     </table>
                   </div>
 
@@ -315,7 +315,7 @@
                     <table style="margin-left: 20px;">
                       <tr><td class="td-in"> u0   </td><td class="td-in"> = </td><td> <input class="vlong_input"  ng-change="rock_reset()" ng-model="rock['e0']"  ></td></tr>
                       <tr><td class="td-in"> u1   </td><td class="td-in"> = </td><td> <input class="vlong_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td></tr>
-                      <tr><td class="td-in"> npts </td><td class="td-in"> = </td><td> <input class="bloch_input" ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td></tr>
+                      <tr><td class="td-in"> npts </td><td class="td-in"> = </td><td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td></tr>
                       <tr><td class="td-in"> nbs  </td><td class="td-in"> = </td><td> <span ng-bind="nrock_beams" ></span></td></tr>
                     </table>
                     <a class="btn-sm btn-primary popup set_rock" ng-click="set_rock()" ng-mouseenter="toggle_popup('rock_set')" ng-mouseleave="toggle_popup('rock_set')">
@@ -323,21 +323,25 @@
                       <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set']"> Set u0,u1 from experimental frame </span>
                     </a>
                     <!-- rock solve button-->
-                    <div class="btn-sm btn-primary rock_solve_param" style="margin-right: 5px"  ng-click="solve_rock()" ng-style="rock_style">
+                    <div class="btn-sm btn-primary rock_solve_param" style="margin-right: 5px" ng-click="solve_rock()" ng-style="rock_style">
+                      <!-- ng-bind=" solve_rock_btn[rock_state]"  -->
                       {a solve_rock_btn a}
                     </div>
-                    <div ng-show="rock_state=='done'">
-                      <a class="btn-sm btn-primary" ng-click="set_rock_sim('i');">
+                    <div ng-show="rock_done">
+                      <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('i');">
                         <span class="glyphicon glyphicon-fast-backward"></span >
                       </a>
-                      <a class="btn-sm btn-primary"  ng-click="set_rock_sim('-')">
+                      <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('-')">
                         <span class="glyphicon glyphicon-step-backward"></span >
                       </a>
-                      <span style="margin-left:5px" ng-bind="sim_rock"></span>
-                      <a class="btn-sm btn-primary"  ng-click="set_rock_sim('+')">
+                      <span style="margin-left:5px" >
+                        <span  ng-hide="input['rock_sim']" ng-bind="sim_rock" ng-dblclick="input['rock_sim']=true" ></span>
+                        <input ng-show="input['rock_sim']" ng-model="sim_rock" ng-key-enter="set_input('rock_sim','rock')" style="width:30px;">
+                      </span>
+                      <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('+')">
                         <span class="glyphicon glyphicon-step-forward"></span >
                       </a>
-                      <a class="btn-sm btn-primary"  ng-click="set_rock_sim('f')">
+                      <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('f')">
                         <span class="glyphicon glyphicon-fast-forward"></span >
                       </a>
                       <!--  show rocking curve -->
@@ -429,10 +433,10 @@
                       <span class="popuptext" ng-show="popup['thicks']"> Thickness range for beam vs thickness (t0,t1,nb_points) </span>
                     </td>
                     <td class="td-in">
-                      <input ng-keypress="update_beam_vs_thickness($event)" type="text" ng-model="bloch['thicks']"  class="mid_input">
+                      <input ng-key-enter="beam_vs_thickness()" type="text" ng-model="bloch['thicks']"  class="mid_input">
                     </td>
                     <td>
-                      <a class="btn btn-primary myBtn-sm" style="border-width:2px;"  ng-click="beam_vs_thickness()">
+                      <a class="btn btn-primary myBtn-sm" style="border-width:2px;" ng-click="beam_vs_thickness()">
                         <img style="width: 90%;" src="/static/images/beam_vs_thick.png"/>
                       </a>
                       <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['beams_thick']=true" ng-mouseleave="popup['beams_thick']=false" style="top:-10px;">
@@ -479,24 +483,40 @@
       <div class="col-sm-10" ng-hide="modes['molecule']" >
         <!-- Analysis figure -->
         <div class="panel" ng-show="modes['analysis']">
-          <div class="row">
-            <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="toggle_popup('single_mode')" ng-mouseleave="toggle_popup('single_mode')">
-              <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
-              <span class="popuptext" style="font-family: sans-serif" ng-show="popup['single_mode']"> toggle single/dual mode </span>
-            </a>
-          </div>
-          <div class="row">
-            <div ng-class="{'col-sm-12':modes['single'],'col-sm-6':!modes['single']}" >
-              <div id="plotly_div" style="width:100%;margin:5px;border-style:solid;float:left" >
-                <line-plot id=fig1 fig="fig1">
-              </div>
-            </div>
-            <div class="col-sm-6" ng-hide="modes['single']">
-              <div style="width:100%;margin:5px;border-style:solid;float:right" >
-                <line-plot id=fig2 fig="fig2">
-              </div>
-            </div>
-          </div>
+          <table>
+            <tr>
+          <!-- <div class="row"> -->
+              <td>
+                <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="toggle_popup('single_mode')" ng-mouseleave="toggle_popup('single_mode')">
+                  <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
+                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['single_mode']"> toggle single/dual mode </span>
+                </a>
+          <!-- </div> -->
+              </td>
+              <td ng-hide="modes['single']">
+                <select ng-model="graph" ng-options="x.desc for x in graphs" ng-change="update_graph()">
+                </select>
+              </td>
+          <!-- <div class="row"> -->
+            <!-- <div ng-class="{'col-sm-12':modes['single'],'col-sm-6':!modes['single']}" > -->
+            <!-- </div> -->
+            </tr>
+            <tr>
+              <td>
+                <div id="plotly_div" style="width:100%;margin:5px;border-style:solid;float:left" >
+                  <line-plot id=fig1 fig="fig1">
+                </div>
+              </td>
+              <td ng-hide="modes['single']">
+              <!-- <div class="col-sm-6" ng-hide="modes['single']"> -->
+                <div style="width:100%;margin:5px;border-style:solid;float:right" >
+                  <line-plot id=fig2 fig="fig2">
+                </div>
+              </td>
+              <!-- </div> -->
+            </tr>
+          <!-- </div> -->
+          </table>
         </div>
 
 
@@ -581,7 +601,7 @@ function deleteRow(obj) {
 
 </script>
 
-<script src="static/js/jsmol.js"></script>
+<!-- <script src="static/js/jsmol.js"></script> -->
 
 <!-- <script text="javascript">
   var myPlot = document.getElementById('plotly_div')

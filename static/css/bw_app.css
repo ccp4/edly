@@ -15,6 +15,9 @@
 .btn-sm{
   margin-left: 3px;
 }
+.btn-rock{
+  padding: 3px;
+}
 
 .panel{
   background-color: #83aec9;

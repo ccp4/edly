@@ -34,14 +34,9 @@ def normalize(s):
     # s = (s-s.min())/s.max()*30
     return s
 
-def bloch_fig(b0_path=None):
-    if not b0_path:
-        b0_path=get_pkl(session['id'])
-    b0 = ut.load_pkl(b0_path)
-    # b0.df_G['hkl'] = b0.df_G.index
-
+def bloch_fig():
+    b0 = ut.load_pkl(session['b0_path'])
     toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
-    # toplot.loc[str((0,0,0)),'I']=0
 
     omega=session['omega']
     session['vis']
@@ -91,16 +86,20 @@ def bloch_fig(b0_path=None):
         hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>'
     ))
 
+    xm = b0.df_G.q.max()
     fig.update_layout(
         title="diffraction pattern z=%d A" %b0.thick,
         paper_bgcolor='LightSteelBlue',#cdcfd1',
         # plot_bgcolor ='LightSteelBlue',#79a3f7',
         width=fig_wh, height=fig_wh,
+        scene = dict(
+            xaxis = dict(range=[-xm,xm]),
+            yaxis = dict(range=[-xm,xm]),
+        ),
     )
-    xm = b0.df_G.q.max()
     fig.update_traces(mode='markers')
-    fig.update_xaxes(range=[-xm,xm])
-    fig.update_yaxes(range=[-xm,xm])
+    # fig.update_xaxes(range=[-xm,xm])
+    # fig.update_yaxes(range=[-xm,xm])
     return fig.to_json()
 
 ########################
@@ -192,7 +191,7 @@ def solve_bloch():
     return update_bloch()
 
 @bw_app.route('/update_omega', methods=['POST'])
-def update_omega(b0_path=None):
+def update_omega():
     data=json.loads(request.data.decode())
     session['omega']=data['omega']
     return bloch_fig()
@@ -205,6 +204,7 @@ def update_bloch():
     b0 = bloch.Bloch(session['cif_file'],
         path=session['path'],name='b',**b_args)
     b0.save()
+    session['b0_path'] = get_pkl(session['id'])
     fig_data = bloch_fig()
     # fig_data.show()
     # fig_data=fig_data.to_json()
@@ -219,11 +219,14 @@ def update_bloch():
 @bw_app.route('/show_u', methods=['POST'])
 def show_u():
     data = json.loads(request.data.decode())
-    if session['modes']['u']=='rock':
-        r_args = get_rock(data)
-        uvw = ut.get_uvw_rock(**r_args)
+    if session['modes']['manual']:
+        if session['modes']['u']=='rock':
+            r_args = get_rock(data)
+            uvw = ut.get_uvw_rock(**r_args)
+        else:
+            uvw = np.array(b_arr(data['u'],session['bloch']['u']))[None,:]
     else:
-        uvw = np.array(b_arr(data['u'],session['bloch']['u']))[None,:]
+        uvw = pets_data[session['mol']].uvw0
 
     ui = np.arange(uvw.shape[0])[:,None]
     uvw = np.vstack([np.hstack([uvw,ui]),np.hstack([0*uvw,ui])])
@@ -232,13 +235,20 @@ def show_u():
     # df = px.data.gapminder().query("continent=='Europe'")
     fig = px.line_3d(df, x="u0", y="u1", z="u2", color='ui')
 
+    xm=1;
     fig.update_layout(
         title="3d view of orientation vector ",
         hovermode='closest',
         # margin=dict(l=20, r=20, t=20, b=20),
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
+        scene = dict(
+            xaxis = dict(range=[-xm,xm]),
+            yaxis = dict(range=[-xm,xm]),
+            zaxis = dict(range=[-xm,xm]),
+        )
     )
+    print('3d fig completed')
     return fig.to_json()
 
 ##############################
@@ -314,7 +324,8 @@ def solve_rock():
 @bw_app.route('/overlay_rock', methods=['POST'])
 def overlay_rock():
     sim = glob.glob(os.path.join(session['path'],'u_*.pkl'))[0]
-    return bloch_fig(b0_path=sim)
+    session['b0_path'] = sim
+    return bloch_fig()
 
 @bw_app.route('/get_rock_sim', methods=['POST'])
 def get_rock_sim():
@@ -323,8 +334,9 @@ def get_rock_sim():
     sims = np.sort(glob.glob(os.path.join(session['path'],'u_*.pkl')))
 
     i    = max(min(rock_sim,sims.size),1)-1
-    sim  = sims[i];print(i,sim)
-    fig = bloch_fig(b0_path=sim)
+    sim  = sims[i] #;print(i,sim)
+    session['b0_path'] = sim
+    fig = bloch_fig()
     return json.dumps({'fig':fig, 'sim':i+1})
 
 @bw_app.route('/show_rock', methods=['POST'])
@@ -370,9 +382,15 @@ def update_thicks(thicks):
 def beam_vs_thick():
     data = json.loads(request.data.decode())
     refl = data['refl']
-    thicks = update_thicks(data['thicks'])
+    b0_path=session['b0_path']
 
-    b0  = ut.load_pkl(get_pkl(session['id']))
+    # if session['modes']['manual'] and session['modes']['u']=='rock':
+    #     b0_path=get_pkl(session['id'])
+
+    thicks = update_thicks(data['thicks'])
+    print(get_pkl(session['id']))
+
+    b0  = ut.load_pkl(b0_path)
     idx = b0.get_beam(refl=refl)
     b0._set_beams_vs_thickness(thicks=thicks)
     Iz  = b0.get_beams_vs_thickness(idx=idx,dict_opt=True)
@@ -499,6 +517,7 @@ def init():
         session['bloch']      = bloch_args
         session['rock']       = rock_args
         session['last_time']  = now
+        session['b0_path']    = get_pkl(session['id'])
         session['time'] = now
         # print(session['cif'],session.get('exp'+'tmp'))
 
@@ -515,6 +534,12 @@ def init():
     session_data['theta_phi']=b_str(session['theta_phi'],2)
     session_data['bloch']=get_session_data('bloch')
     session_data['rock']=get_session_data('rock')
+
+    rock_state=''
+    if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
+        rock_state='done'
+    session_data['rock_state']  = rock_state
+
     return json.dumps(session_data)
 
 def get_session_data(key):

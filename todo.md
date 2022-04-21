@@ -3,24 +3,43 @@
 ### issue#9 graph selector
 - plotly menu for the curves to show
 
-### important
+### issue#11 rocking curve  
+- use arrows or select frame
+- set u from frame
+- save u in move-mode
+
+### issue#12 FELIX option
+- enable solve from felix and run on other machines
+
+### issue#13 CBED
+- CBED panel
+- run CBED
+- display CBED pattern
+- display LACBED frieze
+
+### issue#14 python console
+  - show corresponding python command below
+
+### issue#15 help menu links
+- file(cif files, other projects, ...)
+- help
+- theory
+- documentation
+- tests
+
+## issue#16 miller indices table
+- highlight on hover
+- collapsible table
+
+### issue#17 handle accounts
+- create account for uploading comparison to experiments or saving simulations
+
+### misc
 - generate frame/integrated frame settings
-- persistent selected legend
 - long time chrome violation warning
-- python console
-- help menu links to : file(cif files, other projects, ...), help, theory, documentation, tests
-- FELIX option
-
-### cosmetic
-- accounts
-- fleche directionnelle droite gauche -> changer de frame
-- changer directionelle haut/bas --> changer luminosite (zmax du heatmap )
-
-### Suggestion/question :
+- include kinematic
+- Fkin vs Fdyn
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly
     - try plotly.image
-
-## misc
-  - outils de comparaison/diagnostique erreur simu/vs exp.
