@@ -89,7 +89,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   }
 
   $scope.upload=function(val){
-    $log.log(val);
+    // $log.log(val);
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -244,7 +244,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
           .then(function(response) {
             $scope.rock_state = response.data;
             $scope.solve_rock_btn=$scope.rock_state;
-            $log.log($scope.rock_state);
+            // $log.log($scope.rock_state);
           });
         }, 100);
         $http.post('/solve_rock')
@@ -277,7 +277,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     }
     $log.log($scope.rock_sim);
     // $scope.rock_sim=Math.max(Math.min($scope.rock_sim,$scope.rock['npts']),1)
-    $http.post('/get_rock_sim',JSON.stringify({'sim':$scope.rock_sim}))
+    $http.post('/get_rock_sim',JSON.stringify({'sim':Number($scope.rock_sim)}))
       .then(function(response){
         $scope.fig1 = JSON.parse(response.data.fig);
         $scope.rock_sim = response.data.sim;

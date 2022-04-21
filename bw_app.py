@@ -319,10 +319,10 @@ def overlay_rock():
 @bw_app.route('/get_rock_sim', methods=['POST'])
 def get_rock_sim():
     data = json.loads(request.data.decode())
-    rock_sim = int(data['sim'])
-    print(rock_sim)
-    sims = glob.glob(os.path.join(session['path'],'u_*.pkl'))
-    i    = max(min(rock_sim,len(sims)),1)-1
+    rock_sim = data['sim']
+    sims = np.sort(glob.glob(os.path.join(session['path'],'u_*.pkl')))
+
+    i    = max(min(rock_sim,sims.size),1)-1
     sim  = sims[i];print(i,sim)
     fig = bloch_fig(b0_path=sim)
     return json.dumps({'fig':fig, 'sim':i+1})
@@ -474,7 +474,7 @@ def init():
         }
         rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
 
-        cif_file = os.path.join(mol_path(mol),'pets',session['cif'])
+        cif_file = os.path.join(mol_path(mol),'pets','alpha_glycine.cif')
         crys = ut.import_crys(cif_file)
         crys_dat = {'file':'alpha_glycine.cif'}
         crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
@@ -486,13 +486,12 @@ def init():
         session['path'] = session_path
         session['mol']  = mol
         session['omega'] = 203 #in-plane rotation angle
-        # session['cif'] = '1ejg.pdb'
         session['cif_file'] = cif_file
-        session['crys']  = crys_dat
-        session['frame'] = 1
-        session['sim']   = sim
-        session['exp']   = exp
-        session['modes'] = modes
+        session['crys']   = crys_dat
+        session['frame']  = 1
+        session['sim']    = sim
+        session['exp']    = exp
+        session['modes']  = modes
         session['expand'] = expand_bloch
         session['vis']    = {k:True for k in ['I','Vga','I_pets','Sw']}
         session['zm_counter'] = 0 #dummy variable
