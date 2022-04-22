@@ -51,6 +51,7 @@
       <h2> Electron diffraction dashboard </h2>
    </header>
 
+
    <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
      <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
 
@@ -60,48 +61,89 @@
 
           <!-- Structure -->
           <div class="panel">
-            <p style="font-size:25px">  {a structure a} </p>
-            <div class="row">
-              <div class="col-sm-8">
-                <div ng-click="set_structure()" style="text-align: center;">
-                  <a ng-href="" > <!-- onclick="load_cif(1)" > -->
-                    <span style="font-size:18px;text-align:center" ng-bind="crys['file']"> </span>
-                    <span style="display:none" id="cif_file" ng-bind="cif_file"> </span>
-                  </a>
-                </div>
-              </div>
-              <div class="col-sm-4">
-                <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_mode('molecule')" ng-mouseenter="toggle_popup('mol')" ng-mouseleave="toggle_popup('mol')">
-                  <img ng-hide="modes['molecule']" src="/static/images/jsmol.png"/>
-                  <img ng-show="modes['molecule']" src="/static/images/edly.png"/>
-                  <span class="popuptext" ng-show="popup['mol']"> show/hide molecule </span>
-                </a>
-              </div>
+            <div class="">
+              <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_mode('molecule')" ng-mouseenter="toggle_popup('mol')" ng-mouseleave="toggle_popup('mol')">
+                <img ng-hide="modes['molecule']" src="/static/images/jsmol.png"/>
+                <img ng-show="modes['molecule']" src="/static/images/edly.png"/>
+                <span class="popuptext" ng-show="popup['mol']"> show/hide molecule </span>
+              </a>
             </div>
-            <div class="theta_phi" ng-show="modes['molecule']" style="margin-top:10px;">
-              <div style="font-size:16px;margin:5px;">Lattice parameters : </div>
-              <div style="margin-left:10px;">
-                <span>  a=<span ng-bind="crys['a']"/> </span>
-                <span>, b=<span ng-bind="crys['b']"/> </span>
-                <span>, c=<span ng-bind="crys['c']"/> </span>
+            <div style="font-size:25px">  {a structure a} </div>
+            <div class="theta_phi" style="margin-top:10px;">
+              <a class="popup" ng-click="expand['struct']=!expand['struct']" ng-mouseenter="toggle_popup('expand_struct')" ng-mouseleave="toggle_popup('expand_struct')" style="float:right;bottom:5px">
+                <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
+                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
+                </span>
+              </a>
+              <div ng-click="set_structure()" style="text-align: left;margin-left:10px;">
+                <span style="font-size:18px;text-align:center" ng-bind="crys['file']"> </span>
+                <span style="display:none" id="cif_file" ng-bind="cif_file"> </span>
               </div>
-              <div style="margin-left:10px;">
-                <!-- <span>  \(alpha\)=<span ng-bind="crys['alpha']"/></span> -->
-                <span>  $\alpha$=<span ng-bind="crys['alpha']"/></span>
-                <span>, $\beta$ =<span ng-bind="crys['beta']" /></span>
-                <span>, $\gamma$=<span ng-bind="crys['gamma']"/></span>
-              </div>
-              <div style="font-size:16px;margin:5px;">Lattice vectors : </div>
-              <div style="margin-left:10px;">
-                <div> $a_1$=<span ng-bind="crys['a1']"/></div>
-                <div> $a_2$=<span ng-bind="crys['a2']"/></div>
-                <div> $a_3$=<span ng-bind="crys['a3']"/></div>
+              <div ng-show="expand['struct']" >
+                <div style="font-size:16px;margin:5px;">Lattice parameters : </div>
+                <div style="margin-left:10px;">
+                  <span>  a=<span ng-bind="crys['a']"/> </span>
+                  <span>, b=<span ng-bind="crys['b']"/> </span>
+                  <span>, c=<span ng-bind="crys['c']"/> </span>
+                </div>
+                <div style="margin-left:10px;">
+                  <!-- <span>  \(alpha\)=<span ng-bind="crys['alpha']"/></span> -->
+                  <span>  $\alpha$=<span ng-bind="crys['alpha']"/></span>
+                  <span>, $\beta$ =<span ng-bind="crys['beta']" /></span>
+                  <span>, $\gamma$=<span ng-bind="crys['gamma']"/></span>
+                </div>
+                <div style="font-size:16px;margin:5px;">Lattice vectors : </div>
+                <div style="margin-left:10px;">
+                  <div> $a_1$=<span ng-bind="crys['a1']"/></div>
+                  <div> $a_2$=<span ng-bind="crys['a2']"/></div>
+                  <div> $a_3$=<span ng-bind="crys['a3']"/></div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Upload Buttons -->
-          <div class="panel" ng-show="show_buttons && !modes['molecule']">
+          <!-- Frames panel -->
+          <div class="panel" ng-hide="modes['molecule']">
+            <div class="row">
+              <div class="col-sm-8">
+                <h4>Exp Frames : </h4>
+              </div>
+              <!-- <div class="col-sm-4">
+                <a style="float:right" class="btn btn-primary popup" ng-click="show_buttons=!show_buttons" ng-mouseenter="toggle_popup('btns')" ng-mouseleave="toggle_popup('btns')">
+                  <span class="glyphicon glyphicon-upload" />
+                  <span class="popuptext" style="font-family:sans-serif" ng-show="popup['btns']"> Show upload buttons </span>
+                </a>
+              </div> -->
+            </div>
+            No:<input type="number" min="1" max="max_frame" ng-model="frame" ng-keypress=update_frame($event) style="width: 80px">
+            <a class="btn-sm btn-primary"  ng-click="dec_frame()">
+              <span class="glyphicon glyphicon-step-backward"></span >
+            </a>
+            <a class="btn-sm btn-primary"  ng-click="inc_frame()">
+              <span class="glyphicon glyphicon-step-forward"></span >
+            </a>
+          </div>
+
+          <div class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
+            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_analysis_mode('frames')" ng-mouseenter="toggle_popup('frames')" ng-mouseleave="toggle_popup('frames')">
+              <span class="gg-stack"></span >
+              <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
+            </a>
+            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_analysis_mode('bloch')" ng-mouseenter="toggle_popup('bloch_solver')" ng-mouseleave="toggle_popup('bloch_solver')">
+              <span class="gg-edit-unmask"></span >
+              <span class="popuptext" ng-show="popup['bloch_solver']"> Bloch solver </span>
+            </a>
+            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_analysis_mode('ms')" ng-mouseenter="toggle_popup('ms_solver')" ng-mouseleave="toggle_popup('ms_solver')">
+              <span class="gg-format-justify" style="margin-top:0"></span >
+              <span class="popuptext" ng-show="popup['ms_solver']"> Multislice solver </span>
+            </a>
+          </div>
+
+
+          <!--  ///////////////////////// -->
+          <!-- Exp panel -->
+          <!--  ///////////////////////// -->
+          <div class="panel bloch_panel"  ng-show="modes['analysis']=='frames' && !modes['molecule']">
             <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="toggle_popup('exp')" ng-mouseleave="toggle_popup('exp')">
               <img src="/static/images/exp_button.png" />
               <span class="popuptext" ng-show="popup['exp']"> Upload experimental dataset </span>
@@ -116,40 +158,21 @@
             </a>
           </div>
 
-          <!-- Frames panel -->
-          <div class="panel" ng-hide="modes['molecule']">
+          <!--  ///////////////////////// -->
+          <!-- Multislice solver -->
+          <!--  ///////////////////////// -->
+          <div class="panel bloch_panel" ng-show="modes['analysis']=='ms' && !modes['molecule']" >
             <div class="row">
-              <div class="col-sm-8">
-                <h4>Frames : </h4>
-              </div>
-              <div class="col-sm-4">
-                <a style="float:right" class="btn btn-primary popup" ng-click="show_buttons=!show_buttons" ng-mouseenter="toggle_popup('btns')" ng-mouseleave="toggle_popup('btns')">
-                  <span class="glyphicon glyphicon-upload" />
-                  <span class="popuptext" style="font-family:sans-serif" ng-show="popup['btns']"> Show upload buttons </span>
-                </a>
+              <div class="col-sm-11 bloch_solver" >
+                Multislice
               </div>
             </div>
-            No:<input type="number" min="1" max="max_frame" ng-model="frame" ng-keypress=update_frame($event) style="width: 80px">
-            <a class="btn-sm btn-primary"  ng-click="dec_frame()">
-              <span class="glyphicon glyphicon-step-backward"></span >
-            </a>
-            <a class="btn-sm btn-primary"  ng-click="inc_frame()">
-              <span class="glyphicon glyphicon-step-forward"></span >
-            </a>
           </div>
-
-          <div class="panel" ng-hide="modes['molecule']">
-            <a class="btn btn-primary popup"  ng-click="toggle_analysis_mode()" ng-mouseenter="toggle_popup('ana')" ng-mouseleave="toggle_popup('ana')">
-              <span ng-class="{'glyphicon glyphicon-stats':!modes['analysis'],'gg-stack':modes['analysis']}"></span >
-              <span class="popuptext" ng-show="popup['ana']"> Frames mode </span>
-            </a>
-          </div>
-
 
           <!--  ///////////////////////// -->
           <!-- Bloch solver -->
           <!--  ///////////////////////// -->
-          <div class="panel" ng-show="modes['analysis'] && !modes['molecule']">
+          <div class="panel bloch_panel" ng-show="modes['analysis']=='bloch' && !modes['molecule']" >
             <div class="row">
               <div class="col-sm-11 bloch_solver" >
                 Bloch solver
@@ -313,15 +336,32 @@
                     </span>
                     <div style="font-size:14px;margin-bottom:5px;">Rocking curve settings : </div>
                     <table style="margin-left: 20px;">
-                      <tr><td class="td-in"> u0   </td><td class="td-in"> = </td><td> <input class="vlong_input"  ng-change="rock_reset()" ng-model="rock['e0']"  ></td></tr>
-                      <tr><td class="td-in"> u1   </td><td class="td-in"> = </td><td> <input class="vlong_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td></tr>
-                      <tr><td class="td-in"> npts </td><td class="td-in"> = </td><td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td></tr>
+                      <tr><td class="td-in"> u0   </td><td class="td-in"> = </td><td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e0']"  ></td>
+                        <td class="td-in">
+                          <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="toggle_popup('rock_set_0')" ng-mouseleave="toggle_popup('rock_set_0')">
+                            <span class="glyphicon glyphicon-pushpin"/>
+                            <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
+                          </a>
+                        </td>
+                      </tr>
+                      <tr><td class="td-in"> u1   </td><td class="td-in"> = </td><td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td>
+                        <td class="td-in">
+                          <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="toggle_popup('rock_set_1')" ng-mouseleave="toggle_popup('rock_set_1')">
+                            <span class="glyphicon glyphicon-pushpin"/>
+                            <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
+                          </a>
+                        </td>
+                      </tr>
+                      <tr><td class="td-in"> npts </td><td class="td-in"> = </td><td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td>
+                        <td class="td-in">
+                          <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="toggle_popup('rock_set')" ng-mouseleave="toggle_popup('rock_set')">
+                            <span class="gg-icon gg-path-back" />
+                            <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set']"> Assign u0,u1 from current experimental frame </span>
+                          </a>
+                        </td>
+                      </tr>
                       <tr><td class="td-in"> nbs  </td><td class="td-in"> = </td><td> <span ng-bind="nrock_beams" ></span></td></tr>
                     </table>
-                    <a class="btn-sm btn-primary popup set_rock" ng-click="set_rock()" ng-mouseenter="toggle_popup('rock_set')" ng-mouseleave="toggle_popup('rock_set')">
-                      <span class="gg-icon gg-path-back" />
-                      <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set']"> Set u0,u1 from experimental frame </span>
-                    </a>
                     <!-- rock solve button-->
                     <div class="btn-sm btn-primary rock_solve_param" ng-click="solve_rock()" ng-style="rock_style">
                       {a solve_rock_btn a}
@@ -334,7 +374,7 @@
                         <span class="glyphicon glyphicon-step-backward"></span >
                       </a>
                       <span style="margin-left:5px" >
-                        <span  ng-hide="input['rock_sim']" ng-bind="sim_rock" ng-dblclick="input['rock_sim']=true" ></span>
+                        <span  tabindex="1" class="btn-sm btn-primary" ng-keydown="update_rock_sim($event)" ng-hide="input['rock_sim']" ng-bind="sim_rock" ng-dblclick="input['rock_sim']=true" ></span>
                         <input ng-show="input['rock_sim']" ng-model="sim_rock" ng-key-enter="set_input('rock_sim','rock')" style="width:30px;">
                       </span>
                       <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('+')">
@@ -454,7 +494,16 @@
                     <span class="popuptext" style="font-family: sans-serif" ng-show="popup['expand_refl']" ng-bind="expand_str[expand['refl']]"></span>
                   </span>
                 </a>
-                <div style="font-size:14px;margin-bottom:5px;">Selected reflections : </div>
+                <div style="font-size:14px;margin-bottom:5px;">Selected reflections
+                  <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['sel_refl']=true" ng-mouseleave="popup['sel_refl']=false" >
+                    <span ng-show="popup['sel_refl']" class="popuptext" style="font-family: sans-serif;width:270px;text-align:left;font-size:14px" >
+                      Reflections used for displaying :
+                      <br> &nbsp;&nbsp;beam_vs_thickness
+                      <br> &nbsp;&nbsp;rocking curves
+                      <br> Click on diffraction pattern to select
+                    </span>
+                  </span>
+                </div>
                 <div id='table_miller' ng-show="expand['refl']">
                   <table  id="table_Miller_indices"  border="1" cellpadding="2">
                     <tr>
@@ -483,25 +532,21 @@
       <!-- Frame/analysis viewer -->
       <div class="col-sm-10" ng-hide="modes['molecule']" >
         <!-- Analysis figure -->
-        <div class="panel" ng-show="modes['analysis']">
+        <div class="panel" ng-show="modes['analysis']=='bloch'">
           <table>
             <tr>
-          <!-- <div class="row"> -->
               <td>
                 <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="toggle_popup('single_mode')" ng-mouseleave="toggle_popup('single_mode')">
                   <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
                   <span class="popuptext" style="font-family: sans-serif" ng-show="popup['single_mode']"> toggle single/dual mode </span>
                 </a>
-          <!-- </div> -->
+                <span>max res : <input class="sm_input" type="number" min="0" ng-model="max_res" ng-key-enter="set_max_res()"></span>
               </td>
               <td ng-hide="modes['single']">
-                <select ng-model="graph" ng-options="x.desc for x in graphs" ng-change="update_graph()">
-                </select>
+                <select ng-model="graph" ng-options="x.desc for x in graphs" ng-change="update_graph()"></select>
               </td>
-          <!-- <div class="row"> -->
-            <!-- <div ng-class="{'col-sm-12':modes['single'],'col-sm-6':!modes['single']}" > -->
-            <!-- </div> -->
             </tr>
+            <!-- figs -->
             <tr>
               <td>
                 <div id="plotly_div" style="width:100%;margin:5px;border-style:solid;float:left" >
@@ -509,20 +554,17 @@
                 </div>
               </td>
               <td ng-hide="modes['single']">
-              <!-- <div class="col-sm-6" ng-hide="modes['single']"> -->
                 <div style="width:100%;margin:5px;border-style:solid;float:right" >
                   <line-plot id=fig2 fig="fig2">
                 </div>
               </td>
-              <!-- </div> -->
             </tr>
-          <!-- </div> -->
           </table>
         </div>
 
 
 
-        <div class="panel" ng-hide="modes['analysis']" style="background-color: #80a6c7;">
+        <div class="panel" ng-show="modes['analysis']=='frames'" style="background-color: #80a6c7;">
           <div class="row"  >
             <!-- Simulated frame  -->
             <div class="col-sm-6" >
@@ -558,6 +600,11 @@
       </div><!-- Frame/analysis viewer -->
     </div><!-- ng-controller -->
   </div>
+
+  <footer class="footer">
+     Copyright © 2021, CCP4
+     <div>Author : tarik drevon<div>
+  </footer>
 
 
 <script>
@@ -602,7 +649,7 @@ function deleteRow(obj) {
 
 </script>
 
-<!-- <script src="static/js/jsmol.js"></script> -->
+<script src="static/js/jsmol.js"></script>
 
 <!-- <script text="javascript">
   var myPlot = document.getElementById('plotly_div')

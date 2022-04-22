@@ -86,20 +86,17 @@ def bloch_fig():
         hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>'
     ))
 
-    xm = b0.df_G.q.max()
+    xm = session['max_res']
+    if not xm:xm = b0.df_G.q.max()
     fig.update_layout(
         title="diffraction pattern z=%d A" %b0.thick,
         paper_bgcolor='LightSteelBlue',#cdcfd1',
         # plot_bgcolor ='LightSteelBlue',#79a3f7',
         width=fig_wh, height=fig_wh,
-        scene = dict(
-            xaxis = dict(range=[-xm,xm]),
-            yaxis = dict(range=[-xm,xm]),
-        ),
     )
     fig.update_traces(mode='markers')
-    # fig.update_xaxes(range=[-xm,xm])
-    # fig.update_yaxes(range=[-xm,xm])
+    fig.update_xaxes(range=[-xm,xm])
+    fig.update_yaxes(range=[-xm,xm])
     return fig.to_json()
 
 ########################
@@ -123,7 +120,7 @@ def update_zmax():
     return img
 
 def get_img_frame(frame,zmax,key):
-    session['modes']['analysis']=False
+    session['modes']['analysis']='frames'
     if key=='sim':
         frame=min(max(1,frame-session['sim']['offset']),session['sim']['max_frame'])
     frame_str=str(frame).zfill(session[key]['pad'])
@@ -208,7 +205,7 @@ def update_bloch():
     fig_data = bloch_fig()
     # fig_data.show()
     # fig_data=fig_data.to_json()
-    session['modes']['analysis'] = True
+    session['modes']['analysis'] = 'bloch'
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
     bloch_args=b_args.copy()
     bloch_args.update({'u':b_str(b_args['u'],4),'thicks':b_str(b_args['thicks'],0)})
@@ -273,14 +270,22 @@ def rock_state():
 def set_rock_frame():
     data = json.loads(request.data.decode())
     frame = data['frame']
+    opt= data['opt']
     uvw = pets_data[session['mol']].uvw0
-    u0 = uvw[max(0,frame-2)]
-    u1 = uvw[frame-1]
-    u2 = uvw[min(frame,frame-1)]
-    e0 = (u0 + u1)/2
-    e1 = (u1 + u2)/2
-    e0/=np.linalg.norm(e0)
-    e1/=np.linalg.norm(e1)
+    if opt==0:
+        e0 = uvw[max(0,frame-1)]
+        e1 = np.array(session['rock']['e1'])
+    elif opt==1:
+        e0 = np.array(session['rock']['e0'])
+        e1 = uvw[max(0,frame-1)]
+    else:
+        u0 = uvw[max(0,frame-2)]
+        u1 = uvw[frame-1]
+        u2 = uvw[min(frame,frame-1)]
+        e0 = (u0 + u1)/2
+        e1 = (u1 + u2)/2
+        e0/=np.linalg.norm(e0)
+        e1/=np.linalg.norm(e1)
 
     session['rock'].update({'e0':e0.tolist(),'e1':e1.tolist()})
     session['frame'] = frame
@@ -336,6 +341,7 @@ def get_rock_sim():
     i    = max(min(rock_sim,sims.size),1)-1
     sim  = sims[i] #;print(i,sim)
     session['b0_path'] = sim
+    session['frame'] = data['frame']
     fig = bloch_fig()
     return json.dumps({'fig':fig, 'sim':i+1})
 
@@ -391,7 +397,6 @@ def beam_vs_thick():
     thicks = update_thicks(data['thicks'])
     b0_path=session['b0_path']
     refl = data['refl']
-    # print(session['refl'])
 
     b0  = ut.load_pkl(b0_path)
     idx = b0.get_beam(refl=refl)
@@ -404,23 +409,26 @@ def beam_vs_thick():
         df_hkl = pd.DataFrame(np.array([b0.z,I]).T,columns=['z','I'])
         df_hkl['hkl'] = hkl
         df = pd.concat([df,df_hkl])
-    # df=df.melt(value_vars=Iz.keys(),id_vars=['z'],ignore_index=False)
     ### the figure
     fig = px.line(df, x='z', y='I', color='hkl',markers=True)
-    # fig=px.scatter(df,x='z',y='py',
-    #   color="variable",size='value',
-    #   hover_name='variable',
-    #   # hover_data=['px','py','value',toplot.index],
-    #   )
-    # fig = px.scatter(x=b0.z,y=Iz[0,:])#,color="red")
     fig.update_layout(
         title="thickness dependent intensities",
         hovermode='closest',
-        # margin=dict(l=20, r=20, t=20, b=20),
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
     )
     return fig.to_json()
+
+
+
+########################
+#### misc
+########################
+@bw_app.route('/set_max_res', methods=['POST'])
+def set_max_res():
+    session['max_res'] = json.loads(request.data.decode())['max_res']
+    # print(session['max_res'])
+    return bloch_fig()
 
 ########################
 #### structure related
@@ -488,7 +496,7 @@ def init():
 
         modes = {
             'molecule'  :False,
-            'analysis'  :True,
+            'analysis'  :'bloch',
             'manual'    :False,
             'u'         :'edit',
             'single'    :False,
@@ -506,13 +514,14 @@ def init():
         session['id']   = id
         session['path'] = session_path
         session['mol']  = mol
-        session['omega'] = 203 #in-plane rotation angle
         session['cif_file'] = cif_file
-        session['crys']   = crys_dat
-        session['frame']  = 1
-        session['sim']    = sim
-        session['exp']    = exp
-        session['modes']  = modes
+        session['omega']   = 203 #in-plane rotation angle
+        session['crys']    = crys_dat
+        session['frame']   = 1
+        session['sim']     = sim
+        session['exp']     = exp
+        session['modes']   = modes
+        session['max_res'] = 0
         session['expand'] = expand_bloch
         session['vis']    = {k:True for k in ['I','Vga','I_pets','Sw']}
         session['zm_counter'] = 0 #dummy variable
@@ -530,7 +539,7 @@ def init():
 
 
     print('send init info')
-    info=['mol','frame','crys','cif_file','modes','omega','expand','refl']
+    info=['mol','frame','crys','cif_file','modes','omega','expand','refl','max_res']
     session_data = {k:session[k] for k in info}
     session_data['max_frame']=session['exp']['max_frame']
     for k in ['zmax']:

@@ -1,11 +1,5 @@
 # TODO
 
-
-### issue#11 rocking curve  
-- use arrows or select frame
-- set u from frame
-- save u in move-mode
-
 ### issue#12 FELIX option
 - enable solve from felix and run on other machines
 

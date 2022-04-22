@@ -1,6 +1,18 @@
 # Version log
 
 ## 0.0.2
+
+
+### issue#11 rocking curve  (Fri 22 Apr 16:03:47 BST 2022)
+- use arrows or select frame
+- set u from frame
+- I_pets updated from current frame  in rock_mode
+- max res input
+- added footer copyright
+- expandable structure parameters
+- added info for miller table
+- created tabs for modes['analysis'] preparing for multislice
+
 ### (Thu 21 Apr 16:24:22 BST 2022)
 - rock graph only available in rock mode  
 - update reflection table in session

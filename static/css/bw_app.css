@@ -8,6 +8,11 @@
   text-align: center;
   background: #c9d6ee;
 }
+.footer {
+  padding: 10px;
+  text-align: center;
+  background: #c9d6ee;
+}
 
 .row{
   padding-left: 10px;
@@ -148,13 +153,6 @@ img {
   clear: both;
 }
 
-/* Footer */
-.footer {
-  padding: 20px;
-  text-align: center;
-  background: #ddd;
-  margin-top: 20px;
-}
 
 /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 800px) {
@@ -186,6 +184,10 @@ img {
 .mid_input{
   width: 100px
 }
+.sm_input{
+  width: 50px
+}
+
 .bloch_input{
   width: 60px
 }
@@ -257,6 +259,24 @@ img {
   text-align: left;
   background-color: #1c5640;
   color: #cce6c3;
+}
+
+.tab_btn{
+  border-color: #2c4fa1;
+  margin: 0px;
+  margin-left: -4px;
+  border-width: medium;
+  background-color:#84b6cb;
+  border-style:none;
+  border-bottom: 0;
+  border-radius: 0;
+  height:35px
+}
+.bloch_panel {
+  border-color:#2c4fa1;
+  border-style:solid;
+  border-width:medium;
+  border-radius: 0;
 }
 
 </style>
