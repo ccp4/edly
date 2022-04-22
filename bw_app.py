@@ -266,7 +266,7 @@ def rock_state():
                 session['rock_state'] = 'postprocess'
             else:
                 session['rock_state'] = 'done'
-    print(session['rock_state'])
+    # print(session['rock_state'])
     return json.dumps(session['rock_state'])
 
 @bw_app.route('/set_rock_frame', methods=['POST'])
@@ -378,17 +378,20 @@ def update_thicks(thicks):
     session['bloch']['thicks'] = thicks
     return thicks
 
+
+@bw_app.route('/update_refl', methods=['POST'])
+def update_refl():
+    data=json.loads(request.data.decode())
+    session['refl']=data['refl']
+    return json.dumps({'refl':session['refl']})
+
 @bw_app.route('/beam_vs_thick', methods=['POST'])
 def beam_vs_thick():
-    data = json.loads(request.data.decode())
-    refl = data['refl']
-    b0_path=session['b0_path']
-
-    # if session['modes']['manual'] and session['modes']['u']=='rock':
-    #     b0_path=get_pkl(session['id'])
-
+    data=json.loads(request.data.decode())
     thicks = update_thicks(data['thicks'])
-    print(get_pkl(session['id']))
+    b0_path=session['b0_path']
+    refl = data['refl']
+    # print(session['refl'])
 
     b0  = ut.load_pkl(b0_path)
     idx = b0.get_beam(refl=refl)
@@ -516,6 +519,7 @@ def init():
         session['theta_phi']  = [0,0]
         session['bloch']      = bloch_args
         session['rock']       = rock_args
+        session['refl']       = []
         session['last_time']  = now
         session['b0_path']    = get_pkl(session['id'])
         session['time'] = now
@@ -526,7 +530,7 @@ def init():
 
 
     print('send init info')
-    info=['mol','frame','crys','cif_file','modes','omega','expand']
+    info=['mol','frame','crys','cif_file','modes','omega','expand','refl']
     session_data = {k:session[k] for k in info}
     session_data['max_frame']=session['exp']['max_frame']
     for k in ['zmax']:

@@ -1,7 +1,13 @@
 # Version log
 
+## 0.0.2
+### (Thu 21 Apr 16:24:22 BST 2022)
+- rock graph only available in rock mode  
+- update reflection table in session
+
 ## 0.0.1
-### issue#9 graph selector
+### issue#9 ( Thu 21 Apr 16:24:22 BST 2022)
+- graph selector
 - plotly menu for the curves to show
 - use `b0_path` to fix beam_vs_thickness update in rock mode
 - `show_u` includes all orientation in auto mode (very slow)

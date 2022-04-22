@@ -323,11 +323,10 @@
                       <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set']"> Set u0,u1 from experimental frame </span>
                     </a>
                     <!-- rock solve button-->
-                    <div class="btn-sm btn-primary rock_solve_param" style="margin-right: 5px" ng-click="solve_rock()" ng-style="rock_style">
-                      <!-- ng-bind=" solve_rock_btn[rock_state]"  -->
+                    <div class="btn-sm btn-primary rock_solve_param" ng-click="solve_rock()" ng-style="rock_style">
                       {a solve_rock_btn a}
                     </div>
-                    <div ng-show="rock_done">
+                    <div ng-show="rock_state=='done'">
                       <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('i');">
                         <span class="glyphicon glyphicon-fast-backward"></span >
                       </a>
@@ -456,12 +455,14 @@
                   </span>
                 </a>
                 <div style="font-size:14px;margin-bottom:5px;">Selected reflections : </div>
-                  <table ng-show="expand['refl']" id="table_Miller_indices"  class='table_miller' border="1" cellpadding="2">
+                <div id='table_miller' ng-show="expand['refl']">
+                  <table  id="table_Miller_indices"  border="1" cellpadding="2">
                     <tr>
-                        <td>delete</td>
-                        <td><b>miller_indices</b></td>
+                        <th></th>
+                        <th><b>miller_indices</b></th>
                     </tr>
                   </table>
+                </div>
               </div>
             </div>
 
@@ -566,7 +567,7 @@ var datapts
 function addRow_tagTable(miller_indices) {
     if (!extract_list_indices_from_table().includes(miller_indices)) {
       var row = TABLE_MILLER.insertRow(TABLE_MILLER.rows.length);
-      row.insertCell(0).innerHTML= '<div class="btn btn-primary" style="width:35px" onClick="deleteRow(this)"> <span class="glyphicon glyphicon-remove" /></div>';
+      row.insertCell(0).innerHTML= '<div class="btn btn-delete btn-primary" onclick="deleteRow(this)" > <span class="glyphicon glyphicon-remove" /></div>';
 
       // row.insertCell(1).innerHTML= '<b>'+miller_indices+'</b>';
       row.insertCell(1).innerHTML = miller_indices;

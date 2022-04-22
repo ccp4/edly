@@ -18,6 +18,11 @@
 .btn-rock{
   padding: 3px;
 }
+.btn-delete{
+  padding: 3px;
+  margin: 1px;
+}
+
 
 .panel{
   background-color: #83aec9;
@@ -192,9 +197,10 @@ img {
 }
 .rock_solve_param{
   padding: 5px;
-  margin: 3px;
+  margin: 5px;
   font-size: 15px;
   text-align: center;
+  margin-bottom: 10px;
 }
 .bloch_solver{
   /* background-color: #a1c2c2; */
@@ -231,9 +237,26 @@ img {
   right: 15px;
 }
 
-.table_miller{
+#table_miller{
   overflow-y: scroll;
-  height: 50px;
-  background-color: blue:
+  height: 15vh;
+  margin-left: 10px
+  /* background-color: blue; */
 }
+
+#table_Miller_indices {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+}
+#table_Miller_indices td, #table_Miller_indices th {border: 1px solid #5e826c;}
+#table_Miller_indices tr:nth-child(even){background-color: #70b788;}
+#table_Miller_indices tr:nth-child(odd){background-color: #2f8163;}
+#table_Miller_indices tr:hover {background-color: #26604b;}
+#table_Miller_indices th {
+  padding: 5px;
+  text-align: left;
+  background-color: #1c5640;
+  color: #cce6c3;
+}
+
 </style>

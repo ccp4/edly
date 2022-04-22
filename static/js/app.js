@@ -46,10 +46,16 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   /////////////////////////////////
   $scope.update_refl = function(){
     $scope.refl = extract_list_indices_from_table();
+    $http.post('/update_refl',JSON.stringify({'refl':$scope.refl}))
+      .then(function(response){
+        // $log.log(response.data);
+    });
   }
+
   $scope.addRow_tagTable=function(data){
     let h=data.points[0].customdata[1];
     addRow_tagTable(h);
+    $scope.update_refl();
   }
 
   $scope.leg_click=function(data){
@@ -90,8 +96,16 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.set_mode=function(key){
     $http.post('/set_mode',JSON.stringify({'key':key,'val':$scope.modes[key]}))
     // .then(function(response){
-    //   $log.log(response.data);
-    // });
+      //   $log.log(response.data);
+      // });
+    if (!$scope.modes['manual'] && key=='rock' ){
+    }
+    else{
+      if  ($scope.graph==$scope.graphs['rock']){
+        $scope.graph=$scope.graphs['thick'];
+      }
+      $scope.set_available_graphs('rock',false);
+    }
   }
 
   $scope.toggle_mode=function(key){
@@ -109,9 +123,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     if (!$scope.modes['manual']){
       $scope.update();
     }
-    else{
-
-    }
   }
 
   $scope.toggle_popup=function(key){
@@ -125,7 +136,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
         $scope.update_theta_phi();
         break;
       case 'rock':
-        $scope.update_theta_phi();
+        $scope.get_rock_sim();
         break;
     }
   }
@@ -201,14 +212,16 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     $scope.set_mode('u');
     $scope.u_style = {'edit':'','move':'','rock':''};
     $scope.u_style[val]={"border-style":'solid'};
-    // switch (val){
+    switch (val){
     //   case 'edit':
     //     break;
-    //   case 'move':
-    //     break;
-    //   case 'rock':
-    //     break;
-    // }
+      // case 'move':
+        // break;
+      case 'rock':
+        // $log.log($scope.rock_state=='done');
+        $scope.set_available_graphs('rock',$scope.rock_state=='done');
+        break;
+    }
   }
 
 
@@ -248,7 +261,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
           $scope.rock_style = {'background-color':'green'};
           $scope.rock_state = 'done';
           $scope.solve_rock_btn = $scope.rock_state;
-          $scope.set_available_graphs();
+          $scope.set_available_graphs('rock',true);
           $scope.set_rock_sim(1);
         })
       })
@@ -271,8 +284,10 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
       case '+':$scope.rock_sim += 1;break;
       case 'f':$scope.rock_sim  = 100;break;
     }
-    // $log.log($scope.rock_sim);
-    // $scope.rock_sim=Math.max(Math.min($scope.rock_sim,$scope.rock['npts']),1)
+    $scope.get_rock_sim();
+  }
+
+  $scope.get_rock_sim=function(){
     $http.post('/get_rock_sim',JSON.stringify({'sim':Number($scope.rock_sim)}))
       .then(function(response){
         $scope.fig1 = JSON.parse(response.data.fig);
@@ -290,7 +305,8 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   }
 
   $scope.rock_reset=function(){
-    $scope.rock_state='';
+    $scope.solve_rock_btn='Solve rock';
+    $log.log($scope.rock_state);
     $scope.rock_style={'background-color':'#286090'};
   }
 
@@ -298,7 +314,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   // Rotate mode
   ////////////////////////////////////////////////////////////////////////////////////////////////
   $scope.theta_phi_cb=function(e){
-    // $log.log(e.keyCode);
     var updated = false;
     var theta_phi=[Number($scope.theta_phi[0]),Number($scope.theta_phi[1])];
     $scope.dtheta_phi=Number($scope.dtheta_phi);
@@ -340,7 +355,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.update_theta_phi=function(){
     $scope.theta_phi[0]%=180;
     $scope.theta_phi[1]%=360;
-    // $log.log($scope.theta_phi);
     $http.post('/bloch_rotation',JSON.stringify({'theta_phi':$scope.theta_phi}))
       .then(function(response){
         $scope.load_bloch(response.data);
@@ -429,28 +443,30 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   }
 
   $scope.update_graph=function(){
-    $log.log($scope.graph.type);
+    // $log.log($scope.graph.type);
     if (!$scope.modes['single']){
       switch ($scope.graph.type){
         case 'thick':
-        $scope.beam_vs_thickness();
-        break;
+          $scope.beam_vs_thickness();
+          break;
         case 'rock':
-        $scope.show_rock();
-        break;
+          $scope.show_rock();
+          break;
         case '3d':
-        $scope.show_u();
-        break;
+          $scope.show_u();
+          break;
       }
     }
   }
-  $scope.set_available_graphs = function(){
-    if ($scope.rock_state=='done' && !$scope.rock_done){
-      $scope.rock_done=true;
-      $scope.graphs['rock']={type:'rock',desc:'rocking curve'}
+
+  $scope.set_available_graphs = function(key,val){
+    if(val){
+      $scope.graphs[key]=$scope.all_graphs[key];
+    }
+    else{
+      delete $scope.graphs[key];
     }
   }
-
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
@@ -465,14 +481,15 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.refl=[[0,0,0]];
   $scope.u_style = {'edit':'','move':'','rock':''};
   $scope.rock_style = '';
-  $scope.solve_rock_btn='Solve rock' ;//{'':'Solve rock','init':'init','postprocess':'...postprocess...','done':'completed'}
+  $scope.solve_rock_btn='Solve rock';
   $scope.popup={}
   $scope.sim_rock = 1;
   $scope.rock_sim = 1;
   $scope.rock_done = false;
   $scope.input={'theta':false,'phi':false,'dtp':false ,'rock_sim':true};
 
-  $scope.graphs={thick:{type:'thick',desc:'thickness'},u3d:{type:'3d',desc:'3d view'}}
+  $scope.all_graphs={thick:{type:'thick',desc:'thickness'},u3d:{type:'3d',desc:'3d view'},rock:{type:'rock',desc:'rocking curve'}}
+  $scope.graphs=JSON.parse(JSON.stringify($scope.all_graphs));
   $scope.graph=$scope.graphs['thick'];
 
 
@@ -493,8 +510,13 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
       $scope.omega     = response.data.omega;
       // $scope.expand    = response.data.expand;
       $scope.rock_state=response.data.rock_state;
-      $scope.set_available_graphs();
+      $scope.set_available_graphs('rock',$scope.rock_state=='done');
       $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
+      var refl=response.data.refl;
+      // $log.log(refl);
+      for (let h of refl){
+        addRow_tagTable(h);
+      }
       $scope.update()
     });
 

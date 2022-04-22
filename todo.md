@@ -1,7 +1,5 @@
 # TODO
 
-### issue#9 graph selector
-- plotly menu for the curves to show
 
 ### issue#11 rocking curve  
 - use arrows or select frame
@@ -39,6 +37,7 @@
 - long time chrome violation warning
 - include kinematic
 - Fkin vs Fdyn
+- improve speed show_u
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly
