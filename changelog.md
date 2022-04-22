@@ -1,7 +1,9 @@
 # Version log
 
 ## 0.0.2
-
+## issue#16 miller indices table (Fri 22 Apr 20:26:20 BST 2022)
+- highlight on hover
+- removed update when changing analysis mode
 
 ### issue#11 rocking curve  (Fri 22 Apr 16:03:47 BST 2022)
 - use arrows or select frame

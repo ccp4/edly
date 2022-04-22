@@ -66,6 +66,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     else{
       var update={'visible':true};
     }
+
     $http.post('/set_visible',JSON.stringify({'key':dat.name,'v':update.visible}))
     .then(function(response){
       // $log.log(response.data);
@@ -118,7 +119,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     $scope.set_mode('analysis',val);
     $scope.mode_style = {'bloch':'','frames':''};
     $scope.mode_style[val]=mode_style;
-    $scope.update()
+    // $scope.update()
   }
 
   $scope.toggle_manual_mode=function(){

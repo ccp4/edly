@@ -49,7 +49,7 @@ def bloch_fig():
 
     plts = {
         'I'  :['Ix','blue' ,'circle'     ],
-        'Vga':['Vx','green','triangle-up'],
+        'Vga':['Vx','yellow','triangle-up'],
         'Sw' :['Sx','red'  ,'diamond'    ],
     }
     toplot['Ix']=normalize( np.log10(np.maximum(abs(toplot['I'])  ,1e-5)))
@@ -405,6 +405,7 @@ def beam_vs_thick():
     b0.save(get_pkl(session['id']))
 
     df = pd.DataFrame(columns=['z','I','hkl'])
+    # print(Iz.items())
     for hkl,I in Iz.items():
         df_hkl = pd.DataFrame(np.array([b0.z,I]).T,columns=['z','I'])
         df_hkl['hkl'] = hkl

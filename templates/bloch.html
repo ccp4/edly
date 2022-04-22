@@ -72,7 +72,7 @@
             <div class="theta_phi" style="margin-top:10px;">
               <a class="popup" ng-click="expand['struct']=!expand['struct']" ng-mouseenter="toggle_popup('expand_struct')" ng-mouseleave="toggle_popup('expand_struct')" style="float:right;bottom:5px">
                 <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
-                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
+                  <span class="popuptext" style="" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
                 </span>
               </a>
               <div ng-click="set_structure()" style="text-align: left;margin-left:10px;">
@@ -188,7 +188,7 @@
               <div class="theta_phi" style="margin-top:5px">
                 <a class="popup" ng-click="expand['sim']=!expand['sim']" ng-mouseenter="toggle_popup('expand_sim')" ng-mouseleave="toggle_popup('expand_sim')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['sim'],'glyphicon glyphicon-chevron-up':expand['sim']}">
-                    <span class="popuptext" style="font-family: sans-serif" ng-show="popup['expand_sim']" ng-bind="expand_str[expand['sim']]"></span>
+                    <span class="popuptext" style="" ng-show="popup['expand_sim']" ng-bind="expand_str[expand['sim']]"></span>
                   </span>
                 </a>
                 <div style="font-size:14px;margin-bottom:5px;">Simulation parameters :</div>
@@ -208,7 +208,7 @@
                     <td class="td-in" ng-show="show_keV">
                       <a class="btn-sm btn-primary popup" ng-click="show_keV=false" ng-mouseenter="toggle_popup('lock_keV')" ng-mouseleave="toggle_popup('lock_keV')" style="margin-left: 7px;">
                         <span class="glyphicon glyphicon-lock" />
-                        <span class="popuptext" style="font-family: sans-serif" ng-show="popup['lock_keV']">
+                        <span class="popuptext" style="" ng-show="popup['lock_keV']">
                           Lock keV parameter to experiment </span>
                       </a>
                     </td>
@@ -246,7 +246,7 @@
               <div class="theta_phi" style="margin-top:5px">
                 <a class="popup" ng-click="expand['u']=!expand['u']" ng-mouseenter="toggle_popup('expand_u')" ng-mouseleave="toggle_popup('expand_u')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['u'],'glyphicon glyphicon-chevron-up':expand['u']}">
-                    <span class="popuptext" style="font-family: sans-serif" ng-show="popup['expand_u']" ng-bind="expand_str[expand['u']]"></span>
+                    <span class="popuptext" style="" ng-show="popup['expand_u']" ng-bind="expand_str[expand['u']]"></span>
                   </span>
                 </a>
                 <div style="font-size:14px;margin-bottom:5px;">Beam orientation :</div>
@@ -256,27 +256,27 @@
                   <div class="row" style="margin-bottom: 10px">
                     <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')" style="margin-left: 7px;">
                       <span ng-class="{'glyphicon glyphicon-wrench':!modes['manual'],'glyphicon glyphicon-lock':modes['manual']}" />
-                      <span class="popuptext" style="font-family: sans-serif" ng-show="popup['manual']">
+                      <span class="popuptext" style="" ng-show="popup['manual']">
                         <div ng-show="modes['manual']"> Lock u to experimental frames  </div>
                         <div ng-hide="modes['manual']"> Set u manually   </div></span>
                     </a>
                     <span ng-show="modes['manual']" style="margin-left:5px;">
                       <a class="btn-sm btn-primary popup" ng-style="u_style['edit']" ng-click="set_u_mode('edit')" ng-mouseenter="toggle_popup('u_edit')" ng-mouseleave="toggle_popup('u_edit')">
                         <span class="glyphicon glyphicon-pencil" />
-                        <span class="popuptext" style="font-family: sans-serif" ng-show="popup['u_edit']"> Edit u manually  </span>
+                        <span class="popuptext" style="" ng-show="popup['u_edit']"> Edit u manually  </span>
                       </a>
                       <a class="btn-sm btn-primary popup" ng-style="u_style['move']" ng-click="set_u_mode('move')" ng-mouseenter="toggle_popup('u_move')" ng-mouseleave="toggle_popup('u_move')">
                         <span class="glyphicon glyphicon-move" />
-                        <span class="popuptext" style="font-family: sans-serif" ng-show="popup['u_move']"> Change Euler angles of u using arrows  </span>
+                        <span class="popuptext" style="" ng-show="popup['u_move']"> Change Euler angles of u using arrows  </span>
                       </a>
                       <a class="btn-sm btn-primary popup" ng-style="u_style['rock']" ng-click="set_u_mode('rock')" ng-mouseenter="toggle_popup('u_rock')" ng-mouseleave="toggle_popup('u_rock')">
                         <span class="gg-icon gg-spectrum" ></span>
-                        <span class="popuptext" style="font-family: sans-serif" ng-show="popup['u_rock']"> Set rocking curve for u </span>
+                        <span class="popuptext" style="" ng-show="popup['u_rock']"> Set rocking curve for u </span>
                       </a>
                     </span>
                     <a class="btn-sm btn-primary popup" ng-click="show_u()" ng-mouseenter="toggle_popup('u_show')" ng-mouseleave="toggle_popup('u_show')" style="float:right;right:15px;" >
                       <span class="glyphicon glyphicon-eye-open" />
-                      <span class="popuptext" style="font-family: sans-serif" ng-show="popup['u_show']"> Show u orientation  </span>
+                      <span class="popuptext" style="" ng-show="popup['u_show']"> Show u orientation  </span>
                     </a>
                   </div>
 
@@ -284,7 +284,7 @@
                   <div class="bloch_param" ng-hide="modes['manual'] && modes['u']!='edit'">
                       <span> u </span>
                       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('u_info')" ng-mouseleave="toggle_popup('u_info')">
-                        <span class="popuptext" ng-show="popup['u_info']"> real space beam orientation (cartesian reference frame) </span>
+                        <span class="popuptext" ng-show="popup['u_info']"> Beam orientation based on experimental frame </span>
                       </span>
                       <span> = </span>
                       <span  ng-show="!modes['manual']"                      ng-bind="bloch['u']" ></span>
@@ -294,7 +294,7 @@
                   <!-- move mode-->
                   <div ng-show="modes['manual'] && modes['u']=='move'" >
                     <span style="float:right;"class="popup glyphicon glyphicon-question-sign " ng-mouseenter="popup['rot_help']=true" ng-mouseleave="popup['rot_help']=false">
-                      <div class="popuptext" style="font-family: sans-serif;width:200px;text-align:left" ng-show="popup['rot_help']">
+                      <div class="popuptext" style=";width:200px;text-align:left" ng-show="popup['rot_help']">
                         <div> click on the hand and press hotkeys :
                           <br> &nbsp left  : decrement phi
                           <br> &nbsp right : increment phi
@@ -326,7 +326,7 @@
                   <!-- rock mode -->
                   <div ng-show="modes['manual'] && modes['u']=='rock'" class="">
                     <span style="float:right;" class="popup glyphicon glyphicon-question-sign " ng-mouseenter="popup['rock_help']=true" ng-mouseleave="popup['rock_help']=false">
-                      <div class="popuptext" style="font-family: sans-serif;width:200px;text-align:left" ng-show="popup['rock_help']">
+                      <div class="popuptext" style=";width:200px;text-align:left" ng-show="popup['rock_help']">
                         <div> Rocking curve settings  :
                           <br> &nbsp u0   : initial orientation
                           <br> &nbsp u1   : last orientation
@@ -340,7 +340,7 @@
                         <td class="td-in">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="toggle_popup('rock_set_0')" ng-mouseleave="toggle_popup('rock_set_0')">
                             <span class="glyphicon glyphicon-pushpin"/>
-                            <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
+                            <span class="popuptext" style="" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
                           </a>
                         </td>
                       </tr>
@@ -348,7 +348,7 @@
                         <td class="td-in">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="toggle_popup('rock_set_1')" ng-mouseleave="toggle_popup('rock_set_1')">
                             <span class="glyphicon glyphicon-pushpin"/>
-                            <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
+                            <span class="popuptext" style="" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
                           </a>
                         </td>
                       </tr>
@@ -356,7 +356,7 @@
                         <td class="td-in">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="toggle_popup('rock_set')" ng-mouseleave="toggle_popup('rock_set')">
                             <span class="gg-icon gg-path-back" />
-                            <span class="popuptext" style="font-family: sans-serif" ng-show="popup['rock_set']"> Assign u0,u1 from current experimental frame </span>
+                            <span class="popuptext" style="" ng-show="popup['rock_set']"> Assign u0,u1 from current experimental frame </span>
                           </a>
                         </td>
                       </tr>
@@ -408,7 +408,7 @@
                 <td class="">
                   <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="toggle_popup('omega_show')" ng-mouseleave="toggle_popup('omega_show')">
                     <span class="glyphicon glyphicon-repeat" />
-                    <span class="popuptext" style="font-family: sans-serif" ng-show="popup['omega_show']"> set in-plane rotation angle omega  </span>
+                    <span class="popuptext" style="" ng-show="popup['omega_show']"> set in-plane rotation angle omega  </span>
                   </a>
                 </td>
                 <td class="td-in" style="font-size:13px">
@@ -439,7 +439,7 @@
               <div class="theta_phi" style="margin-top:5px">
                 <a class="popup" ng-click="expand['thick']=!expand['thick']" ng-mouseenter="toggle_popup('expand_thick')" ng-mouseleave="toggle_popup('expand_thick')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['thick'],'glyphicon glyphicon-chevron-up':expand['thick']}">
-                    <span class="popuptext" style="font-family: sans-serif" ng-show="popup['expand_thick']" ng-bind="expand_str[expand['thick']]"></span>
+                    <span class="popuptext" style="" ng-show="popup['expand_thick']" ng-bind="expand_str[expand['thick']]"></span>
                   </span>
                 </a>
                 <div style="font-size:14px;margin-bottom:5px;">Thickness parameters :</div>
@@ -456,7 +456,7 @@
                         <span class='glyphicon glyphicon-hand-down' />
                       </a>
                       <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['move_thick']=true" ng-mouseleave="popup['move_thick']=false" style="top:-10px;">
-                        <span ng-show="popup['move_thick']" class="popuptext" style="font-family: sans-serif;width:270px;text-align:left;font-size:14px" >
+                        <span ng-show="popup['move_thick']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
                           Click and use :
                           <br> &nbsp; arrows   : increase/decrease thickness
                           <br> &nbsp; pageup   : decrease dthick
@@ -491,12 +491,12 @@
               <div class="theta_phi" style="margin-top:5px">
                 <a class="popup" ng-click="expand['refl']=!expand['refl']" ng-mouseenter="toggle_popup('expand_refl')" ng-mouseleave="toggle_popup('expand_refl')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['refl'],'glyphicon glyphicon-chevron-up':expand['refl']}" >
-                    <span class="popuptext" style="font-family: sans-serif" ng-show="popup['expand_refl']" ng-bind="expand_str[expand['refl']]"></span>
+                    <span class="popuptext" style="" ng-show="popup['expand_refl']" ng-bind="expand_str[expand['refl']]"></span>
                   </span>
                 </a>
                 <div style="font-size:14px;margin-bottom:5px;">Selected reflections
                   <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['sel_refl']=true" ng-mouseleave="popup['sel_refl']=false" >
-                    <span ng-show="popup['sel_refl']" class="popuptext" style="font-family: sans-serif;width:270px;text-align:left;font-size:14px" >
+                    <span ng-show="popup['sel_refl']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
                       Reflections used for displaying :
                       <br> &nbsp;&nbsp;beam_vs_thickness
                       <br> &nbsp;&nbsp;rocking curves
@@ -538,7 +538,7 @@
               <td>
                 <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="toggle_popup('single_mode')" ng-mouseleave="toggle_popup('single_mode')">
                   <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
-                  <span class="popuptext" style="font-family: sans-serif" ng-show="popup['single_mode']"> toggle single/dual mode </span>
+                  <span class="popuptext" style="" ng-show="popup['single_mode']"> toggle single/dual mode </span>
                 </a>
                 <span>max res : <input class="sm_input" type="number" min="0" ng-model="max_res" ng-key-enter="set_max_res()"></span>
               </td>
@@ -609,23 +609,20 @@
 
 <script>
 var TABLE_MILLER=document.getElementById('table_Miller_indices')
-var datapts
-
 function addRow_tagTable(miller_indices) {
     if (!extract_list_indices_from_table().includes(miller_indices)) {
       var row = TABLE_MILLER.insertRow(TABLE_MILLER.rows.length);
       row.insertCell(0).innerHTML= '<div class="btn btn-delete btn-primary" onclick="deleteRow(this)" > <span class="glyphicon glyphicon-remove" /></div>';
-
-      // row.insertCell(1).innerHTML= '<b>'+miller_indices+'</b>';
-      row.insertCell(1).innerHTML = miller_indices;
+      console.log(miller_indices)
+      row.insertCell(1).innerHTML= `<div onmouseover="highlight('${miller_indices}',true)" onmouseout="highlight('${miller_indices}',false)" style="padding:2px;margin:0">${miller_indices}</div>`;
   }
 }
 function extract_list_indices_from_table() {
   let listTags=[]
   let listrows= TABLE_MILLER.children[0].children
   for (let row of listrows) {
-    // console.log(row.children[1].innerHTML);
-    listTags.push(row.children[1].innerHTML)
+    // console.log(row.cells[1].children[0]);
+    listTags.push(row.cells[1].children[0].innerHTML)
   }
   return listTags.slice(1,)
 }
@@ -635,17 +632,36 @@ function deleteRow(obj) {
     TABLE_MILLER.deleteRow(index);
 }
 
-//////// function hover row point table miller
-// function on_hover_highlight(indice_miller){
-//   // identifiy the curve
-//   curveNumber=1
-//   let sizes=fig1.data[curveNumber].marker.size
-//   let sym=fig1.data[curveNumber].marker.symbol
-//   // identifiy the correct idx miller
-//   let idxMiller = 6
-//   sizes[idxMiller]*=5
-//   Plotly.restyle('fig1',{'marker':{'size':sizes,'symbol':sym}},[curveNumber])
-// }
+////// function hover row point table miller
+function highlight(miller_indices,val){
+
+  var found = false;
+  var data  = document.getElementById('fig1').data[0].customdata;
+  var idx = 0;
+  while (!found && idx<data.length){
+    found = data[idx][1]==miller_indices;
+    idx++;
+  }
+  if (found){
+    if (val){
+      found=false;
+      var c_nb=0;
+      while (!found && c_nb<3){
+        found=document.getElementById('fig1').data[c_nb].visible==true;
+        c_nb++;
+      }
+      if (found){
+        // console.log(idx);// data[idx][1], miller_indices)
+        Plotly.Fx.hover('fig1',[
+          { curveNumber:c_nb-1, pointNumber:idx-1 },
+        ]);
+      }
+    }
+    else{
+      Plotly.Fx.unhover('fig1',[]);
+    }
+  }
+}
 
 </script>
 

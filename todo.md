@@ -19,10 +19,6 @@
 - documentation
 - tests
 
-## issue#16 miller indices table
-- highlight on hover
-- collapsible table
-
 ### issue#17 handle accounts
 - create account for uploading comparison to experiments or saving simulations
 
