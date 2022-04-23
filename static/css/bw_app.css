@@ -4,10 +4,13 @@
 }
 /* Header/Blog Title */
 .header {
-  padding: 10px;
-  text-align: center;
+  /* text-align: center; */
   background: #c9d6ee;
 }
+.menu {
+  margin-left: 10px;
+}
+
 .footer {
   padding: 10px;
   text-align: center;

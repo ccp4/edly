@@ -496,11 +496,11 @@ def init():
             'thick':250,'thicks':[0,300,100],'opts':'vts','solve':1}
 
         modes = {
-            'molecule'  :False,
-            'analysis'  :'bloch',
-            'manual'    :False,
-            'u'         :'edit',
-            'single'    :False,
+            'molecule'  : False,
+            'analysis'  : 'bloch',
+            'manual'    : False,
+            'u'         : 'edit',
+            'single'    : False,
         }
         rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
 
@@ -516,15 +516,15 @@ def init():
         session['path'] = session_path
         session['mol']  = mol
         session['cif_file'] = cif_file
-        session['omega']   = 203 #in-plane rotation angle
-        session['crys']    = crys_dat
-        session['frame']   = 1
-        session['sim']     = sim
-        session['exp']     = exp
-        session['modes']   = modes
-        session['max_res'] = 0
-        session['expand'] = expand_bloch
-        session['vis']    = {k:True for k in ['I','Vga','I_pets','Sw']}
+        session['omega']    = 203 #in-plane rotation angle
+        session['crys']     = crys_dat
+        session['frame']    = 1
+        session['sim']      = sim
+        session['exp']      = exp
+        session['modes']    = modes
+        session['max_res']  = 0
+        session['expand']   = expand_bloch
+        session['vis']      = {k:True for k in ['I','Vga','I_pets','Sw']}
         session['zm_counter'] = 0 #dummy variable
         session['theta_phi']  = [0,0]
         session['bloch']      = bloch_args

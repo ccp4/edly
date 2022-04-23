@@ -13,6 +13,7 @@
      <link href="/static/css/all_gg.css" rel="stylesheet">
      <link href="/static/css/bw_app.css" rel="stylesheet">
      <link href="/static/css/popup.css" rel="stylesheet">
+     <link href="/static/css/dropdown.css" rel="stylesheet">
      <script src="static/bower_components/angular/angular.min.js"></script>
      <script src="static/bower_components/angular-aria/angular-aria.js"></script>
      <script src="static/bower_components/angular-touch/angular-touch.js"></script>
@@ -47,13 +48,38 @@
 
  <body>
 
-   <header class="header">
-      <h2> Electron diffraction dashboard </h2>
-   </header>
+   <div class="header">
+      <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
+      <!-- Menu -->
+      <div class="menu">
+        <div class="dropdown">
+         <button class="dropbtn">Structures</button>
+         <div class="dropdown-content">
+           <a href="#">New</a>
+           <a href="#"></a>
+           <a href="#"></a>
+         </div>
+        </div>
+        <div class="dropdown">
+         <button class="dropbtn">Links</button>
+         <div class="dropdown-content">
+           <a href="#">Documentation</a>
+           <a href="#">Theory</a>
+           <a href="#">Tests</a>
+         </div>
+        </div>
+        <div class="dropdown">
+         <button class="dropbtn">Help</button>
+         <div class="dropdown-content">
+           <a href="#">How to</a>
+         </div>
+        </div>
+      </div>
+   </div>
 
 
-   <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
-     <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
+  <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
+    <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
 
       <!-- Panel -->
       <div class="col-sm-2" style="padding-left:5px;padding-right:0px;">
@@ -69,7 +95,7 @@
               </a>
             </div>
             <div style="font-size:25px">  {a structure a} </div>
-            <div class="theta_phi" style="margin-top:10px;">
+            <div class="theta_phi">
               <a class="popup" ng-click="expand['struct']=!expand['struct']" ng-mouseenter="toggle_popup('expand_struct')" ng-mouseleave="toggle_popup('expand_struct')" style="float:right;bottom:5px">
                 <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
                   <span class="popuptext" style="" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
@@ -108,12 +134,6 @@
               <div class="col-sm-8">
                 <h4>Exp Frames : </h4>
               </div>
-              <!-- <div class="col-sm-4">
-                <a style="float:right" class="btn btn-primary popup" ng-click="show_buttons=!show_buttons" ng-mouseenter="toggle_popup('btns')" ng-mouseleave="toggle_popup('btns')">
-                  <span class="glyphicon glyphicon-upload" />
-                  <span class="popuptext" style="font-family:sans-serif" ng-show="popup['btns']"> Show upload buttons </span>
-                </a>
-              </div> -->
             </div>
             No:<input type="number" min="1" max="max_frame" ng-model="frame" ng-keypress=update_frame($event) style="width: 80px">
             <a class="btn-sm btn-primary"  ng-click="dec_frame()">
@@ -179,13 +199,12 @@
               </div>
             </div>
 
-
             <!-- ////////////////////////////////////////////
             Parameters Panel
             //////////////////////////////////////////// -->
             <!-- Simulation Parameters  -->
-            <div class="row" style="margin-top: 5px;">
-              <div class="theta_phi" style="margin-top:5px">
+            <div class="row" >
+              <div class="theta_phi" >
                 <a class="popup" ng-click="expand['sim']=!expand['sim']" ng-mouseenter="toggle_popup('expand_sim')" ng-mouseleave="toggle_popup('expand_sim')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['sim'],'glyphicon glyphicon-chevron-up':expand['sim']}">
                     <span class="popuptext" style="" ng-show="popup['expand_sim']" ng-bind="expand_str[expand['sim']]"></span>
@@ -242,8 +261,8 @@
             </div>
 
             <!-- Orientation u -->
-            <div class="row" style="margin-top: 5px;">
-              <div class="theta_phi" style="margin-top:5px">
+            <div class="row">
+              <div class="theta_phi">
                 <a class="popup" ng-click="expand['u']=!expand['u']" ng-mouseenter="toggle_popup('expand_u')" ng-mouseleave="toggle_popup('expand_u')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['u'],'glyphicon glyphicon-chevron-up':expand['u']}">
                     <span class="popuptext" style="" ng-show="popup['expand_u']" ng-bind="expand_str[expand['u']]"></span>
@@ -436,7 +455,7 @@
 
             <!-- thickness dependence-->
             <div class="row" >
-              <div class="theta_phi" style="margin-top:5px">
+              <div class="theta_phi">
                 <a class="popup" ng-click="expand['thick']=!expand['thick']" ng-mouseenter="toggle_popup('expand_thick')" ng-mouseleave="toggle_popup('expand_thick')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['thick'],'glyphicon glyphicon-chevron-up':expand['thick']}">
                     <span class="popuptext" style="" ng-show="popup['expand_thick']" ng-bind="expand_str[expand['thick']]"></span>
@@ -488,7 +507,7 @@
 
             <!-- miller indices table -->
             <div class="row">
-              <div class="theta_phi" style="margin-top:5px">
+              <div class="theta_phi">
                 <a class="popup" ng-click="expand['refl']=!expand['refl']" ng-mouseenter="toggle_popup('expand_refl')" ng-mouseleave="toggle_popup('expand_refl')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['refl'],'glyphicon glyphicon-chevron-up':expand['refl']}" >
                     <span class="popuptext" style="" ng-show="popup['expand_refl']" ng-bind="expand_str[expand['refl']]"></span>
