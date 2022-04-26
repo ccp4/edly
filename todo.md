@@ -1,5 +1,7 @@
 # TODO
 
+### rocking curve at thickness
+
 ### issue#12 FELIX option
 - enable solve from felix and run on other machines
 
@@ -28,6 +30,7 @@
 - include kinematic
 - Fkin vs Fdyn
 - improve speed show_u
+- resolution rings
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly

@@ -6,7 +6,7 @@ var JmolInfo = {
   use: "HTML5",     // "HTML5" or "Java" (case-insensitive)
   j2sPath: "/static/jmol/jsmol/j2s",          // only used in the HTML5 modality
   // j2sPath: "/static/bower_components/jsmol/src/j2s",          // only used in the HTML5 modality
-  src: '/static/data/test/pets/alpha_glycine.cif',          // file to load
+  src: '/static/data/test/alpha_glycine.cif',          // file to load
   // src: '{a cif a}',          // file to load
 };
 Jmol.setXHTML('myJmol');

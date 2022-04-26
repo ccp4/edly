@@ -15,7 +15,7 @@ Then a simple git pull on these dependencies will keep them up to date
 
 ## Installing the js dependencies
 ```
-bower install jquery angular angular-aria angular-touch angular-bootstrap bootstrap-css bootstrap angular-chart plotly MathJax
+bower install jquery angular angular-aria angular-touch angular-bootstrap bootstrap-css bootstrap angular-chart jquery-ui plotly MathJax
 
 cd static
 ln -s ../bower_components .

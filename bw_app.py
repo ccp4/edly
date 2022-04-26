@@ -1,7 +1,7 @@
 import importlib as imp
 from subprocess import check_output,Popen,PIPE
-import json,tifffile,os,sys,glob,time,datetime #,base64,hashlib
-from flask import Flask,Blueprint,request,jsonify,session,render_template
+import json,tifffile,os,sys,glob,time,datetime,crystals #,base64,hashlib
+from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
 import numpy as np,pandas as pd
 from blochwave import bloch
 from blochwave import bloch_pp as bl        #;imp.reload(bl)
@@ -16,11 +16,54 @@ bw_app = Blueprint('bw_app', __name__)
 
 fig_wh=725
 pets_data={}
+structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s=="static/data/tmp"]
+builtins = crystals.Crystal.builtins
 
 @bw_app.route('/')
 def image_viewer():
-    return render_template('bloch.html')
+    return render_template('bloch.html',builtins=builtins)
 
+@bw_app.route('/new_structure', methods=['POST'])
+def new_structure():
+    data = request.form
+    mol=data['name']
+    val=data['val']
+
+    path=mol_path(mol)
+    cif_file=os.path.join(path,data[val])
+    if val=='cif':cif_file+='.cif'
+    elif val=='pdb':cif_file+='.cif.npy'
+
+    msg = 'cif file issue'
+    if not os.path.exists(path):
+    # try:
+        # p=Popen('mkdir %s' %path,shell=True,stdout=PIPE,stderr=PIPE)
+        # o,e=p.communicate()
+        # if e:print(e.decode())
+        check_output('mkdir %s' %path,shell=True)
+        if   val=='cif' :
+            if data['cif'] in crystals.Crystal.builtins:
+                crystals.Crystal.from_database(data['cif']).to_cif(cif_file)
+        elif val=='pdb' :
+            if data['pdb']:
+                ut.pdb2npy(data['pdb'],cif_file)
+        elif val=='file':
+            cif_path=os.path.join(session['path'],data['file'])
+            if os.path.exists(cif_path):
+                check_output('cp %s %s' %(cif_path,cif_file),shell=True)
+
+        #check sucessful import
+        if cif_file:
+            crys=ut.import_crys(cif_file)
+            session['mol']=mol
+            init_mol()
+            msg='ok'
+    # except Exception as e:
+    #     check_output('rm -rf %s' %path,shell=True)
+    #     msg=e.__str__()
+    else:
+        msg='%s already exists' %mol
+    return msg
 
 
 ########################
@@ -71,20 +114,21 @@ def bloch_fig():
         ))
 
     #### pets
-    pets = pets_data[session['mol']]
-    df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
-    pt_plot=df_pets[['qx','qy','I','hkl','F']].copy()
-    pt_plot['Ix']=normalize(np.log10(np.maximum(abs(pt_plot['I']),1e-2)))
+    if session['dat']['pets']:
+        pets = pets_data[session['mol']]
+        df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
+        pt_plot=df_pets[['qx','qy','I','hkl','F']].copy()
+        pt_plot['Ix']=normalize(np.log10(np.maximum(abs(pt_plot['I']),1e-2)))
 
-    fig.add_trace(go.Scatter(
-        x=pt_plot['qx'],y=pt_plot['qy'],marker_size=pt_plot['Ix'],
-        name='I_pets',
-        visible=session['vis']['I_pets'],
-        hovertext=['I_pets']*len(pt_plot),
-        marker_symbol='square',marker_color='purple',
-        customdata=np.array([pt_plot['I'].values, pt_plot['hkl'].to_numpy()]).T,
-        hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>'
-    ))
+        fig.add_trace(go.Scatter(
+            x=pt_plot['qx'],y=-pt_plot['qy'],marker_size=pt_plot['Ix'],
+            name='I_pets',
+            visible=session['vis']['I_pets'],
+            hovertext=['I_pets']*len(pt_plot),
+            marker_symbol='square',marker_color='purple',
+            customdata=np.array([pt_plot['I'].values, pt_plot['hkl'].to_numpy()]).T,
+            hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>'
+        ))
 
     xm = session['max_res']
     if not xm:xm = b0.df_G.q.max()
@@ -96,7 +140,7 @@ def bloch_fig():
     )
     fig.update_traces(mode='markers')
     fig.update_xaxes(range=[-xm,xm])
-    fig.update_yaxes(range=[-xm,xm])
+    fig.update_yaxes(range=[xm,-xm])
     return fig.to_json()
 
 ########################
@@ -109,7 +153,7 @@ def get_frame():
     zmax  = data['zmax']
     exp_img = get_img_frame(frame,zmax['exp'],'exp')
     sim_img = get_img_frame(frame,zmax['sim'],'sim')
-    session['frame']=frame
+    session['frame']=frame  #;print(frame)
     return json.dumps({'exp':exp_img,'sim':sim_img})
 
 @bw_app.route('/update_zmax', methods=['POST'])
@@ -171,11 +215,12 @@ def solve_bloch():
     b_args = data['bloch']
     ## handle
     thicks = update_thicks(data['bloch']['thicks'])
-    u = pets_data[session['mol']].uvw0[data['frame']-1]
     # u = pets_data[session['mol']].uvw[data['frame']-1]
     if data['manual_mode']:
         # print(data['bloch']['u'])
-        u = b_arr(data['bloch']['u'],u)
+        u = b_arr(data['bloch']['u'],session['bloch']['u'])
+    else:
+        u = -pets_data[session['mol']].uvw0[data['frame']-1]
     # print(data['frame'],u)
     # print(pets_data[session['mol']].uvw[data['frame']-1])
 
@@ -454,10 +499,9 @@ def set_visible():
 @bw_app.route('/set_structure', methods=['POST'])
 def set_structure():
     data=json.loads(request.data.decode())
-    cif_file=os.path.join(mol_path(session['mol']),'pets',data['cif'])
-    session['cif'] = data['cif']
-    session['cif_file'] = cif_file
-    return session['cif_file']
+    session['mol']=data['mol']
+    init_mol()
+    return session['mol']
 
 ############################################################################
 #### Init
@@ -473,88 +517,106 @@ def init():
         id = create_id()
         session_path=os.path.join('static','data','tmp',id)
         print(check_output('mkdir -p %s' %session_path,shell=True).decode())
-        print(colors.green+'creating session %s' %id+colors.black)
-
-        mol='test'
-        exp_frames = glob.glob(get_path(mol,'exp','*'))
-        sim_frames = glob.glob(get_path(mol,'sim','*'))
-        exp_max_frame=len(exp_frames)
-        sim_max_frame=len(sim_frames)
-
-        exp = {
-            'tmp':0,'zmax':50, 'z_max':[50]*exp_max_frame,
-            'max_frame':exp_max_frame,
-            'pad':len(os.path.basename(exp_frames[0]).replace('.tiff',''))
-            }
-        sim = {
-            'tmp':0,'zmax':100, 'z_max':[100]*sim_max_frame,
-            'max_frame':sim_max_frame,
-            'pad':len(os.path.basename(sim_frames[0]).replace('.tiff','')),
-            'offset':10,
-            }
-        bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
-            'thick':250,'thicks':[0,300,100],'opts':'vts','solve':1}
-
-        modes = {
-            'molecule'  : False,
-            'analysis'  : 'bloch',
-            'manual'    : False,
-            'u'         : 'edit',
-            'single'    : False,
-        }
-        rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
-
-        cif_file = os.path.join(mol_path(mol),'pets','alpha_glycine.cif')
-        crys = ut.import_crys(cif_file)
-        crys_dat = {'file':'alpha_glycine.cif'}
-        crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
-        crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
-            b_str(crys.lattice_parameters,2).split(',') )))
-        expand_bloch = {'omega':False,'thick':False,'refl':False,'sim':False,'u':True,}
-
-        session['id']   = id
+        print(colors.green+'creating new session %s' %id+colors.black)
+        session['mol'] = 'test'
         session['path'] = session_path
-        session['mol']  = mol
-        session['cif_file'] = cif_file
-        session['omega']    = 203 #in-plane rotation angle
-        session['crys']     = crys_dat
-        session['frame']    = 1
-        session['sim']      = sim
-        session['exp']      = exp
-        session['modes']    = modes
-        session['max_res']  = 0
-        session['expand']   = expand_bloch
-        session['vis']      = {k:True for k in ['I','Vga','I_pets','Sw']}
-        session['zm_counter'] = 0 #dummy variable
-        session['theta_phi']  = [0,0]
-        session['bloch']      = bloch_args
-        session['rock']       = rock_args
-        session['refl']       = []
-        session['last_time']  = now
-        session['b0_path']    = get_pkl(session['id'])
-        session['time'] = now
-        # print(session['cif'],session.get('exp'+'tmp'))
+        session['id']   = id
+        init_mol()
 
-    if not session['mol'] in pets_data.keys():
+    # print(session['mol'],session['mol2'])
+    # print(glob.glob(os.path.join(mol_path(session['mol']),'pets')))
+    # print(glob.glob(os.path.join(mol_path(session['mol']),'pets','*')))
+    if session['dat']['pets'] and not session['mol'] in pets_data.keys():
         pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
-
-
-    print('send init info')
-    info=['mol','frame','crys','cif_file','modes','omega','expand','refl','max_res']
-    session_data = {k:session[k] for k in info}
-    session_data['max_frame']=session['exp']['max_frame']
-    for k in ['zmax']:
-        session_data[k] = dict(zip(['sim','exp'],[session['sim'][k],session['exp'][k]]))
-    session_data['theta_phi']=b_str(session['theta_phi'],2)
-    session_data['bloch']=get_session_data('bloch')
-    session_data['rock']=get_session_data('rock')
-
     rock_state=''
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
         rock_state='done'
-    session_data['rock_state']  = rock_state
 
+    print('sending init info')
+    info=['mol','dat','frame','crys','cif_file','modes','omega','expand','refl','max_res']
+    session_data = {k:session[k] for k in info}
+    session_data['theta_phi'] = b_str(session['theta_phi'],2)
+    session_data['bloch'] = get_session_data('bloch')
+    session_data['rock']  = get_session_data('rock')
+    session_data['rock_state'] = rock_state
+    # exp,sim
+    session_data['zmax'] = {}
+    if session['sim']:
+        session_data['max_frame']   = session['sim']['max_frame']
+        session_data['zmax']['sim'] = session['sim']['zmax']
+    if session['exp']:
+        session_data['max_frame']   = session['exp']['max_frame']
+        session_data['zmax']['exp'] = session['exp']['zmax']
+
+    session_data['structures'] = [s for s in structures if s!=session['mol']]
     return json.dumps(session_data)
+
+
+def init_mol():
+    mol = session['mol']
+    exp = get_frames(mol,'exp')
+    sim = get_frames(mol,'sim',d={'offset':10})
+    dat = {
+        'exp':type(exp)==dict,
+        'sim':type(sim)==dict,
+        'pets':os.path.exists(os.path.join(mol_path(mol),'pets'))}
+
+    bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
+        'thick':250,'thicks':[0,300,100],'opts':'vts','solve':1}
+
+    modes = {
+        'molecule'  : False,
+        'analysis'  : 'bloch',
+        'manual'    : True,
+        'u'         : 'edit',
+        'single'    : False,
+    }
+    rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
+
+    cif_file = glob.glob(os.path.join(mol_path(mol),'*.cif*'))[0]
+    crys = ut.import_crys(cif_file)
+    crys_dat = {'file':os.path.basename(cif_file)}
+    crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
+    crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
+        b_str(crys.lattice_parameters,2).split(',') )))
+    expand_bloch = {'omega':False,'thick':False,'refl':False,'sim':False,'u':True,}
+
+    now = time.time()
+    # session['mol2']  = mol
+    session['dat'] = dat
+    session['cif_file'] = cif_file
+    session['crys']     = crys_dat
+    session['omega']    = 157 #in-plane rotation angle
+    session['frame']    = 1
+    session['sim']      = sim
+    session['exp']      = exp
+    session['modes']    = modes
+    session['max_res']  = 0
+    session['expand']   = expand_bloch
+    session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets']}
+    session['zm_counter'] = 0 #dummy variable
+    session['theta_phi']  = [0,0]
+    session['bloch']      = bloch_args
+    session['rock']       = rock_args
+    session['refl']       = []
+    session['last_time']  = now
+    session['b0_path']    = get_pkl(session['id'])
+    session['time'] = now
+
+
+
+def get_frames(mol,dat,d={}):
+    frames = glob.glob(get_path(mol,dat,'*'))
+    max_frame=len(frames)
+    frames_dict=None
+    if max_frame>0:
+        pad = len(os.path.basename(frames[0]).replace('.tiff',''))
+        frames_dict = {
+            'tmp':0,'zmax':50, 'z_max':[50]*max_frame,
+            'max_frame':max_frame,'pad':pad
+        }
+        frames_dict.update(d)
+    return frames_dict
 
 def get_session_data(key):
     if key=='bloch':

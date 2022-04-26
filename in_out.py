@@ -1,6 +1,8 @@
 from string import ascii_letters,digits
 import os,glob
 import numpy as np
+from crystals import Crystal as Crys
+import crystals
 
 chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol

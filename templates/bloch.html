@@ -5,8 +5,8 @@
      <meta charset="utf-8">
      <meta http-equiv="X-UA-Compatible" content="IE=edge">
      <meta name="viewport" content="width=device-width, initial-scale=1">
-     <meta name="description" content="">
-     <meta name="author" content="">
+     <meta name="description" content="Electron diffraction online simulators">
+     <meta name="author" content="tarik drevon">
      <title> Electron diffraction Dashboard </title>
      <link rel="shortcut icon" href="static/favicon.ico" >
      <link rel="stylesheet" href="static/bower_components/bootstrap-css/css/bootstrap.min.css">
@@ -14,16 +14,10 @@
      <link href="/static/css/bw_app.css" rel="stylesheet">
      <link href="/static/css/popup.css" rel="stylesheet">
      <link href="/static/css/dropdown.css" rel="stylesheet">
+     <!-- <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css"> -->
      <script src="static/bower_components/angular/angular.min.js"></script>
      <script src="static/bower_components/angular-aria/angular-aria.js"></script>
      <script src="static/bower_components/angular-touch/angular-touch.js"></script>
-     <!-- <script type="text/javascript" async src="static/bower_components/MathJax/es5/latest.js?config=TeX-MML-AM_CHTML"></script> -->
-     <!-- <script src="static/bower_components/angular-route/angular-route.min.js"></script> -->
-     <!-- <script src="static/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script> -->
-     <script src="static/bower_components/jquery/dist/jquery.min.js"></script>
-     <!-- <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css"> -->
-     <!-- <script src="static/bower_components/plotlyjs/plotly.js"></script> -->
-     <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
      <script src="static/bower_components/plotly-latest.min.js"></script>
      <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
@@ -34,52 +28,45 @@
       src="static/bower_components/MathJax/MathJax.js?config=TeX-MML-AM_CHTML">
      </script>
 
-     <!-- <script src="static/bower_components/MathJax/es5/latest.js"></script> -->
      <script src="static/js/app.js"></script>
-
-     <!-- <script src="static/bower_components/jsmol/src/JSmol.min.js"></script> -->
-     <!-- <script src="static/bower_components/jsmol/src/js/Jmol2.js"></script> -->
      <script src="static/jmol/jsmol/JSmol.min.js"></script>
      <script src="static/jmol/jsmol/js/Jmol2.js"></script>
-     <!-- <script > jmolInitialize("static/bower_components/jsmol/src");</script> -->
      <script > jmolInitialize("/static/jmol/jsmol");</script>
  </head>
 
 
  <body>
 
-   <div class="header">
-      <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
-      <!-- Menu -->
-      <div class="menu">
-        <div class="dropdown">
-         <button class="dropbtn">Structures</button>
-         <div class="dropdown-content">
-           <a href="#">New</a>
-           <a href="#"></a>
-           <a href="#"></a>
-         </div>
-        </div>
-        <div class="dropdown">
-         <button class="dropbtn">Links</button>
-         <div class="dropdown-content">
-           <a href="#">Documentation</a>
-           <a href="#">Theory</a>
-           <a href="#">Tests</a>
-         </div>
-        </div>
-        <div class="dropdown">
-         <button class="dropbtn">Help</button>
-         <div class="dropdown-content">
-           <a href="#">How to</a>
-         </div>
-        </div>
-      </div>
-   </div>
-
 
   <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
     <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
+      <div class="header">
+         <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
+         <!-- Menu -->
+         <div class="menu">
+           <div class="dropdown">
+            <button class="dropbtn">Structures</button>
+            <div class="dropdown-content">
+              <a href="" onclick="dialog_new_structure()">New</a>
+              <a href=""  ng-repeat="x in structures" ng-click="set_structure(x)">{a x a}</a>
+            </div>
+           </div>
+           <div class="dropdown">
+            <button class="dropbtn">Links</button>
+            <div class="dropdown-content">
+              <a href="#">Documentation</a>
+              <a href="#">Theory</a>
+              <a href="#">Tests</a>
+            </div>
+           </div>
+           <div class="dropdown">
+            <button class="dropbtn">Help</button>
+            <div class="dropdown-content">
+              <a href="#">How to</a>
+            </div>
+           </div>
+         </div>
+      </div>
 
       <!-- Panel -->
       <div class="col-sm-2" style="padding-left:5px;padding-right:0px;">
@@ -103,7 +90,7 @@
               </a>
               <div ng-click="set_structure()" style="text-align: left;margin-left:10px;">
                 <span style="font-size:18px;text-align:center" ng-bind="crys['file']"> </span>
-                <span style="display:none" id="cif_file" ng-bind="cif_file"> </span>
+                <span style="display:none" ng-bind="cif_file"> </span>
               </div>
               <div ng-show="expand['struct']" >
                 <div style="font-size:16px;margin:5px;">Lattice parameters : </div>
@@ -129,13 +116,13 @@
           </div>
 
           <!-- Frames panel -->
-          <div class="panel" ng-hide="modes['molecule']">
+          <div class="panel" ng-hide="modes['molecule']" ng-if="max_frame>0">
             <div class="row">
               <div class="col-sm-8">
                 <h4>Exp Frames : </h4>
               </div>
             </div>
-            No:<input type="number" min="1" max="max_frame" ng-model="frame" ng-keypress=update_frame($event) style="width: 80px">
+            No:<input type="number" min="1" max="max_frame" ng-model="frame" ng-keydown="update_frame($event)" style="width: 80px">
             <a class="btn-sm btn-primary"  ng-click="dec_frame()">
               <span class="glyphicon glyphicon-step-backward"></span >
             </a>
@@ -236,24 +223,24 @@
                   <tr>
                     <td class="td-in">
                       <span>Nmax</span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')" ng-key-enter="update_bloch()">
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')" >
                         <span class="popuptext" ng-show="popup['Nmax']"> Maximum resolution : reflection index would be (Nmax,Nmax,Nmax) </span>
                       </span>
                     </td>
                     <td class="td-in">
-                      <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input">
+                      <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()">
                     </td>
                   </tr>
                   <!-- Smax -->
                   <tr>
                     <td class="td-in">
                       <span> Smax </span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')" ng-key-enter="update_bloch()">
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')" >
                         <span class="popuptext" ng-show="popup['Smax']"> Maximum excitation error </span>
                       </span>
                     </td>
                     <td class="td-in">
-                      <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input">
+                      <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input" ng-key-enter="update_bloch()">
                     </td>
                   </tr>
                 </table>
@@ -273,12 +260,14 @@
 
                   <!-- buttons -->
                   <div class="row" style="margin-bottom: 10px">
-                    <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')" style="margin-left: 7px;">
-                      <span ng-class="{'glyphicon glyphicon-wrench':!modes['manual'],'glyphicon glyphicon-lock':modes['manual']}" />
-                      <span class="popuptext" style="" ng-show="popup['manual']">
-                        <div ng-show="modes['manual']"> Lock u to experimental frames  </div>
-                        <div ng-hide="modes['manual']"> Set u manually   </div></span>
-                    </a>
+                    <span ng-if="dat['pets']">
+                      <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')" style="margin-left: 7px;">
+                        <span ng-class="{'glyphicon glyphicon-wrench':!modes['manual'],'glyphicon glyphicon-lock':modes['manual']}" />
+                        <span class="popuptext" style="" ng-show="popup['manual']">
+                          <div ng-show="modes['manual']"> Lock u to experimental frames  </div>
+                          <div ng-hide="modes['manual']"> Set u manually   </div></span>
+                      </a>
+                    </span>
                     <span ng-show="modes['manual']" style="margin-left:5px;">
                       <a class="btn-sm btn-primary popup" ng-style="u_style['edit']" ng-click="set_u_mode('edit')" ng-mouseenter="toggle_popup('u_edit')" ng-mouseleave="toggle_popup('u_edit')">
                         <span class="glyphicon glyphicon-pencil" />
@@ -355,24 +344,27 @@
                     </span>
                     <div style="font-size:14px;margin-bottom:5px;">Rocking curve settings : </div>
                     <table style="margin-left: 20px;">
-                      <tr><td class="td-in"> u0   </td><td class="td-in"> = </td><td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e0']"  ></td>
-                        <td class="td-in">
+                      <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
+                        <td> <input class="long_input" ng-change="rock_reset()" ng-model="rock['e0']"  ></td>
+                        <td class="td-in" ng-if="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="toggle_popup('rock_set_0')" ng-mouseleave="toggle_popup('rock_set_0')">
                             <span class="glyphicon glyphicon-pushpin"/>
                             <span class="popuptext" style="" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
                           </a>
                         </td>
                       </tr>
-                      <tr><td class="td-in"> u1   </td><td class="td-in"> = </td><td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td>
-                        <td class="td-in">
+                      <tr><td class="td-in"> u1   </td><td class="td-in"> = </td>
+                        <td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td>
+                        <td class="td-in" ng-if="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="toggle_popup('rock_set_1')" ng-mouseleave="toggle_popup('rock_set_1')">
                             <span class="glyphicon glyphicon-pushpin"/>
                             <span class="popuptext" style="" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
                           </a>
                         </td>
                       </tr>
-                      <tr><td class="td-in"> npts </td><td class="td-in"> = </td><td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td>
-                        <td class="td-in">
+                      <tr><td class="td-in"> npts </td><td class="td-in"> = </td>
+                        <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td>
+                        <td class="td-in" ng-if="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="toggle_popup('rock_set')" ng-mouseleave="toggle_popup('rock_set')">
                             <span class="gg-icon gg-path-back" />
                             <span class="popuptext" style="" ng-show="popup['rock_set']"> Assign u0,u1 from current experimental frame </span>
@@ -586,7 +578,7 @@
         <div class="panel" ng-show="modes['analysis']=='frames'" style="background-color: #80a6c7;">
           <div class="row"  >
             <!-- Simulated frame  -->
-            <div class="col-sm-6" >
+            <div class="col-sm-6" ng-if="dat['sim']==true">
               <h3> Simulated Frames </h3>
               <div class="row">
                 <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['sim']" ng-keypress=update_zmax($event,'sim') style="width: 70px"></div>
@@ -600,7 +592,7 @@
               </div>
             </div>
             <!-- Experimental frame  -->
-            <div class="col-sm-6">
+            <div class="col-sm-6" ng-if="dat['exp']==true">
               <h3> Experimental Frames </h3>
               <div class="row" >
                 <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px"></div>
@@ -617,14 +609,52 @@
         </div><!-- col-sm-12 -->
 
       </div><!-- Frame/analysis viewer -->
+
+      <footer class="footer">
+         Copyright © 2021, CCP4
+         <div>Author : Tarik Drevon<div>
+      </footer>
+
     </div><!-- ng-controller -->
   </div>
 
-  <footer class="footer">
-     Copyright © 2021, CCP4
-     <div>Author : tarik drevon<div>
-  </footer>
 
+
+      <!-- form -->
+      <div id="dialog" title="new project">
+        <p>Create a new structure?</p>
+        <!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span> -->
+        <form>
+          <fieldset>
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" value="new" class="text ui-widget-content ui-corner-all">
+            <div> Please, provide a cif file from : </div>
+            <label for="radio-1">builtins</label><input onclick="set_cif('cif')"  type="radio" name="radio-1" id="radio_cif" checked=true>
+            <label for="radio-2">pdb     </label><input onclick="set_cif('pdb')"  type="radio" name="radio-1" id="radio_pdb">
+            <label for="radio-3">file    </label><input onclick="set_cif('file')" type="radio" name="radio-1" id="radio_file">
+            <div id="cif_cif">
+              <label for="cif"> Name : </label>
+              <select name="cif" id="cif">
+                {% for s in builtins %}
+                <option>{{s}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div id="cif_pdb">
+              <label for="">pdb id : </label>
+              <input type="text" name="pdb" id="pdb" value="" class="text ui-widget-content ui-corner-all">
+            </div>
+            <div id="cif_file">
+              <label for="file_cif"> file : </label>
+              <input type = "file" class="glyphicon glyphicon-file" name = "file_cif" id="file_cif" />
+            </div>
+
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+          </fieldset>
+        </form>
+        <div id="cif_error" style="color:red;display:none"></div>
+      </div>
 
 <script>
 var TABLE_MILLER=document.getElementById('table_Miller_indices')
@@ -684,14 +714,99 @@ function highlight(miller_indices,val){
 
 </script>
 
-<script src="static/js/jsmol.js"></script>
 
-<!-- <script text="javascript">
-  var myPlot = document.getElementById('plotly_div')
-  myPlot.on('plotly_click', function(){
-      alert('You clicked this Plotly chart!');
+<script>
+// const $jq = $.noConflict();
+var dialog, form;
+  // name = $( "#name" ),
+  // cif = $( "#cif" );
+  // pdb = $( "#pdb" );
+  // allFields = $( [] ).add( name ).add( cif ).add(pdb);
+
+$(document).ready(function () {
+  // dialog = $( "#dialog" ).dialog({
+  //   autoOpen: f,
+  // });
+
+  dialog = $( "#dialog" ).dialog({
+    autoOpen: false,
+    height: 500,
+    width: 400,
+    modal: true,
+    buttons: {
+      "create ": new_structure,
+      Cancel: function() {
+        dialog.dialog( "close" );
+      },
+    },
+    close: function() {
+      form[ 0 ].reset();
+      // allFields.removeClass( "ui-state-error" );
+    }
+  });
+
+  form = dialog.find( "form" ).on( "submit", function( event ) {
+    event.preventDefault();
+    new_structure();
+  });
+
+  function new_structure(){
+  //   // e.preventDefault();
+    var val='';
+    if      ($('#radio_cif')[0].checked)  {val='cif'}
+    else if ($('#radio_pdb')[0].checked)  {val='pdb'}
+    else if ($('#radio_file')[0].checked) {val='file'}
+    else{return};
+    var formData = {
+        'name':$('#name')[0].value,
+        'cif':$('#cif')[0].value,
+        'pdb':$('#pdb')[0].value,
+        'file':$('#file_cif')[0].value.replace('C:\\fakepath\\',''),
+        'val':val,
+      };
+    console.log(formData);
+    $.ajax({
+      type:'POST',
+      url:'/new_structure',
+      data:formData,
+      success: function(data){
+         console.log(data);
+         if (data=='ok'){
+           dialog.dialog( "close" );
+           window.location='/'
+         }
+         else{
+           $('#cif_error')[0].innerHTML='error :'+data;
+           $('#cif_error').show()
+         }
+      }
     });
-</script> -->
+  };
+
+});
+
+function dialog_new_structure(){
+  dialog.dialog( "open" );
+};
+
+function set_cif(id){
+  $('#cif_cif').hide()
+  $('#cif_pdb').hide()
+  $('#cif_file').hide()
+  $(`#cif_${id}`).show()
+};
+set_cif('cif');
+// console.log(new FormData($('form')[0]));
+</script>
+
+<!-- <script src="static/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="static/bower_components/jquery-ui/jquery-ui.js"></script> -->
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css">
+<!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" /> -->
+
+<script src="static/js/jsmol.js"></script>
 
 </body>
 </html>

@@ -41,6 +41,7 @@ app.directive('ngKeyEnter', function() {
 
 app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', function ($scope,$rootScope,$log,$http,$interval) {
 
+  $scope.initPlotly=false
   /////////////////////////////////
   //// plotly cb
   /////////////////////////////////
@@ -78,12 +79,19 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   ///////////////////////////////////////////////////////////////////
   // uploads
   ///////////////////////////////////////////////////////////////////
-  $scope.initPlotly=false
-  $scope.set_structure=function(){
-    $http.post('/set_structure',JSON.stringify({'cif':$scope.crys['file']}))
+  $scope.new_structure=function(){
+    $http.post('/new_structure',JSON.stringify({'name':name,'cif':'cif'}))
     .then(function(response){
       $scope.cif_file=response.data;
       // $log.log(response.data);
+    });
+  }
+
+  $scope.set_structure=function(mol){
+    $http.post('/set_structure',JSON.stringify({'mol':mol}))
+    .then(function(response){
+      // $log.log(response.data);
+      $scope.init()
     });
   }
 
@@ -156,11 +164,12 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     $scope.frame=Math.max(1,$scope.frame-1);
     $scope.update();
   };
-  $scope.update_frame=function(event){
+  $scope.update_frame=function(){
     if (event.key=='Enter'){
-      $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
-      $scope.update();
-    }
+    $log.log($scope.frame)
+    $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
+    $scope.update();
+  }
   }
 
   $scope.update_zmax=function(event,val){
@@ -187,6 +196,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   // Bloch
   ////////////////////////////////////////////////////////////////////////////////////////////////
   $scope.update_bloch=function(){
+    // $log.log($scope.bloch['Smax'],$scope.bloch['Nmax'])
     $http.post('/solve_bloch',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.modes['manual']}))
       .then(function(response){
         $scope.load_bloch(response.data);
@@ -499,6 +509,36 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
+  $scope.init = function(){
+    $http.get('/init')
+      .then(function(response){
+        $scope.structure = response.data.mol;
+        $scope.dat       = response.data.dat;
+        $scope.frame     = response.data.frame;
+        $scope.max_frame = response.data.max_frame;
+        $scope.zmax      = response.data.zmax;
+        $scope.crys      = response.data.crys;
+        $scope.cif_file  = response.data.cif_file;
+        $scope.bloch     = response.data.bloch;
+        $scope.modes     = response.data.modes;
+        $scope.rock      = response.data.rock;
+        $scope.theta_phi = response.data.theta_phi.split(',');
+        $scope.omega     = response.data.omega;
+        $scope.expand    = response.data.expand;
+        $scope.rock_state=response.data.rock_state;
+        $scope.set_available_graphs('rock',$scope.rock_state=='done');
+        $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
+        $scope.mode_style[$scope.modes['analysis']]=mode_style;
+        $scope.max_res=response.data.max_res;
+        var refl=response.data.refl;
+        for (let h of refl){
+          addRow_tagTable(h);
+        }
+        $scope.structures = response.data.structures;
+        $scope.update()
+      });
+  }
+
   $scope.fig1={};
   $scope.fig2={};
   $scope.nbeams=0;
@@ -514,9 +554,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.popup={}
   $scope.sim_rock = 1;
   $scope.rock_sim = 1;
-  $scope.rock_done = false;
+  // $scope.rock_done = false;
   $scope.input={'theta':false,'phi':false,'dtp':false ,'rock_sim':true};
-
+  $scope.structures = [];
   $scope.all_graphs={thick:{type:'thick',desc:'thickness'},u3d:{type:'3d',desc:'3d view'},rock:{type:'rock',desc:'rocking curve'}}
   $scope.graphs=JSON.parse(JSON.stringify($scope.all_graphs));
   $scope.graph=$scope.graphs['thick'];
@@ -524,32 +564,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
 
   // $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}
   $scope.expand_str={false:'expand',true:'minimize'};
-  $http.get('/init')
-    .then(function(response){
-      $scope.structure = response.data.mol;
-      $scope.frame     = response.data.frame;
-      $scope.max_frame = response.data.max_frame;
-      $scope.zmax      = response.data.zmax;
-      $scope.bloch     = response.data.bloch;
-      $scope.crys      = response.data.crys;
-      $scope.cif_file  = response.data.cif_file;
-      $scope.modes     = response.data.modes;
-      $scope.rock      = response.data.rock;
-      $scope.theta_phi = response.data.theta_phi.split(',');
-      $scope.omega     = response.data.omega;
-      $scope.expand    = response.data.expand;
-      $scope.rock_state=response.data.rock_state;
-      $scope.set_available_graphs('rock',$scope.rock_state=='done');
-      $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
-      $scope.mode_style[$scope.modes['analysis']]=mode_style;
-      $scope.max_res=response.data.max_res;
-      var refl=response.data.refl;
-      // $log.log(refl);
-      for (let h of refl){
-        addRow_tagTable(h);
-      }
-      $scope.update()
-    });
-
+  $scope.init();
 
 }]);

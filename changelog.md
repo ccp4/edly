@@ -1,6 +1,15 @@
 # Version log
 
 ## 0.0.2
+### issue#15 help menu links (Tue 26 Apr 00:58:23 BST 2022)
+- projects (new, other projects, ...)
+- links : (theory,documentation,tests)
+- help
+- pets orientation vector u
+- y range goes from xm to -xm
+- set_intensities with FELIX convention
+- import crambin
+
 ## issue#16 miller indices table (Fri 22 Apr 20:26:20 BST 2022)
 - highlight on hover
 - removed update when changing analysis mode
