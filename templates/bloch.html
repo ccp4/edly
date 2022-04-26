@@ -629,9 +629,9 @@
             <label for="name">Name</label>
             <input type="text" name="name" id="name" value="new" class="text ui-widget-content ui-corner-all">
             <div> Please, provide a cif file from : </div>
-            <label for="radio-1">builtins</label><input onclick="set_cif('cif')"  type="radio" name="radio-1" id="radio_cif" checked=true>
-            <label for="radio-2">pdb     </label><input onclick="set_cif('pdb')"  type="radio" name="radio-1" id="radio_pdb">
-            <label for="radio-3">file    </label><input onclick="set_cif('file')" type="radio" name="radio-1" id="radio_file">
+            <label for="radio-1">builtins</label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_cif" >
+            <label for="radio-2">pdb     </label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_pdb">
+            <label for="radio-3">file    </label><input onclick="set_cif()" type="radio" name="radio-1" id="radio_file" checked=true>
             <div id="cif_cif">
               <label for="cif"> Name : </label>
               <select name="cif" id="cif">
@@ -646,7 +646,7 @@
             </div>
             <div id="cif_file">
               <label for="file_cif"> file : </label>
-              <input type = "file" class="glyphicon glyphicon-file" name = "file_cif" id="file_cif" />
+              <input type = "file" class="glyphicon glyphicon-file" name = "file_cif" id="file_cif" onchange="upload_cif()"/>
             </div>
 
             <!-- Allow form submission with keyboard without duplicating the dialog button -->
@@ -716,17 +716,8 @@ function highlight(miller_indices,val){
 
 
 <script>
-// const $jq = $.noConflict();
 var dialog, form;
-  // name = $( "#name" ),
-  // cif = $( "#cif" );
-  // pdb = $( "#pdb" );
-  // allFields = $( [] ).add( name ).add( cif ).add(pdb);
-
 $(document).ready(function () {
-  // dialog = $( "#dialog" ).dialog({
-  //   autoOpen: f,
-  // });
 
   dialog = $( "#dialog" ).dialog({
     autoOpen: false,
@@ -741,6 +732,7 @@ $(document).ready(function () {
     },
     close: function() {
       form[ 0 ].reset();
+      $('#cif_error').hide()
       // allFields.removeClass( "ui-state-error" );
     }
   });
@@ -776,8 +768,7 @@ $(document).ready(function () {
            window.location='/'
          }
          else{
-           $('#cif_error')[0].innerHTML='error :'+data;
-           $('#cif_error').show()
+           show_error(data)
          }
       }
     });
@@ -785,17 +776,67 @@ $(document).ready(function () {
 
 });
 
+function show_error(data,err){
+  var msg='',color='green';
+  if (err){
+    msg='error : ';
+    color='red'
+  }
+  $('#cif_error')[0].innerHTML=msg+data;
+  $('#cif_error')[0].style.color=color;
+  $('#cif_error').show()
+}
+// $(':file_cif').on('change', function () {
+function upload_cif(){
+  var files = $('#file_cif')[0].files;
+  if (files.length>0) {
+    var file = files[0];
+    extension = file.name.split('.').pop();
+    console.log(extension);
+    if (extension !='cif'){
+      show_error('upload a cif file thank you',true);return
+    }
+    else{
+      // console.log(file.size);
+      if (file.size > 1000*1024) {
+        show_error('max upload size is 1Mo',true);return
+      }
+      else{
+        console.log(file);
+        $.ajax({
+         url: '/upload_cif',
+         type: 'POST',
+         // data: {'name':file.name},
+         data: new FormData($('form')[0]),
+         cache: false,
+         contentType: false,
+         processData: false,
+         success: function(data){
+           if (data!='ok'){show_error(data,true)}
+          else{show_error(data,false)}
+         },
+       });
+     }
+   }
+  }
+}
+// });
+
+
 function dialog_new_structure(){
   dialog.dialog( "open" );
 };
 
-function set_cif(id){
+function set_cif(){
   $('#cif_cif').hide()
   $('#cif_pdb').hide()
   $('#cif_file').hide()
-  $(`#cif_${id}`).show()
+  // $(`#cif_${id}`).show()
+  if      ($('#radio_cif')[0].checked)  {$('#cif_cif').show()}
+  else if ($('#radio_pdb')[0].checked)  {$('#cif_pdb').show()}
+  else if ($('#radio_file')[0].checked) {$('#cif_file').show()}
 };
-set_cif('cif');
+set_cif();
 // console.log(new FormData($('form')[0]));
 </script>
 
@@ -806,7 +847,7 @@ set_cif('cif');
 <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css">
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" /> -->
 
-<script src="static/js/jsmol.js"></script>
+<!-- <script src="static/js/jsmol.js"></script> -->
 
 </body>
 </html>

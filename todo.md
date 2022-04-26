@@ -15,11 +15,7 @@
   - show corresponding python command below
 
 ### issue#15 help menu links
-- file(cif files, other projects, ...)
-- help
-- theory
-- documentation
-- tests
+- file import cif files
 
 ### issue#17 handle accounts
 - create account for uploading comparison to experiments or saving simulations

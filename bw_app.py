@@ -23,6 +23,21 @@ builtins = crystals.Crystal.builtins
 def image_viewer():
     return render_template('bloch.html',builtins=builtins)
 
+
+@bw_app.route('/upload_cif', methods=['POST'])
+def upload_cif():
+    try:
+        f = request.files['file_cif']
+        cif_file=os.path.join(session['path'],f.filename)
+        f.save(cif_file)
+        return 'ok'
+    except Exception as e:
+        msg='could not import cif file:'
+        print(colors.red+msg)
+        print(colors.magenta,e,colors.black)
+        return "%s : %s" %(msg, e.__str__())
+
+
 @bw_app.route('/new_structure', methods=['POST'])
 def new_structure():
     data = request.form
@@ -36,31 +51,31 @@ def new_structure():
 
     msg = 'cif file issue'
     if not os.path.exists(path):
-    # try:
-        # p=Popen('mkdir %s' %path,shell=True,stdout=PIPE,stderr=PIPE)
-        # o,e=p.communicate()
-        # if e:print(e.decode())
-        check_output('mkdir %s' %path,shell=True)
-        if   val=='cif' :
-            if data['cif'] in crystals.Crystal.builtins:
-                crystals.Crystal.from_database(data['cif']).to_cif(cif_file)
-        elif val=='pdb' :
-            if data['pdb']:
-                ut.pdb2npy(data['pdb'],cif_file)
-        elif val=='file':
-            cif_path=os.path.join(session['path'],data['file'])
-            if os.path.exists(cif_path):
-                check_output('cp %s %s' %(cif_path,cif_file),shell=True)
+        try:
+            # p=Popen('mkdir %s' %path,shell=True,stdout=PIPE,stderr=PIPE)
+            # o,e=p.communicate()
+            # if e:print(e.decode())
+            check_output('mkdir %s' %path,shell=True)
+            if   val=='cif' :
+                if data['cif'] in crystals.Crystal.builtins:
+                    crystals.Crystal.from_database(data['cif']).to_cif(cif_file)
+            elif val=='pdb' :
+                if data['pdb']:
+                    ut.pdb2npy(data['pdb'],cif_file)
+            elif val=='file':
+                cif_path=os.path.join(session['path'],data['file'])
+                if os.path.exists(cif_path):
+                    check_output('cp %s %s' %(cif_path,cif_file),shell=True)
 
-        #check sucessful import
-        if cif_file:
-            crys=ut.import_crys(cif_file)
-            session['mol']=mol
-            init_mol()
-            msg='ok'
-    # except Exception as e:
-    #     check_output('rm -rf %s' %path,shell=True)
-    #     msg=e.__str__()
+            #check sucessful import
+            if cif_file:
+                crys=ut.import_crys(cif_file)
+                session['mol']=mol
+                init_mol()
+                msg='ok'
+        except Exception as e:
+            check_output('rm -rf %s' %path,shell=True)
+            msg=e.__str__()
     else:
         msg='%s already exists' %mol
     return msg
@@ -523,7 +538,7 @@ def init():
         session['id']   = id
         init_mol()
 
-    # print(session['mol'],session['mol2'])
+    # print(session['dat'])
     # print(glob.glob(os.path.join(mol_path(session['mol']),'pets')))
     # print(glob.glob(os.path.join(mol_path(session['mol']),'pets','*')))
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
