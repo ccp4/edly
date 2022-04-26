@@ -281,5 +281,13 @@ img {
   border-width:medium;
   border-radius: 0;
 }
-
+.gif{
+  width:75%;
+  border-style:solid;
+  border-color:blue;
+  border-width:thick;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>

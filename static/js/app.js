@@ -39,7 +39,7 @@ app.directive('ngKeyEnter', function() {
 
 
 
-app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', function ($scope,$rootScope,$log,$http,$interval) {
+app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$timeout', function ($scope,$rootScope,$log,$http,$interval,$timeout) {
 
   $scope.initPlotly=false
   /////////////////////////////////
@@ -164,12 +164,10 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     $scope.frame=Math.max(1,$scope.frame-1);
     $scope.update();
   };
-  $scope.update_frame=function(){
-    if (event.key=='Enter'){
-    $log.log($scope.frame)
+  $scope.update_frame=function(val){
     $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
+    $log.log($scope.frame)
     $scope.update();
-  }
   }
 
   $scope.update_zmax=function(event,val){
@@ -506,6 +504,19 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
     });
   }
 
+  var timer;
+  // mouseenter event
+  $scope.showIt = function (val) {
+      timer = $timeout(function () {
+          $scope.show[val] = true;
+      }, 500);
+  };
+  // mouseleave event
+  $scope.hideIt = function (val) {
+      $timeout.cancel(timer);
+      $scope.show[val]=false;
+  };
+
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -535,12 +546,14 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
           addRow_tagTable(h);
         }
         $scope.structures = response.data.structures;
+        $scope.gifs = response.data.gifs;
         $scope.update()
       });
   }
 
   $scope.fig1={};
   $scope.fig2={};
+  $scope.frame = 1;
   $scope.nbeams=0;
   $scope.nrock_beams=0;
   $scope.show_buttons=false;
@@ -561,6 +574,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval', fun
   $scope.graphs=JSON.parse(JSON.stringify($scope.all_graphs));
   $scope.graph=$scope.graphs['thick'];
   var mode_style = {"border-style":'solid','background-color':'#18327c'};
+  $scope.show={}
 
   // $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}
   $scope.expand_str={false:'expand',true:'minimize'};

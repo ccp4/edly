@@ -1,10 +1,13 @@
 # Version log
 
 ## 0.0.2
+
 ### issue#15 help menu links
 #### (Tue 26 Apr 09:51:41 BST 2022)
 - hide error after closing dialog
 - import cif
+- added links
+- fixed frame enter issue due to ng-if
 
 #### (Tue 26 Apr 00:58:23 BST 2022)
 - projects (new, other projects, ...)

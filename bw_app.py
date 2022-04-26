@@ -18,10 +18,11 @@ fig_wh=725
 pets_data={}
 structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s=="static/data/tmp"]
 builtins = crystals.Crystal.builtins
+gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
 
 @bw_app.route('/')
 def image_viewer():
-    return render_template('bloch.html',builtins=builtins)
+    return render_template('bloch.html',builtins=builtins,gifs=gifs)
 
 
 @bw_app.route('/upload_cif', methods=['POST'])
@@ -564,6 +565,7 @@ def init():
         session_data['zmax']['exp'] = session['exp']['zmax']
 
     session_data['structures'] = [s for s in structures if s!=session['mol']]
+    session_data['gifs'] = gifs
     return json.dumps(session_data)
 
 

@@ -14,9 +14,6 @@
 ### issue#14 python console
   - show corresponding python command below
 
-### issue#15 help menu links
-- file import cif files
-
 ### issue#17 handle accounts
 - create account for uploading comparison to experiments or saving simulations
 
@@ -27,6 +24,7 @@
 - Fkin vs Fdyn
 - improve speed show_u
 - resolution rings
+- fix frame bug 
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly

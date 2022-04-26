@@ -48,24 +48,28 @@
             <button class="dropbtn">Structures</button>
             <div class="dropdown-content">
               <a href="" onclick="dialog_new_structure()">New</a>
-              <a href=""  ng-repeat="x in structures" ng-click="set_structure(x)">{a x a}</a>
+              <a href="" ng-repeat="x in structures" ng-click="set_structure(x)">{a x a}</a>
             </div>
            </div>
            <div class="dropdown">
             <button class="dropbtn">Links</button>
             <div class="dropdown-content">
-              <a href="#">Documentation</a>
-              <a href="#">Theory</a>
-              <a href="#">Tests</a>
+              <a href="" onclick="open_link('https://www.ccp4.ac.uk/ccp4-ed/projects/dynamical_diffraction/')">Theory</a>
+              <a href="" onclick="open_link('https://debloch.readthedocs.io/en/latest/reference/debloch.bloch.Bloch.html')">Documentation</a>
+              <a href="" onclick="open_link('http://ccp4serv6.rc-harwell.ac.uk:8010/blochwave/report/report.html')">Tests</a>
             </div>
            </div>
            <div class="dropdown">
-            <button class="dropbtn">Help</button>
+            <button class="dropbtn">How to</button>
             <div class="dropdown-content">
-              <a href="#">How to</a>
+              <a href="" ng-repeat="(tle,gif) in gifs" ng-bind="tle" ng-mouseenter="showIt(tle)" ng-mouseleave="hideIt(tle)">
+              </a>
             </div>
            </div>
-         </div>
+         </div><!-- menu -->
+         <div ng-repeat="(tle,gif) in gifs" ng-show="show[tle]" class="gif"/>
+           <a href="{a gif a}"> <img ng-src="{a gif a}"  /></a>
+        </div>
       </div>
 
       <!-- Panel -->
@@ -116,13 +120,14 @@
           </div>
 
           <!-- Frames panel -->
-          <div class="panel" ng-hide="modes['molecule']" ng-if="max_frame>0">
+          <div class="panel" ng-hide="modes['molecule']" ng-show="max_frame>0">
             <div class="row">
               <div class="col-sm-8">
                 <h4>Exp Frames : </h4>
               </div>
             </div>
-            No:<input type="number" min="1" max="max_frame" ng-model="frame" ng-keydown="update_frame($event)" style="width: 80px">
+            No:
+            <input type="number" min="1" max="max_frame" ng-model="frame" ng-key-enter="update_frame()" style="width: 80px" />
             <a class="btn-sm btn-primary"  ng-click="dec_frame()">
               <span class="glyphicon glyphicon-step-backward"></span >
             </a>
@@ -260,7 +265,7 @@
 
                   <!-- buttons -->
                   <div class="row" style="margin-bottom: 10px">
-                    <span ng-if="dat['pets']">
+                    <span ng-show="dat['pets']">
                       <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')" style="margin-left: 7px;">
                         <span ng-class="{'glyphicon glyphicon-wrench':!modes['manual'],'glyphicon glyphicon-lock':modes['manual']}" />
                         <span class="popuptext" style="" ng-show="popup['manual']">
@@ -346,7 +351,7 @@
                     <table style="margin-left: 20px;">
                       <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
                         <td> <input class="long_input" ng-change="rock_reset()" ng-model="rock['e0']"  ></td>
-                        <td class="td-in" ng-if="dat['pets']">
+                        <td class="td-in" ng-show="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="toggle_popup('rock_set_0')" ng-mouseleave="toggle_popup('rock_set_0')">
                             <span class="glyphicon glyphicon-pushpin"/>
                             <span class="popuptext" style="" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
@@ -355,7 +360,7 @@
                       </tr>
                       <tr><td class="td-in"> u1   </td><td class="td-in"> = </td>
                         <td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td>
-                        <td class="td-in" ng-if="dat['pets']">
+                        <td class="td-in" ng-show="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="toggle_popup('rock_set_1')" ng-mouseleave="toggle_popup('rock_set_1')">
                             <span class="glyphicon glyphicon-pushpin"/>
                             <span class="popuptext" style="" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
@@ -364,7 +369,7 @@
                       </tr>
                       <tr><td class="td-in"> npts </td><td class="td-in"> = </td>
                         <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td>
-                        <td class="td-in" ng-if="dat['pets']">
+                        <td class="td-in" ng-show="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="toggle_popup('rock_set')" ng-mouseleave="toggle_popup('rock_set')">
                             <span class="gg-icon gg-path-back" />
                             <span class="popuptext" style="" ng-show="popup['rock_set']"> Assign u0,u1 from current experimental frame </span>
@@ -572,7 +577,6 @@
             </tr>
           </table>
         </div>
-
 
 
         <div class="panel" ng-show="modes['analysis']=='frames'" style="background-color: #80a6c7;">
@@ -838,6 +842,12 @@ function set_cif(){
 };
 set_cif();
 // console.log(new FormData($('form')[0]));
+
+function open_link(link){
+  console.log(link);
+  window.open(link)
+};
+
 </script>
 
 <!-- <script src="static/bower_components/jquery/dist/jquery.min.js"></script>
