@@ -548,12 +548,13 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.structures = response.data.structures;
         $scope.gifs = response.data.gifs;
         $scope.update()
+        console.log($scope.max_frame)
       });
   }
 
   $scope.fig1={};
   $scope.fig2={};
-  $scope.frame = 1;
+  // $scope.frame = 1;
   $scope.nbeams=0;
   $scope.nrock_beams=0;
   $scope.show_buttons=false;

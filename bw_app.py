@@ -1,4 +1,4 @@
-import importlib as imp
+# import importlib as imp
 from subprocess import check_output,Popen,PIPE
 import json,tifffile,os,sys,glob,time,datetime,crystals #,base64,hashlib
 from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
@@ -6,7 +6,7 @@ import numpy as np,pandas as pd
 from blochwave import bloch
 from blochwave import bloch_pp as bl        #;imp.reload(bl)
 from EDutils import utilities as ut
-from EDutils import pets as pt              ;imp.reload(pt)
+from EDutils import pets as pt              #;imp.reload(pt)
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
 import plotly.express as px
@@ -15,7 +15,7 @@ from in_out import*
 bw_app = Blueprint('bw_app', __name__)
 
 fig_wh=725
-pets_data={}
+pets_data = {}
 structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s=="static/data/tmp"]
 builtins = crystals.Crystal.builtins
 gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
@@ -53,9 +53,6 @@ def new_structure():
     msg = 'cif file issue'
     if not os.path.exists(path):
         try:
-            # p=Popen('mkdir %s' %path,shell=True,stdout=PIPE,stderr=PIPE)
-            # o,e=p.communicate()
-            # if e:print(e.decode())
             check_output('mkdir %s' %path,shell=True)
             if   val=='cif' :
                 if data['cif'] in crystals.Crystal.builtins:
@@ -534,14 +531,11 @@ def init():
         session_path=os.path.join('static','data','tmp',id)
         print(check_output('mkdir -p %s' %session_path,shell=True).decode())
         print(colors.green+'creating new session %s' %id+colors.black)
-        session['mol'] = 'test'
+        session['mol'] = 'diamond'
         session['path'] = session_path
         session['id']   = id
         init_mol()
 
-    # print(session['dat'])
-    # print(glob.glob(os.path.join(mol_path(session['mol']),'pets')))
-    # print(glob.glob(os.path.join(mol_path(session['mol']),'pets','*')))
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
         pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
     rock_state=''
@@ -557,12 +551,14 @@ def init():
     session_data['rock_state'] = rock_state
     # exp,sim
     session_data['zmax'] = {}
+    session_data['max_frame'] = 0
     if session['sim']:
         session_data['max_frame']   = session['sim']['max_frame']
         session_data['zmax']['sim'] = session['sim']['zmax']
     if session['exp']:
-        session_data['max_frame']   = session['exp']['max_frame']
+        session_data['max_frame']   = max(session['exp']['max_frame'],session_data['max_frame'])
         session_data['zmax']['exp'] = session['exp']['zmax']
+    print(session_data['max_frame'])
 
     session_data['structures'] = [s for s in structures if s!=session['mol']]
     session_data['gifs'] = gifs
@@ -586,7 +582,7 @@ def init_mol():
         'analysis'  : 'bloch',
         'manual'    : True,
         'u'         : 'edit',
-        'single'    : False,
+        'single'    : True,
     }
     rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
 

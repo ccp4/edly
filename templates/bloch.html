@@ -120,7 +120,7 @@
           </div>
 
           <!-- Frames panel -->
-          <div class="panel" ng-hide="modes['molecule']" ng-show="max_frame>0">
+          <div class="panel" ng-show="!modes['molecule'] && max_frame>0">
             <div class="row">
               <div class="col-sm-8">
                 <h4>Exp Frames : </h4>
@@ -614,51 +614,51 @@
 
       </div><!-- Frame/analysis viewer -->
 
-      <footer class="footer">
-         Copyright © 2021, CCP4
-         <div>Author : Tarik Drevon<div>
-      </footer>
 
     </div><!-- ng-controller -->
+
+    <!-- footer  -->
+    <footer class="footer">
+       Copyright © 2021, CCP4
+       <div>Author : Tarik Drevon<div>
+    </footer>
   </div>
 
+  <!-- form -->
+  <div id="dialog" title="new project">
+    <p>Create a new structure?</p>
+    <!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span> -->
+    <form>
+      <fieldset>
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" value="new" class="text ui-widget-content ui-corner-all">
+        <div> Please, provide a cif file from : </div>
+        <label for="radio-1">builtins</label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_cif" >
+        <label for="radio-2">pdb     </label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_pdb">
+        <label for="radio-3">file    </label><input onclick="set_cif()" type="radio" name="radio-1" id="radio_file" checked=true>
+        <div id="cif_cif">
+          <label for="cif"> Name : </label>
+          <select name="cif" id="cif">
+            {% for s in builtins %}
+            <option>{{s}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div id="cif_pdb">
+          <label for="">pdb id : </label>
+          <input type="text" name="pdb" id="pdb" value="" class="text ui-widget-content ui-corner-all">
+        </div>
+        <div id="cif_file">
+          <label for="file_cif"> file : </label>
+          <input type = "file" class="glyphicon glyphicon-file" name = "file_cif" id="file_cif" onchange="upload_cif()"/>
+        </div>
 
-
-      <!-- form -->
-      <div id="dialog" title="new project">
-        <p>Create a new structure?</p>
-        <!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span> -->
-        <form>
-          <fieldset>
-            <label for="name">Name</label>
-            <input type="text" name="name" id="name" value="new" class="text ui-widget-content ui-corner-all">
-            <div> Please, provide a cif file from : </div>
-            <label for="radio-1">builtins</label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_cif" >
-            <label for="radio-2">pdb     </label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_pdb">
-            <label for="radio-3">file    </label><input onclick="set_cif()" type="radio" name="radio-1" id="radio_file" checked=true>
-            <div id="cif_cif">
-              <label for="cif"> Name : </label>
-              <select name="cif" id="cif">
-                {% for s in builtins %}
-                <option>{{s}}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div id="cif_pdb">
-              <label for="">pdb id : </label>
-              <input type="text" name="pdb" id="pdb" value="" class="text ui-widget-content ui-corner-all">
-            </div>
-            <div id="cif_file">
-              <label for="file_cif"> file : </label>
-              <input type = "file" class="glyphicon glyphicon-file" name = "file_cif" id="file_cif" onchange="upload_cif()"/>
-            </div>
-
-            <!-- Allow form submission with keyboard without duplicating the dialog button -->
-            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-          </fieldset>
-        </form>
-        <div id="cif_error" style="color:red;display:none"></div>
-      </div>
+        <!-- Allow form submission with keyboard without duplicating the dialog button -->
+        <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+      </fieldset>
+    </form>
+    <div id="cif_error" style="color:red;display:none"></div>
+  </div>
 
 <script>
 var TABLE_MILLER=document.getElementById('table_Miller_indices')
