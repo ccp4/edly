@@ -96,7 +96,7 @@ def bloch_fig():
 
     omega=session['omega']
     session['vis']
-    if omega:
+    if omega and session['dat']['pets']:
         ct,st = np.cos(np.deg2rad(omega)),np.sin(np.deg2rad(omega))
         qx_b,qy_b = toplot[['px','py']].values.T
         # print(qy_b[0])
@@ -512,6 +512,7 @@ def set_visible():
 @bw_app.route('/set_structure', methods=['POST'])
 def set_structure():
     data=json.loads(request.data.decode())
+    print(data)
     session['mol']=data['mol']
     init_mol()
     return session['mol']
@@ -580,10 +581,11 @@ def init_mol():
     modes = {
         'molecule'  : False,
         'analysis'  : 'bloch',
-        'manual'    : True,
+        'manual'    : not dat['pets'],
         'u'         : 'edit',
         'single'    : True,
     }
+
     rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
 
     cif_file = glob.glob(os.path.join(mol_path(mol),'*.cif*'))[0]

@@ -128,6 +128,7 @@
             </div>
             No:
             <input type="number" min="1" max="max_frame" ng-model="frame" ng-key-enter="update_frame()" style="width: 80px" />
+            <span> / <span ng-bind="max_frame"/></span>
             <a class="btn-sm btn-primary"  ng-click="dec_frame()">
               <span class="glyphicon glyphicon-step-backward"></span >
             </a>
@@ -421,7 +422,7 @@
                 <td class="td-in" style="width: 50%;">
                   <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()">Solve</div>
                 </td>
-                <td class="">
+                <td class="" ng-show="dat['pets']">
                   <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="toggle_popup('omega_show')" ng-mouseleave="toggle_popup('omega_show')">
                     <span class="glyphicon glyphicon-repeat" />
                     <span class="popuptext" style="" ng-show="popup['omega_show']"> set in-plane rotation angle omega  </span>

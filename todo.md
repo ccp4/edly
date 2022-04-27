@@ -12,19 +12,19 @@
 - display LACBED frieze
 
 ### issue#14 python console
-  - show corresponding python command below
+- show corresponding python command below
 
 ### issue#17 handle accounts
 - create account for uploading comparison to experiments or saving simulations
+
 
 ### misc
 - generate frame/integrated frame settings
 - long time chrome violation warning
 - include kinematic
 - Fkin vs Fdyn
-- improve speed show_u
+- improve speed show_u : ui,uf, u_int
 - resolution rings
-- fix frame bug 
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly

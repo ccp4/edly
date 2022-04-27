@@ -127,7 +127,11 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.set_mode('analysis',val);
     $scope.mode_style = {'bloch':'','frames':''};
     $scope.mode_style[val]=mode_style;
-    // $scope.update()
+    if (changed){
+      $log.log('updating')
+      $scope.update();
+      changed=false;
+    }
   }
 
   $scope.toggle_manual_mode=function(){
@@ -157,16 +161,17 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   // Frames
   ///////////////////////////////////////////////////////////////////
   $scope.inc_frame=function(){
-    $scope.frame=Math.min($scope.max_frame,$scope.frame+1);
-    $scope.update();
+    $scope.frame+=1;//=Math.min($scope.max_frame,$scope.frame+1);
+    $scope.update_frame();
   };
   $scope.dec_frame=function(){
-    $scope.frame=Math.max(1,$scope.frame-1);
-    $scope.update();
+    $scope.frame-=1;//=Math.max(1,$scope.frame-1);
+    $scope.update_frame();
   };
-  $scope.update_frame=function(val){
+  $scope.update_frame=function(){
     $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
-    $log.log($scope.frame)
+    // $log.log($scope.frame)
+    changed=true;
     $scope.update();
   }
 
@@ -548,10 +553,10 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.structures = response.data.structures;
         $scope.gifs = response.data.gifs;
         $scope.update()
-        console.log($scope.max_frame)
       });
   }
 
+  var changed=true;
   $scope.fig1={};
   $scope.fig2={};
   // $scope.frame = 1;
