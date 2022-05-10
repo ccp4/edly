@@ -1,7 +1,5 @@
 # TODO
 
-### rocking curve at thickness
-
 ### issue#12 FELIX option
 - enable solve from felix and run on other machines
 
@@ -17,6 +15,8 @@
 ### issue#17 handle accounts
 - create account for uploading comparison to experiments or saving simulations
 
+### issue#18 save option
+- save/load sim info with a name 
 
 ### misc
 - generate frame/integrated frame settings
@@ -25,6 +25,7 @@
 - Fkin vs Fdyn
 - improve speed show_u : ui,uf, u_int
 - resolution rings
+- occasional crash when updating frames and errors
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly

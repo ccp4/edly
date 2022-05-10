@@ -1,6 +1,6 @@
 # edly
 
-pip install flask plotly wheel tarikDrevonUtils tarikED==1.0.9
+pip install flask plotly wheel tarikDrevonUtils ccp4ED==1.0.9
 
 ## development environment
 ```

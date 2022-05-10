@@ -418,13 +418,17 @@ def show_rock():
     ### the figure
     fig = px.line(df,x='Sw',y='I',color='hkl',markers=True)
     fig.update_layout(
-        title="Rocking curve",
+        title="Rocking curve at z=%d A" %b0.thick,
         hovermode='closest',
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
     )
     return fig.to_json()
 
+@bw_app.route('/update_rock_thickness', methods=['POST'])
+def update_rock_thickness():
+    rock = ut.load_pkl(file=rock_path(session['id']))
+    self.do('set_thickness',thick=session['bloch']['thick'])
 ########################
 #### Thickness stuffs
 ########################
@@ -435,6 +439,7 @@ def update_thickness():
     b0.set_thickness(thick=thick)
     b0.save(get_pkl(session['id']))
     session['bloch']['thick'] = thick
+    session['now'] = time.time()
     return bloch_fig()
 
 def update_thicks(thicks):

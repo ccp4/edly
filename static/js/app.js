@@ -141,9 +141,18 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     }
   }
 
-  $scope.toggle_popup=function(key){
-    $scope.popup[key]=!$scope.popup[key];
-  }
+  var timer;
+  // mouseenter event
+  $scope.showIt = function (val) {
+      timer = $timeout(function () {
+          $scope.popup[val] = true;
+      }, 500);
+  };
+  // mouseleave event
+  $scope.hideIt = function (val) {
+      $timeout.cancel(timer);
+      $scope.popup[val]=false;
+  };
 
   $scope.set_input=function(key,v){
     $scope.input[key]=false;
@@ -509,18 +518,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     });
   }
 
-  var timer;
-  // mouseenter event
-  $scope.showIt = function (val) {
-      timer = $timeout(function () {
-          $scope.show[val] = true;
-      }, 500);
-  };
-  // mouseleave event
-  $scope.hideIt = function (val) {
-      $timeout.cancel(timer);
-      $scope.show[val]=false;
-  };
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs

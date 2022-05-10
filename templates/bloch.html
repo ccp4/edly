@@ -67,7 +67,7 @@
             </div>
            </div>
          </div><!-- menu -->
-         <div ng-repeat="(tle,gif) in gifs" ng-show="show[tle]" class="gif"/>
+         <div ng-repeat="(tle,gif) in gifs" ng-show="popup[tle]" class="gif"/>
            <a href="{a gif a}"> <img ng-src="{a gif a}"  /></a>
         </div>
       </div>
@@ -79,7 +79,7 @@
           <!-- Structure -->
           <div class="panel">
             <div class="">
-              <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_mode('molecule')" ng-mouseenter="toggle_popup('mol')" ng-mouseleave="toggle_popup('mol')">
+              <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_mode('molecule')" ng-mouseenter="showIt('mol')" ng-mouseleave="hideIt('mol')">
                 <img ng-hide="modes['molecule']" src="/static/images/jsmol.png"/>
                 <img ng-show="modes['molecule']" src="/static/images/edly.png"/>
                 <span class="popuptext" ng-show="popup['mol']"> show/hide molecule </span>
@@ -87,7 +87,7 @@
             </div>
             <div style="font-size:25px">  {a structure a} </div>
             <div class="theta_phi">
-              <a class="popup" ng-click="expand['struct']=!expand['struct']" ng-mouseenter="toggle_popup('expand_struct')" ng-mouseleave="toggle_popup('expand_struct')" style="float:right;bottom:5px">
+              <a class="popup" ng-click="expand['struct']=!expand['struct']" ng-mouseenter="showIt('expand_struct')" ng-mouseleave="hideIt('expand_struct')" style="float:right;bottom:5px">
                 <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
                   <span class="popuptext" style="" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
                 </span>
@@ -138,15 +138,15 @@
           </div>
 
           <div class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
-            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_analysis_mode('frames')" ng-mouseenter="toggle_popup('frames')" ng-mouseleave="toggle_popup('frames')">
+            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_analysis_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
               <span class="gg-stack"></span >
               <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
             </a>
-            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_analysis_mode('bloch')" ng-mouseenter="toggle_popup('bloch_solver')" ng-mouseleave="toggle_popup('bloch_solver')">
+            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_analysis_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
               <span class="gg-edit-unmask"></span >
               <span class="popuptext" ng-show="popup['bloch_solver']"> Bloch solver </span>
             </a>
-            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_analysis_mode('ms')" ng-mouseenter="toggle_popup('ms_solver')" ng-mouseleave="toggle_popup('ms_solver')">
+            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_analysis_mode('ms')" ng-mouseenter="showIt('ms_solver')" ng-mouseleave="hideIt('ms_solver')">
               <span class="gg-format-justify" style="margin-top:0"></span >
               <span class="popuptext" ng-show="popup['ms_solver']"> Multislice solver </span>
             </a>
@@ -157,15 +157,15 @@
           <!-- Exp panel -->
           <!--  ///////////////////////// -->
           <div class="panel bloch_panel"  ng-show="modes['analysis']=='frames' && !modes['molecule']">
-            <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="toggle_popup('exp')" ng-mouseleave="toggle_popup('exp')">
+            <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="showIt('exp')" ng-mouseleave="hideIt('exp')">
               <img src="/static/images/exp_button.png" />
               <span class="popuptext" ng-show="popup['exp']"> Upload experimental dataset </span>
             </a>
-            <a class="btn btn-primary myBtn popup" ng-click="upload('sim')" ng-mouseenter="toggle_popup('sim')" ng-mouseleave="toggle_popup('sim')">
+            <a class="btn btn-primary myBtn popup" ng-click="upload('sim')" ng-mouseenter="showIt('sim')" ng-mouseleave="hideIt('sim')">
               <img src="/static/images/bloch_button.png" />
               <span class="popuptext" ng-show="popup['sim']"> Upload simulated dataset </span>
             </a>
-            <a class="btn btn-primary myBtn popup" ng-click="upload('pets')" ng-mouseenter="toggle_popup('pets')" ng-mouseleave="toggle_popup('pets')">
+            <a class="btn btn-primary myBtn popup" ng-click="upload('pets')" ng-mouseenter="showIt('pets')" ng-mouseleave="hideIt('pets')">
               <img src="/static/images/proc_button.png" />
               <span class="popuptext" ng-show="popup['pets']"> Import processed data from pets/dials </span>
             </a>
@@ -198,7 +198,7 @@
             <!-- Simulation Parameters  -->
             <div class="row" >
               <div class="theta_phi" >
-                <a class="popup" ng-click="expand['sim']=!expand['sim']" ng-mouseenter="toggle_popup('expand_sim')" ng-mouseleave="toggle_popup('expand_sim')" style="float:right;bottom:5px">
+                <a class="popup" ng-click="expand['sim']=!expand['sim']" ng-mouseenter="showIt('expand_sim')" ng-mouseleave="hideIt('expand_sim')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['sim'],'glyphicon glyphicon-chevron-up':expand['sim']}">
                     <span class="popuptext" style="" ng-show="popup['expand_sim']" ng-bind="expand_str[expand['sim']]"></span>
                   </span>
@@ -209,7 +209,7 @@
                   <tr>
                     <td class="td-in">
                       <span>keV</span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('keV')" ng-mouseleave="toggle_popup('keV')" >
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['keV']=true" ng-mouseleave="popup['keV']=false" >
                         <span class="popuptext" ng-show="popup['keV']"> beam energy </span>
                       </span>
                     </td>
@@ -218,7 +218,7 @@
                       <span  ng-hide="show_keV" ng-bind="bloch['keV']" ng-dblclick="show_keV=true"></span>
                     </td>
                     <td class="td-in" ng-show="show_keV">
-                      <a class="btn-sm btn-primary popup" ng-click="show_keV=false" ng-mouseenter="toggle_popup('lock_keV')" ng-mouseleave="toggle_popup('lock_keV')" style="margin-left: 7px;">
+                      <a class="btn-sm btn-primary popup" ng-click="show_keV=false" ng-mouseenter="showIt('lock_keV')" ng-mouseleave="hideIt('lock_keV')" style="margin-left: 7px;">
                         <span class="glyphicon glyphicon-lock" />
                         <span class="popuptext" style="" ng-show="popup['lock_keV']">
                           Lock keV parameter to experiment </span>
@@ -229,7 +229,7 @@
                   <tr>
                     <td class="td-in">
                       <span>Nmax</span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Nmax')" ng-mouseleave="toggle_popup('Nmax')" >
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['Nmax']=true" ng-mouseleave="popup['Nmax']=false" >
                         <span class="popuptext" ng-show="popup['Nmax']"> Maximum resolution : reflection index would be (Nmax,Nmax,Nmax) </span>
                       </span>
                     </td>
@@ -241,7 +241,7 @@
                   <tr>
                     <td class="td-in">
                       <span> Smax </span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('Smax')" ng-mouseleave="toggle_popup('Smax')" >
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['Smax']=true" ng-mouseleave="popup['Smax']=false" >
                         <span class="popuptext" ng-show="popup['Smax']"> Maximum excitation error </span>
                       </span>
                     </td>
@@ -256,7 +256,7 @@
             <!-- Orientation u -->
             <div class="row">
               <div class="theta_phi">
-                <a class="popup" ng-click="expand['u']=!expand['u']" ng-mouseenter="toggle_popup('expand_u')" ng-mouseleave="toggle_popup('expand_u')" style="float:right;bottom:5px">
+                <a class="popup" ng-click="expand['u']=!expand['u']" ng-mouseenter="showIt('expand_u')" ng-mouseleave="hideIt('expand_u')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['u'],'glyphicon glyphicon-chevron-up':expand['u']}">
                     <span class="popuptext" style="" ng-show="popup['expand_u']" ng-bind="expand_str[expand['u']]"></span>
                   </span>
@@ -267,7 +267,7 @@
                   <!-- buttons -->
                   <div class="row" style="margin-bottom: 10px">
                     <span ng-show="dat['pets']">
-                      <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="toggle_popup('manual')" ng-mouseleave="toggle_popup('manual')" style="margin-left: 7px;">
+                      <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="showIt('manual')" ng-mouseleave="hideIt('manual')" style="margin-left: 7px;">
                         <span ng-class="{'glyphicon glyphicon-wrench':!modes['manual'],'glyphicon glyphicon-lock':modes['manual']}" />
                         <span class="popuptext" style="" ng-show="popup['manual']">
                           <div ng-show="modes['manual']"> Lock u to experimental frames  </div>
@@ -275,20 +275,20 @@
                       </a>
                     </span>
                     <span ng-show="modes['manual']" style="margin-left:5px;">
-                      <a class="btn-sm btn-primary popup" ng-style="u_style['edit']" ng-click="set_u_mode('edit')" ng-mouseenter="toggle_popup('u_edit')" ng-mouseleave="toggle_popup('u_edit')">
+                      <a class="btn-sm btn-primary popup" ng-style="u_style['edit']" ng-click="set_u_mode('edit')" ng-mouseenter="showIt('u_edit')" ng-mouseleave="hideIt('u_edit')">
                         <span class="glyphicon glyphicon-pencil" />
                         <span class="popuptext" style="" ng-show="popup['u_edit']"> Edit u manually  </span>
                       </a>
-                      <a class="btn-sm btn-primary popup" ng-style="u_style['move']" ng-click="set_u_mode('move')" ng-mouseenter="toggle_popup('u_move')" ng-mouseleave="toggle_popup('u_move')">
+                      <a class="btn-sm btn-primary popup" ng-style="u_style['move']" ng-click="set_u_mode('move')" ng-mouseenter="showIt('u_move')" ng-mouseleave="hideIt('u_move')">
                         <span class="glyphicon glyphicon-move" />
                         <span class="popuptext" style="" ng-show="popup['u_move']"> Change Euler angles of u using arrows  </span>
                       </a>
-                      <a class="btn-sm btn-primary popup" ng-style="u_style['rock']" ng-click="set_u_mode('rock')" ng-mouseenter="toggle_popup('u_rock')" ng-mouseleave="toggle_popup('u_rock')">
+                      <a class="btn-sm btn-primary popup" ng-style="u_style['rock']" ng-click="set_u_mode('rock')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
                         <span class="gg-icon gg-spectrum" ></span>
                         <span class="popuptext" style="" ng-show="popup['u_rock']"> Set rocking curve for u </span>
                       </a>
                     </span>
-                    <a class="btn-sm btn-primary popup" ng-click="show_u()" ng-mouseenter="toggle_popup('u_show')" ng-mouseleave="toggle_popup('u_show')" style="float:right;right:15px;" >
+                    <a class="btn-sm btn-primary popup" ng-click="show_u()" ng-mouseenter="showIt('u_show')" ng-mouseleave="hideIt('u_show')" style="float:right;right:15px;" >
                       <span class="glyphicon glyphicon-eye-open" />
                       <span class="popuptext" style="" ng-show="popup['u_show']"> Show u orientation  </span>
                     </a>
@@ -297,7 +297,7 @@
                   <!-- frame mode or edit mode -->
                   <div class="bloch_param" ng-hide="modes['manual'] && modes['u']!='edit'">
                       <span> u </span>
-                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('u_info')" ng-mouseleave="toggle_popup('u_info')">
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['u_info']=true" ng-mouseleave="popup['u_info']=false">
                         <span class="popuptext" ng-show="popup['u_info']"> Beam orientation based on experimental frame </span>
                       </span>
                       <span> = </span>
@@ -353,7 +353,7 @@
                       <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
                         <td> <input class="long_input" ng-change="rock_reset()" ng-model="rock['e0']"  ></td>
                         <td class="td-in" ng-show="dat['pets']">
-                          <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="toggle_popup('rock_set_0')" ng-mouseleave="toggle_popup('rock_set_0')">
+                          <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="showIt('rock_set_0')" ng-mouseleave="hideIt('rock_set_0')">
                             <span class="glyphicon glyphicon-pushpin"/>
                             <span class="popuptext" style="" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
                           </a>
@@ -362,7 +362,7 @@
                       <tr><td class="td-in"> u1   </td><td class="td-in"> = </td>
                         <td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td>
                         <td class="td-in" ng-show="dat['pets']">
-                          <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="toggle_popup('rock_set_1')" ng-mouseleave="toggle_popup('rock_set_1')">
+                          <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="showIt('rock_set_1')" ng-mouseleave="hideIt('rock_set_1')">
                             <span class="glyphicon glyphicon-pushpin"/>
                             <span class="popuptext" style="" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
                           </a>
@@ -371,7 +371,7 @@
                       <tr><td class="td-in"> npts </td><td class="td-in"> = </td>
                         <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td>
                         <td class="td-in" ng-show="dat['pets']">
-                          <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="toggle_popup('rock_set')" ng-mouseleave="toggle_popup('rock_set')">
+                          <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="showIt('rock_set')" ng-mouseleave="hideIt('rock_set')">
                             <span class="gg-icon gg-path-back" />
                             <span class="popuptext" style="" ng-show="popup['rock_set']"> Assign u0,u1 from current experimental frame </span>
                           </a>
@@ -423,7 +423,7 @@
                   <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()">Solve</div>
                 </td>
                 <td class="" ng-show="dat['pets']">
-                  <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="toggle_popup('omega_show')" ng-mouseleave="toggle_popup('omega_show')">
+                  <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="showIt('omega_show')" ng-mouseleave="hideIt('omega_show')">
                     <span class="glyphicon glyphicon-repeat" />
                     <span class="popuptext" style="" ng-show="popup['omega_show']"> set in-plane rotation angle omega  </span>
                   </a>
@@ -431,7 +431,7 @@
                 <td class="td-in" style="font-size:13px">
                   <span>nbs = </span>
                   <span ng-bind="nbeams"></span>
-                  <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('nbms')" ng-mouseleave="toggle_popup('nbms')" >
+                  <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['nbms']=true" ng-mouseleave="popup['nbms']=false" >
                     <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
                   </span>
                   <!-- <span> = </span> -->
@@ -443,7 +443,7 @@
             <div class="row" ng-show="expand['omega']">
               <div class="bloch_param" >
                 <span> omega </span>
-                <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="toggle_popup('omega')" ng-mouseleave="toggle_popup('omega')">
+                <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['omega']=true" ng-mouseleave="popup['omega']=false">
                   <span class="popuptext" ng-show="popup['omega']"> In-plane rotation angle for experimental data (change to align it with expected reflections)</span>
                 </span>
                 <span> = </span>
@@ -454,7 +454,7 @@
             <!-- thickness dependence-->
             <div class="row" >
               <div class="theta_phi">
-                <a class="popup" ng-click="expand['thick']=!expand['thick']" ng-mouseenter="toggle_popup('expand_thick')" ng-mouseleave="toggle_popup('expand_thick')" style="float:right;bottom:5px">
+                <a class="popup" ng-click="expand['thick']=!expand['thick']" ng-mouseenter="showIt('expand_thick')" ng-mouseleave="hideIt('expand_thick')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['thick'],'glyphicon glyphicon-chevron-up':expand['thick']}">
                     <span class="popuptext" style="" ng-show="popup['expand_thick']" ng-bind="expand_str[expand['thick']]"></span>
                   </span>
@@ -506,7 +506,7 @@
             <!-- miller indices table -->
             <div class="row">
               <div class="theta_phi">
-                <a class="popup" ng-click="expand['refl']=!expand['refl']" ng-mouseenter="toggle_popup('expand_refl')" ng-mouseleave="toggle_popup('expand_refl')" style="float:right;bottom:5px">
+                <a class="popup" ng-click="expand['refl']=!expand['refl']" ng-mouseenter="showIt('expand_refl')" ng-mouseleave="hideIt('expand_refl')" style="float:right;bottom:5px">
                   <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['refl'],'glyphicon glyphicon-chevron-up':expand['refl']}" >
                     <span class="popuptext" style="" ng-show="popup['expand_refl']" ng-bind="expand_str[expand['refl']]"></span>
                   </span>
@@ -553,7 +553,7 @@
           <table>
             <tr>
               <td>
-                <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="toggle_popup('single_mode')" ng-mouseleave="toggle_popup('single_mode')">
+                <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="showIt('single_mode')" ng-mouseleave="hideIt('single_mode')">
                   <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
                   <span class="popuptext" style="" ng-show="popup['single_mode']"> toggle single/dual mode </span>
                 </a>

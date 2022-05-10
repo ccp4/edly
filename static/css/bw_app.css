@@ -287,7 +287,8 @@ img {
   border-color:blue;
   border-width:thick;
   display: block;
-  margin-left: auto;
-  margin-right: auto;
+  /* margin-left: auto;
+  margin-right: auto; */
+  float:right;
 }
 </style>
