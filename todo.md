@@ -27,11 +27,12 @@
 - resolution rings
 - occasional crash when updating frames and errors
 - show  electron scattering factor
+- provide the number of beams before solving
+- ask before solving 
+- uglymol
+- downloadable intensities
 
 ### bugs
-- interval rock not working on VM : get('/') fixed  
-- rocking curve error : `thick` taken from `session['bloch']`
-- rocking curve orientations error : needed calling `get_uvw_cont`
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly

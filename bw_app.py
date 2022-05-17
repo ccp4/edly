@@ -2,6 +2,7 @@
 from subprocess import check_output,Popen,PIPE
 import json,tifffile,os,sys,glob,time,datetime,crystals #,base64,hashlib
 from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
+from functools import wraps
 import numpy as np,pandas as pd
 from blochwave import bloch
 from blochwave import bloch_pp as bl        #;imp.reload(bl)
@@ -20,8 +21,39 @@ structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s==
 builtins = crystals.Crystal.builtins
 gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
 
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        # print(session.get('logged_in'))
+        if session.get('logged_in')==True:
+            return f(*args, **kwargs)
+        else:
+            # flash("You need to login first")
+            return redirect(url_for('bw_app.login'))
+    return wrap
+
+@bw_app.route('/login', methods=['GET','POST'])
+def login():
+    session['logged_in'] = False
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        username = request.form['username']
+        # passw    = request.form['password']
+        if not username:
+            msg='please enter username'
+        # elif not passw=="ccp4_debloch!":
+        #     msg='wrong password. Contact tarik.drevon@stfc.ac.uk for access'
+        else:
+            session['logged_in'] = True
+            session['username']  = username
+            print('username : ' ,username)
+            msg='ok'
+        return msg
+
 @bw_app.route('/')
-def image_viewer():
+@login_required
+def home():
     return render_template('bloch.html',builtins=builtins,gifs=gifs)
 
 
@@ -258,6 +290,7 @@ def update_bloch():
     # b_args['thicks']=None
     b0 = bloch.Bloch(session['cif_file'],
         path=session['path'],name='b',**b_args)
+    # b0.solve()
     b0.save()
     session['b0_path'] = get_pkl(session['id'])
     fig_data = bloch_fig()
@@ -529,12 +562,13 @@ def set_structure():
 @bw_app.route('/init', methods=['GET'])
 def init():
     now = time.time()
+    print('username : ' ,session['username'])
     if session.get('id') and os.path.exists(session.get('path')):
         if (now-session['last_time'])>24*3600:
-            print('warning:session create at %s has expired ' %session['last_time'])
+            print('warning:session created at %s has expired ' %session['last_time'])
             print(check_output('rm -rf %s/*' %session.get('path'),shell=True).decode())
     else:
-        id = create_id()
+        id = '%s_%s' %(session['username'],create_id())
         session_path=os.path.join('static','data','tmp',id)
         print(check_output('mkdir -p %s' %session_path,shell=True).decode())
         print(colors.green+'creating new session %s' %id+colors.black)
@@ -549,7 +583,7 @@ def init():
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
         rock_state='done'
 
-    print('sending init info')
+    # print('sending init info')
     info=['mol','dat','frame','crys','cif_file','modes','omega','expand','refl','max_res']
     session_data = {k:session[k] for k in info}
     session_data['theta_phi'] = b_str(session['theta_phi'],2)
@@ -565,7 +599,7 @@ def init():
     if session['exp']:
         session_data['max_frame']   = max(session['exp']['max_frame'],session_data['max_frame'])
         session_data['zmax']['exp'] = session['exp']['zmax']
-    print(session_data['max_frame'])
+    # print(session_data['max_frame'])
 
     session_data['structures'] = [s for s in structures if s!=session['mol']]
     session_data['gifs'] = gifs
@@ -614,7 +648,7 @@ def init_mol():
     session['modes']    = modes
     session['max_res']  = 0
     session['expand']   = expand_bloch
-    session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets']}
+    session['vis']      = {'I':True,'Vga':False,'Sw':False,'I_pets':True} #{k:True for k in ['I','Vga','Sw','I_pets']}
     session['zm_counter'] = 0 #dummy variable
     session['theta_phi']  = [0,0]
     session['bloch']      = bloch_args

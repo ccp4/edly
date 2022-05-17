@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+ <html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Electron diffraction online simulators">
+    <meta name="author" content="tarik drevon">
+    <title> Electron diffraction Dashboard </title>
+    <link rel="shortcut icon" href="static/favicon.ico" >
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css">
+</head>
+
+<body>
+<a href="" onclick="dialog_open()">login</a>
+<div id="dialog" title="login">
+  <p>Login</p>
+  <form>
+    <fieldset>
+      <input type="username" name="username" placeholder="Username">
+      <!-- <input type="password" name="password" placeholder="Password"> -->
+      <!-- <input type="submit" value="Log in"> -->
+    </fieldset>
+  </form>
+  <div id="msg_error" style="color:red;display:none"></div>
+</div>
+</body>
+
+
+
+<script>
+var dialog, form;
+$(document).ready(function () {
+
+  dialog = $( "#dialog" ).dialog({
+    autoOpen: true,
+    height: 500,
+    width: 400,
+    modal: true,
+    buttons: {
+      "login ": login,
+      Cancel: function() {
+        dialog.dialog( "close" );
+      },
+    },
+    close: function() {
+      form[ 0 ].reset();
+    }
+  });
+
+  form = dialog.find( "form" ).on( "submit", function( event ) {
+    event.preventDefault();
+    login();
+  });
+
+
+  function login(){
+    var log_details = Object.fromEntries(new FormData($('form')[0]).entries())
+    // console.log(log_details);
+    $.ajax({
+      type:'POST',
+      url:'/login',
+      data:log_details,
+      success: function(data){
+         // console.log(data);
+         if (data=='ok'){
+           dialog.dialog( "close" );
+           window.location='/'
+         }
+         else{
+           show_error(data);
+         }
+      }
+    });
+  }
+  function show_error(data){
+    var msg='',color='red';
+    $('#msg_error')[0].innerHTML=msg+data;
+    $('#msg_error')[0].style.color=color;
+    $('#msg_error').show()
+  }
+
+  function dialog_open(){
+    dialog.dialog( "open" );
+  };
+});
+
+
+
+</script>
+
+<!-- <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css"> -->
+</html>

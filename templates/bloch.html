@@ -44,7 +44,7 @@
     <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
       <div class="header">
          <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
-         <!-- Menu -->
+         <!-- Menu -->``
          <div class="menu">
            <div class="dropdown">
             <button class="dropbtn">Structures</button>
@@ -669,7 +669,7 @@ function addRow_tagTable(miller_indices) {
     if (!extract_list_indices_from_table().includes(miller_indices)) {
       var row = TABLE_MILLER.insertRow(TABLE_MILLER.rows.length);
       row.insertCell(0).innerHTML= '<div class="btn btn-delete btn-primary" onclick="deleteRow(this)" > <span class="glyphicon glyphicon-remove" /></div>';
-      console.log(miller_indices)
+      // console.log(miller_indices)
       row.insertCell(1).innerHTML= `<div onmouseover="highlight('${miller_indices}',true)" onmouseout="highlight('${miller_indices}',false)" style="padding:2px;margin:0">${miller_indices}</div>`;
   }
 }
@@ -763,13 +763,13 @@ $(document).ready(function () {
         'file':$('#file_cif')[0].value.replace('C:\\fakepath\\',''),
         'val':val,
       };
-    console.log(formData);
+    // console.log(formData);
     $.ajax({
       type:'POST',
       url:'/new_structure',
       data:formData,
       success: function(data){
-         console.log(data);
+         // console.log(data);
          if (data=='ok'){
            dialog.dialog( "close" );
            window.location='/'
@@ -793,13 +793,14 @@ function show_error(data,err){
   $('#cif_error')[0].style.color=color;
   $('#cif_error').show()
 }
+
 // $(':file_cif').on('change', function () {
 function upload_cif(){
   var files = $('#file_cif')[0].files;
   if (files.length>0) {
     var file = files[0];
     extension = file.name.split('.').pop();
-    console.log(extension);
+    // console.log(extension);
     if (extension !='cif'){
       show_error('upload a cif file thank you',true);return
     }
@@ -809,7 +810,7 @@ function upload_cif(){
         show_error('max upload size is 1Mo',true);return
       }
       else{
-        console.log(file);
+        // console.log(file);
         $.ajax({
          url: '/upload_cif',
          type: 'POST',
@@ -847,7 +848,7 @@ set_cif();
 // console.log(new FormData($('form')[0]));
 
 function open_link(link){
-  console.log(link);
+  // console.log(link);
   window.open(link)
 };
 
@@ -860,7 +861,7 @@ function open_link(link){
 <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css">
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" /> -->
 
-<!-- <script src="static/js/jsmol.js"></script> -->
+<script src="static/js/jsmol.js"></script>
 
 </body>
 </html>

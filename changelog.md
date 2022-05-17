@@ -1,8 +1,14 @@
 # Version log
 
 ## 0.0.2
+### Tue 17 May 17:40:15 BST 2022
+- added username info
+
 ### Tue 17 May 11:19:21 BST 2022
 - Solve bloch state created to prevent solving when already being solved
+- interval rock not working on VM : get('/') fixed  
+- rocking curve error : `thick` taken from `session['bloch']`
+- rocking curve orientations error : needed calling `get_uvw_cont`
 
 ### issue#15 help menu links
 #### (Tue 26 Apr 09:51:41 BST 2022)

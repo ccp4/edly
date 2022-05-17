@@ -181,6 +181,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
     // $log.log($scope.frame)
     changed=true;
+    $scope.bloch_solve_reset();
     $scope.update();
   }
 
