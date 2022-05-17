@@ -277,7 +277,7 @@ def show_u():
     if session['modes']['manual']:
         if session['modes']['u']=='rock':
             r_args = get_rock(data)
-            uvw = ut.get_uvw_rock(**r_args)
+            uvw = ut.get_uvw_cont(**r_args)
         else:
             uvw = np.array(b_arr(data['u'],session['bloch']['u']))[None,:]
     else:
@@ -303,7 +303,7 @@ def show_u():
             zaxis = dict(range=[-xm,xm]),
         )
     )
-    print('3d fig completed')
+    # print('3d fig completed')
     return fig.to_json()
 
 ##############################
@@ -313,7 +313,7 @@ def show_u():
 def rock_state():
     if not session['rock_state'] == 'done':
         n_simus=len(glob.glob(os.path.join(session['path'],'u_*.pkl')))
-        npts=session['rock']['npts']
+        npts=session['rock']['nframes']
         if not n_simus==npts:
             session['rock_state'] = '%d/%d' %(n_simus,npts)
         else:
@@ -332,9 +332,9 @@ def set_rock_frame():
     uvw = pets_data[session['mol']].uvw0
     if opt==0:
         e0 = uvw[max(0,frame-1)]
-        e1 = np.array(session['rock']['e1'])
+        e1 = np.array(session['rock']['u1'])
     elif opt==1:
-        e0 = np.array(session['rock']['e0'])
+        e0 = np.array(session['rock']['u0'])
         e1 = uvw[max(0,frame-1)]
     else:
         u0 = uvw[max(0,frame-2)]
@@ -345,7 +345,7 @@ def set_rock_frame():
         e0/=np.linalg.norm(e0)
         e1/=np.linalg.norm(e1)
 
-    session['rock'].update({'e0':e0.tolist(),'e1':e1.tolist()})
+    session['rock'].update({'u0':e0.tolist(),'u1':e1.tolist()})
     session['frame'] = frame
     return json.dumps({'rock':get_session_data('rock')})
 
@@ -367,8 +367,8 @@ def set_rock():
 def get_rock(data):
     r_args = data['rock']
     r_args.update({
-        'e0' : b_arr(data['rock']['e0'],session['rock']['e0']),
-        'e1' : b_arr(data['rock']['e1'],session['rock']['e1']),
+        'u0' : b_arr(data['rock']['u0'],session['rock']['u0']),
+        'u1' : b_arr(data['rock']['u1'],session['rock']['u1']),
     })
     return r_args
 
@@ -377,7 +377,8 @@ def solve_rock():
     Sargs = {k:session['bloch'][k] for k in ['keV','Nmax','Smax','thick']}
     Sargs['cif_file'] = session['cif_file']
 
-    uvw  = ut.get_uvw_rock(**session['rock'])
+    uvw  = ut.get_uvw_cont(**session['rock'])
+    # print(session['rock'],uvw)
     rock = bl.Bloch_cont(path=session['path'],tag='',uvw=uvw,Sargs=Sargs)
     session['rock_state'] = 'done'
     nbeams = np.array([rock.load(i).nbeams for i  in range(rock.n_simus)] )
@@ -418,7 +419,7 @@ def show_rock():
     ### the figure
     fig = px.line(df,x='Sw',y='I',color='hkl',markers=True)
     fig.update_layout(
-        title="Rocking curve at z=%d A" %b0.thick,
+        title="Rocking curve at z=%d A" %session['bloch']['thick'],
         hovermode='closest',
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
@@ -591,7 +592,7 @@ def init_mol():
         'single'    : True,
     }
 
-    rock_args = {'e0':[0,3,1],'e1':[2,1],'deg':0.5,'npts':3,'show':0}
+    rock_args = {'u0':[0,3,1],'u1':[2,1],'deg':0.5,'nframes':3,'show':0}
 
     cif_file = glob.glob(os.path.join(mol_path(mol),'*.cif*'))[0]
     crys = ut.import_crys(cif_file)
@@ -646,7 +647,7 @@ def get_session_data(key):
     elif key == 'rock':
         data=session['rock'].copy()
         data.update({
-            'e0':b_str(session['rock']['e0'],4),
-            'e1':b_str(session['rock']['e1'],4),
+            'u0':b_str(session['rock']['u0'],4),
+            'u1':b_str(session['rock']['u1'],4),
         })
     return data

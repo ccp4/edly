@@ -237,6 +237,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
 
   $scope.show_u=function(){
     $scope.graph=$scope.graphs['u3d']
+    $scope.modes['single']=false;
     $http.post('show_u',JSON.stringify({'rock':$scope.rock,'u':$scope.bloch['u']}))
       .then(function(response){
         $scope.fig2 = response.data;
@@ -285,7 +286,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.rock_style={'background-color':'red'};
         var interval;
         interval = $interval(function () {
-          $http.get('/rock_state')
+          $http.get('rock_state')
           .then(function(response) {
             $scope.rock_state = response.data;
             $scope.solve_rock_btn=$scope.rock_state;
@@ -307,6 +308,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   }
 
   $scope.show_rock=function(){
+    $scope.modes['single']=false;
     $scope.update_refl();
     $scope.graph=$scope.graphs['rock']
     $http.post('show_rock',JSON.stringify({'refl':$scope.refl}))

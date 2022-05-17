@@ -26,7 +26,12 @@
 - improve speed show_u : ui,uf, u_int
 - resolution rings
 - occasional crash when updating frames and errors
-- show  electron scattering factor 
+- show  electron scattering factor
+
+### bugs
+- interval rock not working on VM : get('/') fixed  
+- rocking curve error : `thick` taken from `session['bloch']`
+- rocking curve orientations error : needed calling `get_uvw_cont`
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly

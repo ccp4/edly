@@ -2,7 +2,7 @@
 
 ## 0.0.2
 ### Tue 17 May 11:19:21 BST 2022
-- Solve bloch state created to prevent solving when already being solved=
+- Solve bloch state created to prevent solving when already being solved
 
 ### issue#15 help menu links
 #### (Tue 26 Apr 09:51:41 BST 2022)

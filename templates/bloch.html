@@ -353,7 +353,7 @@
                     <div style="font-size:14px;margin-bottom:5px;">Rocking curve settings : </div>
                     <table style="margin-left: 20px;">
                       <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
-                        <td> <input class="long_input" ng-change="rock_reset()" ng-model="rock['e0']"  ></td>
+                        <td> <input class="long_input" ng-change="rock_reset()" ng-model="rock['u0']"  ></td>
                         <td class="td-in" ng-show="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="showIt('rock_set_0')" ng-mouseleave="hideIt('rock_set_0')">
                             <span class="glyphicon glyphicon-pushpin"/>
@@ -362,7 +362,7 @@
                         </td>
                       </tr>
                       <tr><td class="td-in"> u1   </td><td class="td-in"> = </td>
-                        <td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['e1']"  ></td>
+                        <td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['u1']"  ></td>
                         <td class="td-in" ng-show="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="showIt('rock_set_1')" ng-mouseleave="hideIt('rock_set_1')">
                             <span class="glyphicon glyphicon-pushpin"/>
@@ -371,7 +371,7 @@
                         </td>
                       </tr>
                       <tr><td class="td-in"> npts </td><td class="td-in"> = </td>
-                        <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['npts']" type="number" min="2" max="100"></td>
+                        <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['nframes']" type="number" min="2" max="100"></td>
                         <td class="td-in" ng-show="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="showIt('rock_set')" ng-mouseleave="hideIt('rock_set')">
                             <span class="gg-icon gg-path-back" />
