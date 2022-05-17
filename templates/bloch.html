@@ -235,7 +235,7 @@
                       </span>
                     </td>
                     <td class="td-in">
-                      <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()">
+                      <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
                     </td>
                   </tr>
                   <!-- Smax -->
@@ -247,7 +247,7 @@
                       </span>
                     </td>
                     <td class="td-in">
-                      <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input" ng-key-enter="update_bloch()">
+                      <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
                     </td>
                   </tr>
                 </table>
@@ -303,7 +303,7 @@
                       </span>
                       <span> = </span>
                       <span  ng-show="!modes['manual']"                      ng-bind="bloch['u']" ></span>
-                      <input ng-show="modes['manual'] && modes['u']=='edit'" ng-model="bloch['u']" ng-key-enter="update_bloch()"  type="text" class="bloch_input" style="width:180px">
+                      <input ng-show="modes['manual'] && modes['u']=='edit'" ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
                   </div>
 
                   <!-- move mode-->
@@ -421,7 +421,7 @@
             <div class="row " ng-hide="modes['manual'] && modes['u']=='rock'">
               <table style="margin-left: 5px;"><tr>
                 <td class="td-in" style="width: 50%;">
-                  <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()">Solve</div>
+                  <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()" ng-style="bloch_solve_style" ng-bind="bloch_solve_btn"></div>
                 </td>
                 <td class="" ng-show="dat['pets']">
                   <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="showIt('omega_show')" ng-mouseleave="hideIt('omega_show')">

@@ -16,7 +16,7 @@
 - create account for uploading comparison to experiments or saving simulations
 
 ### issue#18 save option
-- save/load sim info with a name 
+- save/load sim info with a name
 
 ### misc
 - generate frame/integrated frame settings
@@ -26,6 +26,7 @@
 - improve speed show_u : ui,uf, u_int
 - resolution rings
 - occasional crash when updating frames and errors
+- show  electron scattering factor 
 
 ### Challenge:
 - trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly

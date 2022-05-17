@@ -1,6 +1,8 @@
 # Version log
 
 ## 0.0.2
+### Tue 17 May 11:19:21 BST 2022
+- Solve bloch state created to prevent solving when already being solved=
 
 ### issue#15 help menu links
 #### (Tue 26 Apr 09:51:41 BST 2022)
@@ -18,7 +20,7 @@
 - set_intensities with FELIX convention
 - import crambin
 
-## issue#16 miller indices table (Fri 22 Apr 20:26:20 BST 2022)
+### issue#16 miller indices table (Fri 22 Apr 20:26:20 BST 2022)
 - highlight on hover
 - removed update when changing analysis mode
 
