@@ -8,6 +8,7 @@ from blochwave import bloch
 from blochwave import bloch_pp as bl        #;imp.reload(bl)
 from EDutils import utilities as ut
 from EDutils import pets as pt              #;imp.reload(pt)
+from scattering import scattering_factors as scatf
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
 import plotly.express as px
@@ -101,7 +102,7 @@ def new_structure():
             if cif_file:
                 crys=ut.import_crys(cif_file)
                 session['mol']=mol
-                init_mol()
+                init_session()
                 msg='ok'
         except Exception as e:
             check_output('rm -rf %s' %path,shell=True)
@@ -127,7 +128,7 @@ def bloch_fig():
     toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
 
     omega=session['omega']
-    session['vis']
+    # session['vis']
     if omega and session['dat']['pets']:
         ct,st = np.cos(np.deg2rad(omega)),np.sin(np.deg2rad(omega))
         qx_b,qy_b = toplot[['px','py']].values.T
@@ -155,7 +156,8 @@ def bloch_fig():
             hovertext=[k]*len(toplot),
             marker_symbol=m,marker_color=c,
             customdata=customdata,
-            hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{customdata[0]:.2e}<br>miller indices=%{customdata[1]}<extra></extra>'
+            hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{customdata[0]:.2e}<br>miller indices=%{customdata[1]}<extra></extra>',
+            mode='markers',
         ))
 
     #### pets
@@ -172,18 +174,36 @@ def bloch_fig():
             hovertext=['I_pets']*len(pt_plot),
             marker_symbol='square',marker_color='purple',
             customdata=np.array([pt_plot['I'].values, pt_plot['hkl'].to_numpy()]).T,
-            hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>'
+            hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>',
+            mode='markers',
         ))
 
     xm = session['max_res']
-    if not xm:xm = b0.df_G.q.max()
+    if not xm:
+        xm = b0.df_G.q.max()
+    t,qs = np.linspace(0,2*np.pi,100),np.arange(0.25,xm,0.25)
+    for q0 in qs:
+        name='%.2f A' %(1/q0)
+        fig.add_trace(go.Scatter(
+            x=q0*np.cos(t),y=q0*np.sin(t),
+            legendgroup="resolution rings",
+            legendgrouptitle_text="rings",
+            name=name,hovertext=name,
+            hovertemplate='<b>%{hovertext}</b>',
+            visible=session['vis']['rings'],
+            mode='lines',marker_color='purple',
+        ))
+    offset=3+session['dat']['pets']
+    rings=list(range(offset,offset+qs.size))
+    session['rings']=rings#json.dumps(rings)
+
     fig.update_layout(
         title="diffraction pattern z=%d A" %b0.thick,
         paper_bgcolor='LightSteelBlue',#cdcfd1',
         # plot_bgcolor ='LightSteelBlue',#79a3f7',
         width=fig_wh, height=fig_wh,
     )
-    fig.update_traces(mode='markers')
+    # fig.update_traces(mode='markers')
     fig.update_xaxes(range=[-xm,xm])
     fig.update_yaxes(range=[xm,-xm])
     return fig.to_json()
@@ -242,6 +262,12 @@ def get_img_frame(frame,zmax,key):
 ########################
 #### Bloch
 ########################
+@bw_app.route('/update_omega', methods=['POST'])
+def update_omega():
+    data=json.loads(request.data.decode())
+    session['omega']=data['omega']
+    return bloch_fig()
+
 @bw_app.route('/bloch_rotation', methods=['POST'])
 def bloch_rotation():
     data=json.loads(request.data.decode())
@@ -249,13 +275,13 @@ def bloch_rotation():
     theta %=180
     phi   %=360
     session['bloch']['u'] = list(ut.u_from_theta_phi(theta,phi))
-    session['bloch']['solve'] = False
+    # session['bloch']['solve'] = False
     session['modes']['rotation'] = True
     session['modes']['manual']   = True
     return update_bloch()
 
-@bw_app.route('/solve_bloch', methods=['POST'])
-def solve_bloch():
+@bw_app.route('/bloch_u', methods=['POST'])
+def bloch_u():
     data=json.loads(request.data.decode())
     b_args = data['bloch']
     ## handle
@@ -269,7 +295,7 @@ def solve_bloch():
     # print(data['frame'],u)
     # print(pets_data[session['mol']].uvw[data['frame']-1])
 
-    b_args.update({'u':list(u),'thicks':list(thicks),'solve':True})
+    b_args.update({'u':list(u),'thicks':list(thicks)})
     session['frame'] = data['frame']
     session['modes']['manual'] = data['manual_mode']
     session['bloch'] = b_args
@@ -277,32 +303,31 @@ def solve_bloch():
     # print({k:type(v) for k,v in session['bloch'].items()})
     return update_bloch()
 
-@bw_app.route('/update_omega', methods=['POST'])
-def update_omega():
-    data=json.loads(request.data.decode())
-    session['omega']=data['omega']
-    return bloch_fig()
-
-
 def update_bloch():
     b_args = session['bloch']#.copy()
     # print(b_args['u'])
     # b_args['thicks']=None
-    b0 = bloch.Bloch(session['cif_file'],
-        path=session['path'],name='b',**b_args)
-    # b0.solve()
+    b0 = bloch.Bloch(session['cif_file'],path=session['path'],
+        name='b',solve=False,**b_args)
     b0.save()
+
+    # session['modes']['analysis'] = 'bloch'
     session['b0_path'] = get_pkl(session['id'])
-    fig_data = bloch_fig()
-    # fig_data.show()
-    # fig_data=fig_data.to_json()
-    session['modes']['analysis'] = 'bloch'
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
     bloch_args=b_args.copy()
     bloch_args.update({'u':b_str(b_args['u'],4),'thicks':b_str(b_args['thicks'],0)})
-    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
+    fig_data = bloch_fig()
+    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,'rings':session['rings'],
         'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
     return info
+
+@bw_app.route('/solve_bloch', methods=['POST'])
+def solve_bloch():
+    b0 = ut.load_pkl(get_pkl(session['id']))
+    b0.solve(opts='vts')#opts=session['bloch']['opts'])
+    # fig_data.show()
+    # fig_data=fig_data.to_json()
+    return bloch_fig()
 
 @bw_app.route('/show_u', methods=['POST'])
 def show_u():
@@ -337,6 +362,7 @@ def show_u():
         )
     )
     # print('3d fig completed')
+    session['graph']='3d'
     return fig.to_json()
 
 ##############################
@@ -457,6 +483,7 @@ def show_rock():
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
     )
+    session['graph']='rock'
     return fig.to_json()
 
 @bw_app.route('/update_rock_thickness', methods=['POST'])
@@ -515,6 +542,7 @@ def beam_vs_thick():
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
     )
+    session['graph']='thick'
     return fig.to_json()
 
 
@@ -527,6 +555,30 @@ def set_max_res():
     session['max_res'] = json.loads(request.data.decode())['max_res']
     # print(session['max_res'])
     return bloch_fig()
+
+@bw_app.route('/show_sf', methods=['POST'])
+def show_sf():
+    b0 = ut.load_pkl(session['b0_path'])
+    q  = np.linspace(0,max(session['max_res'],b0.df_G.q.max()),500)
+    Z = list(b0.crys.chemical_composition)#;print(Z)
+    q,fq = scatf.get_elec_atomic_factors(Z,q)
+    cs = dict(zip(Z,dsp.getCs('Spectral',len(Z))))
+    cs.update({'H':'#808080','C':'#0f0f0f','N':'blue','O':'red','S':'yellow'})
+
+    fig=go.Figure()
+    for fe,Ze in zip(fq,Z):
+        fig.add_trace(go.Scatter(
+            x=q,y=fe,name=Ze,marker_color=cs[Ze],
+        ))
+
+    fig.update_layout(
+        title="Electron scattering form factors",
+        hovermode='closest',
+        paper_bgcolor="LightSteelBlue",
+        width=fig_wh, height=fig_wh,
+    )
+    session['graph']='scat'
+    return fig.to_json()
 
 ########################
 #### structure related
@@ -551,7 +603,7 @@ def set_visible():
 @bw_app.route('/set_structure', methods=['POST'])
 def set_structure():
     data=json.loads(request.data.decode())
-    print(data)
+    # print(data)
     session['mol']=data['mol']
     init_mol()
     return session['mol']
@@ -575,7 +627,7 @@ def init():
         session['mol'] = 'diamond'
         session['path'] = session_path
         session['id']   = id
-        init_mol()
+        init_session()
 
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
         pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
@@ -584,7 +636,8 @@ def init():
         rock_state='done'
 
     # print('sending init info')
-    info=['mol','dat','frame','crys','cif_file','modes','omega','expand','refl','max_res']
+    info=['mol','dat','frame','crys','cif_file',
+        'modes','omega','expand','refl','max_res','graph']
     session_data = {k:session[k] for k in info}
     session_data['theta_phi'] = b_str(session['theta_phi'],2)
     session_data['bloch'] = get_session_data('bloch')
@@ -605,6 +658,9 @@ def init():
     session_data['gifs'] = gifs
     return json.dumps(session_data)
 
+def init_session():
+    init_mol()
+    init_args()
 
 def init_mol():
     mol = session['mol']
@@ -615,45 +671,51 @@ def init_mol():
         'sim':type(sim)==dict,
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets'))}
 
-    bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
-        'thick':250,'thicks':[0,300,100],'opts':'vts','solve':1}
-
-    modes = {
-        'molecule'  : False,
-        'analysis'  : 'bloch',
-        'manual'    : not dat['pets'],
-        'u'         : 'edit',
-        'single'    : True,
-    }
-
-    rock_args = {'u0':[0,3,1],'u1':[2,1],'deg':0.5,'nframes':3,'show':0}
-
     cif_file = glob.glob(os.path.join(mol_path(mol),'*.cif*'))[0]
     crys = ut.import_crys(cif_file)
     crys_dat = {'file':os.path.basename(cif_file)}
     crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
     crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
         b_str(crys.lattice_parameters,2).split(',') )))
+
+    now = time.time()
+    session['cif_file'] = cif_file
+    session['crys']     = crys_dat
+    session['dat'] = dat
+    session['sim'] = sim
+    session['exp'] = exp
+    session['zm_counter'] = 0 #dummy variable
+    session['frame'] = 1
+    if not session['dat']['pets'] and not session['modes']['manual']:
+        session['modes']['manual'] = True
+    session['time']  = now
+
+def init_args():
+    rock_args = {'u0':[0,3,1],'u1':[2,1],'deg':0.5,'nframes':3,'show':0}
+    bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
+        'thick':250,'thicks':[0,300,100]}
+    modes = {
+        'molecule'  : False,
+        'analysis'  : 'bloch',
+        'manual'    : not session['dat']['pets'],
+        'u'         : 'edit',
+        'single'    : False,
+    }
     expand_bloch = {'omega':False,'thick':False,'refl':False,'sim':False,'u':True,}
 
     now = time.time()
     # session['mol2']  = mol
-    session['dat'] = dat
-    session['cif_file'] = cif_file
-    session['crys']     = crys_dat
+    session['rings'] = []
     session['omega']    = 157 #in-plane rotation angle
-    session['frame']    = 1
-    session['sim']      = sim
-    session['exp']      = exp
     session['modes']    = modes
     session['max_res']  = 0
     session['expand']   = expand_bloch
-    session['vis']      = {'I':True,'Vga':False,'Sw':False,'I_pets':True} #{k:True for k in ['I','Vga','Sw','I_pets']}
-    session['zm_counter'] = 0 #dummy variable
+    session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
     session['theta_phi']  = [0,0]
     session['bloch']      = bloch_args
     session['rock']       = rock_args
     session['refl']       = []
+    session['graph']      = 'thick'
     session['last_time']  = now
     session['b0_path']    = get_pkl(session['id'])
     session['time'] = now

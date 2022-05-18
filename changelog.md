@@ -1,6 +1,14 @@
 # Version log
 
 ## 0.0.2
+### Wed 18 May 15:01:58 BST 2022
+- fixed bug not re updating when changing structure
+- fixed bug re initializing all arguments when changing structure
+- scattering factors viewer
+- added solver state `bloch_state`
+- added resolution rings
+- graph fig2 saved in session 
+
 ### Tue 17 May 17:40:15 BST 2022
 - added username info
 

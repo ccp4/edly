@@ -59,20 +59,33 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.update_refl();
   }
 
-  $scope.leg_click=function(data){
-    let dat = data.data[data.curveNumber];
+  $scope.leg_click=function(event){
+    var curve_nb=event.curveNumber;
+    if ( !(curve_nb<$scope.rings[0])){
+      curve_nb=$scope.rings[0];
+    }
+    let dat = event.data[curve_nb];
     if (dat.visible==true){
       var update={'visible':'legendonly'};
     }
     else{
       var update={'visible':true};
     }
+    if ( curve_nb<$scope.rings[0]){
+      $http.post('set_visible',JSON.stringify({'key':dat.name,'v':update.visible}))
+      .then(function(response){
+        // $log.log(response.data);
+        Plotly.restyle('fig1', update,[curve_nb]);
+      });
+    }
+    else{
+      $http.post('set_visible',JSON.stringify({'key':'rings','v':update.visible}))
+      .then(function(response){
+        // $log.log(response.data);
+        Plotly.restyle('fig1', update,$scope.rings);
+      });
+    }
 
-    $http.post('set_visible',JSON.stringify({'key':dat.name,'v':update.visible}))
-    .then(function(response){
-      // $log.log(response.data);
-      Plotly.restyle('fig1', update,[data.curveNumber]);
-    });
     return false;
   }
 
@@ -211,12 +224,23 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   $scope.update_bloch=function(){
     // $log.log($scope.bloch['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
-      $scope.bloch_solve_set('Solving');
-      $http.post('solve_bloch',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.modes['manual']}))
+      $scope.bloch_solve_set('Assembling');
+      $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.modes['manual']}))
       .then(function(response){
         $scope.load_bloch(response.data);
-        $scope.update_graph();
-        $scope.bloch_solve_set('Solved');
+        if (response.data.nbeams>1000){
+          $log.log('too many beams sorry');
+          $scope.bloch_solve_set('Solve');
+        }
+        else{
+          $scope.bloch_solve_set('Solving');
+          $http.post('solve_bloch',JSON.stringify())
+          .then(function(response){
+            $scope.fig1 = response.data;//JSON.parse(response.data.fig);
+            $scope.update_graph();
+            $scope.bloch_solve_set('Solved');
+          });
+        }
       });
     }
   };
@@ -229,8 +253,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   }
 
   $scope.load_bloch = function (data){
-    $scope.fig1      = JSON.parse(data.fig);
+    $scope.fig1 = JSON.parse(data.fig);
     $scope.bloch     = data.bloch;
+    $scope.rings     = data.rings;
     $scope.nbeams    = data.nbeams;
     $scope.theta_phi = data.theta_phi.split(',');
   }
@@ -240,6 +265,16 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.graph=$scope.graphs['u3d']
     $scope.modes['single']=false;
     $http.post('show_u',JSON.stringify({'rock':$scope.rock,'u':$scope.bloch['u']}))
+      .then(function(response){
+        $scope.fig2 = response.data;
+        // $log.log()
+    });
+  }
+
+  $scope.show_scat=function(){
+    $scope.graph=$scope.graphs['scat']
+    $scope.modes['single']=false;
+    $http.post('show_sf')
       .then(function(response){
         $scope.fig2 = response.data;
         // $log.log()
@@ -417,15 +452,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   }
 
 
-  $scope.update_omega = function (e) {
-    if (event.key=='Enter') {
-      $http.post('update_omega',JSON.stringify({'omega':$scope.omega}))
-      .then(function(response){
-        $scope.fig1 = response.data;
-      })
-    }
-  }
-
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Thickness
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -483,6 +509,15 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // misc stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
+  $scope.update_omega = function (e) {
+    if (event.key=='Enter') {
+      $http.post('update_omega',JSON.stringify({'omega':$scope.omega}))
+      .then(function(response){
+        $scope.fig1 = response.data;
+      })
+    }
+  }
+
   $scope.update = function(){
     switch ($scope.modes['analysis']){
       case 'bloch':
@@ -513,6 +548,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         case '3d':
           $scope.show_u();
           break;
+        case 'scat':
+          $scope.show_scat();
+          break;
       }
     }
   }
@@ -530,6 +568,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $http.post('set_max_res',JSON.stringify({'max_res':$scope.max_res}))
       .then(function(response){
         $scope.fig1 = response.data;
+        if ($scope.graph.type=='scat' && !$scope.modes['single']){
+          $scope.show_scat();
+        }
     });
   }
 
@@ -553,7 +594,8 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.theta_phi = response.data.theta_phi.split(',');
         $scope.omega     = response.data.omega;
         $scope.expand    = response.data.expand;
-        $scope.rock_state=response.data.rock_state;
+        $scope.rock_state= response.data.rock_state;
+        $scope.graph     = $scope.graphs[response.data.graph];
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
         $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
         $scope.mode_style[$scope.modes['analysis']]=mode_style;
@@ -564,6 +606,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         }
         $scope.structures = response.data.structures;
         $scope.gifs = response.data.gifs;
+        $scope.bloch_solve_reset();
         $scope.update()
       });
   }
@@ -588,12 +631,12 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   // $scope.rock_done = false;
   $scope.input={'theta':false,'phi':false,'dtp':false ,'rock_sim':true};
   $scope.structures = [];
-  $scope.all_graphs={thick:{type:'thick',desc:'thickness'},u3d:{type:'3d',desc:'3d view'},rock:{type:'rock',desc:'rocking curve'}}
+  $scope.all_graphs={thick:{type:'thick',desc:'thickness'},
+    u3d:{type:'3d',desc:'3d view'},rock:{type:'rock',desc:'rocking curve'},
+    scat:{type:'scat',desc:'scattering factors'}}
   $scope.graphs=JSON.parse(JSON.stringify($scope.all_graphs));
-  $scope.graph=$scope.graphs['thick'];
   var mode_style = {"border-style":'solid','background-color':'#18327c'};
-  var bloch_colors={'Solve':'blue','Solving':'red','Solved':'green'}
-  $scope.bloch_solve_reset();
+  var bloch_colors={'Solve':'blue','Solving':'red','Solved':'green','Assembling':'red'}
   $scope.show={}
 
   // $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}

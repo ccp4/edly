@@ -24,13 +24,12 @@
 - include kinematic
 - Fkin vs Fdyn
 - improve speed show_u : ui,uf, u_int
-- resolution rings
 - occasional crash when updating frames and errors
-- show  electron scattering factor
+- show electron scattering factor for all elements
 - provide the number of beams before solving
-- ask before solving 
-- uglymol
+- ask before solving full bloch
 - downloadable intensities
+- uglymol
 
 ### bugs
 

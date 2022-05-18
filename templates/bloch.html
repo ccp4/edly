@@ -236,7 +236,7 @@
                       </span>
                     </td>
                     <td class="td-in">
-                      <input type="number" min="0" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
+                      <input type="number" min="0" max="20" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
                     </td>
                   </tr>
                   <!-- Smax -->
@@ -861,7 +861,7 @@ function open_link(link){
 <link rel="stylesheet" href="static/bower_components/jquery-ui/themes/base/jquery-ui.css">
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" /> -->
 
-<script src="static/js/jsmol.js"></script>
+<!-- <script src="static/js/jsmol.js"></script> -->
 
 </body>
 </html>
