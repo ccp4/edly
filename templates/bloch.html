@@ -236,7 +236,7 @@
                       </span>
                     </td>
                     <td class="td-in">
-                      <input type="number" min="0" max="20" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
+                      <input type="number" min="0" max="30" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
                     </td>
                   </tr>
                   <!-- Smax -->
@@ -371,7 +371,7 @@
                         </td>
                       </tr>
                       <tr><td class="td-in"> npts </td><td class="td-in"> = </td>
-                        <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['nframes']" type="number" min="2" max="100"></td>
+                        <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['nframes']" ng-key-enter="solve_rock()" type="number" min="2" max="100"></td>
                         <td class="td-in" ng-show="dat['pets']">
                           <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="showIt('rock_set')" ng-mouseleave="hideIt('rock_set')">
                             <span class="gg-icon gg-path-back" />

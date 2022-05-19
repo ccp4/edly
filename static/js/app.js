@@ -25,7 +25,7 @@ app.directive('linePlot', function () {
 app.directive('ngKeyEnter', function() {
   function linkFunc(scope, element, attrs) {
     element.bind("keydown keypress", function(event) {
-      if (event.which === 13) {
+      if (event.which == 13) {
         scope.$apply(function() {
             scope.$eval(attrs.ngKeyEnter);
         });
@@ -312,6 +312,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   }
 
   $scope.solve_rock=function(){
+    $log.log($scope.solve_rock_btn,$scope.rock_state)
     if ($scope.solve_rock_btn=='Solve rock'){
     // if ($scope.solve_rock_btn[$scope.rock_state]=='Solve rock'){
       $http.post('set_rock',JSON.stringify({'rock':$scope.rock,'bloch':$scope.bloch}))
@@ -331,15 +332,20 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         }, 100);
         $http.post('solve_rock')
         .then(function(response){
-          $interval.cancel(interval);
           $scope.nrock_beams = response.data.nbeams;
           $scope.rock_style = {'background-color':'green'};
           $scope.rock_state = 'done';
-          $scope.solve_rock_btn = $scope.rock_state;
+          $scope.solve_rock_btn = 'done';
           $scope.set_available_graphs('rock',true);
           $scope.set_rock_sim(1);
+          $log.log('completed');
+          $interval.cancel(interval);
+          // $scope.rock_state = 'done';
+          // $scope.solve_rock_btn = 'done';
         })
       })
+      $scope.rock_state = 'done';
+      $scope.solve_rock_btn = 'done';
     }
   }
 
@@ -491,6 +497,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
       $http.post('update_thickness',JSON.stringify({'thick':$scope.bloch['thick']}))
       .then(function(response){
         $scope.fig1 = response.data;
+        if ($scope.modes['u']=='rock'){
+          $scope.show_rock();
+        }
       });
     }
   }
@@ -536,7 +545,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
   }
 
   $scope.update_graph=function(){
-    // $log.log($scope.graph.type);
+    // $log.log($scope.graph);
     if (!$scope.modes['single']){
       switch ($scope.graph.type){
         case 'thick':
@@ -550,6 +559,10 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
           break;
         case 'scat':
           $scope.show_scat();
+          break;
+        default :
+          $scope.graph = $scope.graphs['thick'];
+          $scope.beam_vs_thickness();
           break;
       }
     }
@@ -595,8 +608,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.omega     = response.data.omega;
         $scope.expand    = response.data.expand;
         $scope.rock_state= response.data.rock_state;
-        $scope.graph     = $scope.graphs[response.data.graph];
+        $log.log(response.data.graph)
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
+        $scope.graph = $scope.graphs[response.data.graph];
         $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
         $scope.mode_style[$scope.modes['analysis']]=mode_style;
         $scope.max_res=response.data.max_res;

@@ -1,7 +1,7 @@
 # TODO
 
 ### issue#12 FELIX option
-- enable solve from felix and run on other machines
+- enable solve from Felix and run on other machines
 
 ### issue#13 CBED
 - CBED panel
@@ -18,6 +18,10 @@
 ### issue#18 save option
 - save/load sim info with a name
 
+### issue#19 Structure factors from gemmi
+- Use gemmi
+- use resolution instead of Nmax
+
 ### misc
 - generate frame/integrated frame settings
 - long time chrome violation warning
@@ -25,11 +29,9 @@
 - Fkin vs Fdyn
 - improve speed show_u : ui,uf, u_int
 - occasional crash when updating frames and errors
-- show electron scattering factor for all elements
-- provide the number of beams before solving
-- ask before solving full bloch
-- downloadable intensities
+- download data
 - uglymol
+- bug rock curve 
 
 ### bugs
 

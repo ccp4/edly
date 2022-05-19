@@ -75,8 +75,8 @@ def upload_cif():
 @bw_app.route('/new_structure', methods=['POST'])
 def new_structure():
     data = request.form
-    mol=data['name']
-    val=data['val']
+    mol = data['name']
+    val = data['val']
 
     path=mol_path(mol)
     cif_file=os.path.join(path,data[val])
@@ -84,6 +84,8 @@ def new_structure():
     elif val=='pdb':cif_file+='.cif.npy'
 
     msg = 'cif file issue'
+    if not mol or mol=='new':
+        msg='Choose a name for the structure'
     if not os.path.exists(path):
         try:
             check_output('mkdir %s' %path,shell=True)
@@ -188,8 +190,8 @@ def bloch_fig():
             x=q0*np.cos(t),y=q0*np.sin(t),
             legendgroup="resolution rings",
             legendgrouptitle_text="rings",
-            name=name,hovertext=name,
-            hovertemplate='<b>%{hovertext}</b>',
+            name=name,hovertext=['q=%.3f recA' %q0]*t.size,
+            hovertemplate='<b>ring</b><br>%{hovertext}<br>res='+name+'<extra></extra>',
             visible=session['vis']['rings'],
             mode='lines',marker_color='purple',
         ))
@@ -362,7 +364,7 @@ def show_u():
         )
     )
     # print('3d fig completed')
-    session['graph']='3d'
+    session['graph']='u3d'
     return fig.to_json()
 
 ##############################
@@ -468,6 +470,7 @@ def show_rock():
     data = json.loads(request.data.decode())
     refl = data['refl']
     rock = ut.load_pkl(file=rock_path(session['id']))
+    update_rock_thickness()
 
     df=pd.concat([
         b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']]
@@ -481,6 +484,7 @@ def show_rock():
         title="Rocking curve at z=%d A" %session['bloch']['thick'],
         hovermode='closest',
         paper_bgcolor="LightSteelBlue",
+        xaxis_title='Excitation Error Sw(A^-1)',yaxis_title='Intensity',
         width=fig_wh, height=fig_wh,
     )
     session['graph']='rock'
@@ -489,16 +493,17 @@ def show_rock():
 @bw_app.route('/update_rock_thickness', methods=['POST'])
 def update_rock_thickness():
     rock = ut.load_pkl(file=rock_path(session['id']))
-    self.do('set_thickness',thick=session['bloch']['thick'])
+    rock.do('set_thickness',thick=session['bloch']['thick'])
+
 ########################
 #### Thickness stuffs
 ########################
 @bw_app.route('/update_thickness', methods=['POST'])
 def update_thickness():
     thick = json.loads(request.data.decode())['thick']
-    b0 = ut.load_pkl(get_pkl(session['id']))
+    b0 = ut.load_pkl(session['b0_path'])
     b0.set_thickness(thick=thick)
-    b0.save(get_pkl(session['id']))
+    b0.save(session['b0_path'])
     session['bloch']['thick'] = thick
     session['now'] = time.time()
     return bloch_fig()
@@ -541,6 +546,7 @@ def beam_vs_thick():
         hovermode='closest',
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
+        xaxis_title='thickness(A)',yaxis_title='intensity',
     )
     session['graph']='thick'
     return fig.to_json()
@@ -569,6 +575,7 @@ def show_sf():
     for fe,Ze in zip(fq,Z):
         fig.add_trace(go.Scatter(
             x=q,y=fe,name=Ze,marker_color=cs[Ze],
+
         ))
 
     fig.update_layout(
@@ -576,7 +583,8 @@ def show_sf():
         hovermode='closest',
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
-    )
+        xaxis_title='q(A^-1)',yaxis_title='fe(A)',
+        )
     session['graph']='scat'
     return fig.to_json()
 
@@ -606,6 +614,8 @@ def set_structure():
     # print(data)
     session['mol']=data['mol']
     init_mol()
+    if not session['dat']['pets'] and not session['modes']['manual']:
+        session['modes']['manual'] = True
     return session['mol']
 
 ############################################################################
@@ -686,12 +696,10 @@ def init_mol():
     session['exp'] = exp
     session['zm_counter'] = 0 #dummy variable
     session['frame'] = 1
-    if not session['dat']['pets'] and not session['modes']['manual']:
-        session['modes']['manual'] = True
     session['time']  = now
 
 def init_args():
-    rock_args = {'u0':[0,3,1],'u1':[2,1],'deg':0.5,'nframes':3,'show':0}
+    rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
     bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
         'thick':250,'thicks':[0,300,100]}
     modes = {
