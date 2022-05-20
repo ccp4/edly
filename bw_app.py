@@ -22,6 +22,7 @@ structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s==
 builtins = crystals.Crystal.builtins
 gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
 
+
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -30,38 +31,8 @@ def login_required(f):
             return f(*args, **kwargs)
         else:
             # flash("You need to login first")
-            return redirect(url_for('bw_app.login'))
+            return redirect(url_for('login'))
     return wrap
-
-@bw_app.route('/login', methods=['GET','POST'])
-def login():
-    session['logged_in'] = False
-    if request.method == 'GET':
-        return render_template('login.html')
-    else:
-        username = request.form['username']
-        # passw    = request.form['password']
-        if not username:
-            msg='please enter username'
-        # elif not passw=="ccp4_debloch!":
-        #     msg='wrong password. Contact tarik.drevon@stfc.ac.uk for access'
-        else:
-            session['logged_in'] = True
-            session['username']  = username
-            print('username : ' ,username)
-            msg='ok'
-        return msg
-
-@bw_app.route('/bloch_viewer',methods=['GET'])
-@login_required
-def bloch_viewer():
-    return home()
-    # return redirect(url_for('bw_app.home'))
-
-@bw_app.route('/')
-@login_required
-def home():
-    return render_template('bloch.html',builtins=builtins,gifs=gifs)
 
 
 @bw_app.route('/upload_cif', methods=['POST'])
@@ -659,6 +630,7 @@ def set_structure():
 ############################################################################
 #### Init
 ############################################################################
+@login_required
 @bw_app.route('/init', methods=['GET'])
 def init():
     now = time.time()
