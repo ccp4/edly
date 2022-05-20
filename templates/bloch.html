@@ -38,43 +38,57 @@
 
 
  <body>
-
-
   <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
     <div ng-controller="viewer" class="row" style="margin:0px;padding-left:0px">
+      <!--================================================  -->
+      <!--================================================  -->
+      <!-- HEADER -->
       <div class="header">
-         <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
-         <!-- Menu -->``
-         <div class="menu">
-           <div class="dropdown">
-            <button class="dropbtn">Structures</button>
-            <div class="dropdown-content">
-              <a href="" onclick="dialog_new_structure()">New</a>
-              <a href="" ng-repeat="x in structures" ng-click="set_structure(x)">{a x a}</a>
-            </div>
-           </div>
-           <div class="dropdown">
-            <button class="dropbtn">Links</button>
-            <div class="dropdown-content">
-              <a href="" onclick="open_link('https://www.ccp4.ac.uk/ccp4-ed/projects/dynamical_diffraction/')">Theory</a>
-              <a href="" onclick="open_link('https://debloch.readthedocs.io/en/latest/reference/debloch.bloch.Bloch.html')">Documentation</a>
-              <a href="" onclick="open_link('http://ccp4serv6.rc-harwell.ac.uk:8010/blochwave/report/report.html')">Tests</a>
-            </div>
-           </div>
-           <div class="dropdown">
-            <button class="dropbtn">How to</button>
-            <div class="dropdown-content">
-              <a href="" ng-repeat="(tle,gif) in gifs" ng-bind="tle" ng-mouseenter="showIt(tle)" ng-mouseleave="hideIt(tle)">
-              </a>
-            </div>
-           </div>
-         </div><!-- menu -->
-         <div ng-repeat="(tle,gif) in gifs" ng-show="popup[tle]" class="gif"/>
-           <a href="{a gif a}"> <img ng-src="{a gif a}"  /></a>
-        </div>
+        <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
+        <!-- Menu -->
+        <div class="menu">
+         <div class="dropdown">
+          <button class="dropbtn">Structures</button>
+          <div class="dropdown-content">
+            <a href="" onclick="dialog_new_structure()">New</a>
+            <a href="" ng-repeat="x in structures" ng-click="set_structure(x)">{a x a}</a>
+          </div>
+         </div>
+         <div class="dropdown">
+          <button class="dropbtn">Links</button>
+          <div class="dropdown-content">
+            <a href="" onclick="open_link('https://www.ccp4.ac.uk/ccp4-ed/projects/dynamical_diffraction/')">Theory</a>
+            <a href="" onclick="open_link('https://debloch.readthedocs.io/en/latest/reference/debloch.bloch.Bloch.html')">Documentation</a>
+            <a href="" onclick="open_link('http://ccp4serv6.rc-harwell.ac.uk:8010/blochwave/report/report.html')">Tests</a>
+          </div>
+         </div>
+         <div class="dropdown">
+          <button class="dropbtn">How to</button>
+          <div class="dropdown-content">
+            <!-- <a href="" ng-repeat="(tle,gif) in gifs" ng-bind="tle" onclick="dialog_gif(this,tle,gif)" > -->
+              <!-- ng-mouseenter="showIt(tle)" ng-mouseleave="hideIt(tle)" > -->
+          {% for (tle,gif) in gifs.items() %}
+            <a href="" onclick="open_gif_dialog(this,'{{tle}}','{{gif}}')" >
+             {{tle}}
+            </a>
+          {% endfor %}
+          </div>
+         </div>
+        </div><!-- menu -->
+      </div><!-- header -->
+      <!-- Open dialog to show GIFS -->
+      <div id="dialog-gif" title="how to" >
+        <!-- <div id="gif"></div> -->
       </div>
+      <!-- <div class="row" style="background-color:blue;">
+        <div ng-repeat="(tle,gif) in gifs" ng-show="popup[tle]" class="gif">
+          <a href="{a gif a}"> <img ng-src="{a gif a}"  /></a>
+        </div>
+      </div> -->
 
-      <!-- Panel -->
+      <!-- ================================================================= -->
+      <!-- ================================================================= -->
+      <!-- PANEL =================================-->
       <div class="col-sm-2" style="padding-left:5px;padding-right:0px;">
         <div class="panel" style="background-color:#b5ccda">
 
@@ -749,6 +763,31 @@ function highlight(miller_indices,val){
   }
 }
 
+</script>
+
+<script>
+var gif_dialog;
+$(document).ready(function () {
+  gif_dialog = $( "#dialog-gif" ).dialog({
+    autoOpen: false,
+    height: 980,
+    width: 1600,
+    modal: true,
+    buttons: {
+      Cancel: function() {
+        gif_dialog.dialog( "close" );
+      },
+    },
+    close: function() {
+    }
+  });
+});
+
+function open_gif_dialog(elt,tle,gif){
+  // console.log(tle,gif);
+  $('#dialog-gif')[0].innerHTML=`<h2>${tle}</h2> <a href="${gif}" > <img style="border:solid" src="${gif}"  /></a>`
+  gif_dialog.dialog( "open" );
+};
 </script>
 
 

@@ -658,7 +658,6 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.omega     = response.data.omega;
         $scope.expand    = response.data.expand;
         $scope.rock_state= response.data.rock_state;
-        $log.log(response.data.graph)
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
         $scope.graph = $scope.graphs[response.data.graph];
         $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
@@ -670,7 +669,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
           addRow_tagTable(h);
         }
         $scope.structures = response.data.structures;
-        $scope.gifs = response.data.gifs;
+        // $scope.gifs = response.data.gifs;
         $scope.bloch_solve_reset();
         $scope.update()
       });
