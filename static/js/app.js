@@ -520,10 +520,10 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
           updated=true;
           break;
         case 34:
-          $scope.dthick+=5;
+          $scope.dthick+=1;
           break;
         case 33:
-          $scope.dthick-=5;
+          $scope.dthick-=1;
           break;
         case 8:
           $scope.dthick=5;

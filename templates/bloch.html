@@ -501,14 +501,15 @@
                       </a>
                       <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['move_thick']=true" ng-mouseleave="popup['move_thick']=false" style="top:-10px;">
                         <span ng-show="popup['move_thick']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
-                          <b>Click on hand and use keys :</b>
+                          <b>Click on hand button and use keys :</b>
                           <br> &nbsp; arrows   : increase/decrease thickness
                           <br> &nbsp;&nbsp; up/down    : by dthick
                           <br> &nbsp;&nbsp; left/right : by 10*dthick
-                          <br> &nbsp; pageup   : decrease dthick
-                          <br> &nbsp; pagedown : increase dthick
-                          <br> where :
-                          <br> &nbsp; dthick is the thickness increment currently at
+                          <br> &nbsp; pageup    : decrease dthick
+                          <br> &nbsp; pagedown  : increase dthick
+                          <br> &nbsp; backspace : reset dthick to 5A
+                          <br> <b>where : </b>
+                          <br> &nbsp; dthick is the thickness increment
                           <br> &nbsp; dthick=<span ng-bind="dthick"></span>A
                         </span>
                     </td>
