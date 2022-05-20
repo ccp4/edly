@@ -1,8 +1,5 @@
 # TODO
 
-### issue#12 FELIX option
-- enable solve from Felix and run on other machines
-
 ### issue#13 CBED
 - CBED panel
 - run CBED
@@ -31,7 +28,6 @@
 - occasional crash when updating frames and errors
 - download data
 - uglymol
-- bug rock curve 
 
 ### bugs
 

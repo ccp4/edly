@@ -207,6 +207,8 @@
                 </a>
                 <div style="font-size:14px;margin-bottom:5px;">Simulation parameters :</div>
                 <table style="margin-left: 10px;" ng-show="expand['sim']">
+                <tr><td>
+                <table>
                   <!-- keV -->
                   <tr>
                     <td class="td-in">
@@ -228,7 +230,7 @@
                     </td>
                   </tr>
                   <!-- Nmax -->
-                  <tr>
+                  <tr ng-hide="bloch['felix']">
                     <td class="td-in">
                       <span>Nmax</span>
                       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['Nmax']=true" ng-mouseleave="popup['Nmax']=false" >
@@ -240,7 +242,7 @@
                     </td>
                   </tr>
                   <!-- Smax -->
-                  <tr>
+                  <tr ng-hide="bloch['felix']">
                     <td class="td-in">
                       <span> Smax </span>
                       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['Smax']=true" ng-mouseleave="popup['Smax']=false" >
@@ -251,7 +253,30 @@
                       <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
                     </td>
                   </tr>
-                </table>
+                  <!-- nbeams -->
+                  <tr ng-show="bloch['felix']">
+                    <td class="td-in">
+                      <span> nbeams </span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['nbeams']=true" ng-mouseleave="popup['nbeams']=false" >
+                        <span class="popuptext" ng-show="popup['nbeams']"> Number of beams to include </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <input type="number" min="1" max="2000" ng-model="bloch['nbeams']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
+                    </td>
+                  </tr>
+                <!-- FELIX option -->
+                </table></td>
+                <td class="td-in" style="width:35%">
+                  <div style="width: 60%;margin:5px"><img src="/static/images/felix.png"/></div>
+                  <input type="checkbox" ng-model="bloch['felix']" ng-change="toggle_felix()"/>
+                  <span>  Felix </span>
+                  <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['felix']=true" ng-mouseleave="popup['felix']=false">
+                    <span class="popuptext" ng-show="popup['felix']"> Use <a style="color: #1431ea;" href=https://github.com/rbeanland/Felix> Felix </a> solver </span>
+                  </span>
+                </td>
+                </tr></table>
+                <!-- <div> -->
               </div>
             </div>
 
@@ -476,11 +501,14 @@
                       </a>
                       <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['move_thick']=true" ng-mouseleave="popup['move_thick']=false" style="top:-10px;">
                         <span ng-show="popup['move_thick']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
-                          Click and use :
+                          <b>Click on hand and use keys :</b>
                           <br> &nbsp; arrows   : increase/decrease thickness
+                          <br> &nbsp;&nbsp; up/down    : by dthick
+                          <br> &nbsp;&nbsp; left/right : by 10*dthick
                           <br> &nbsp; pageup   : decrease dthick
                           <br> &nbsp; pagedown : increase dthick
-                          <br> &nbsp; dthick : thickness increment
+                          <br> where :
+                          <br> &nbsp; dthick is the thickness increment currently at
                           <br> &nbsp; dthick=<span ng-bind="dthick"></span>A
                         </span>
                     </td>
@@ -559,7 +587,8 @@
                   <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
                   <span class="popuptext" style="" ng-show="popup['single_mode']"> toggle single/dual mode </span>
                 </a>
-                <span>max res : <input class="sm_input" type="number" min="0" ng-model="max_res" ng-key-enter="set_max_res()"></span>
+                <span>max res (recA) : <input class="sm_input" type="number" min="0" ng-model="max_res" ng-key-enter="set_max_res()"></span>
+                <span>&nbsp; rings spacing (recA) : <input class="sm_input" type="number" min="0" ng-model="dq_ring" ng-key-enter="set_ring_spacing()"></span>
               </td>
               <td ng-hide="modes['single']">
                 <select ng-model="graph" ng-options="x.desc for x in graphs" ng-change="update_graph()"></select>

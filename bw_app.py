@@ -91,7 +91,9 @@ def new_structure():
             check_output('mkdir %s' %path,shell=True)
             if   val=='cif' :
                 if data['cif'] in crystals.Crystal.builtins:
-                    crystals.Crystal.from_database(data['cif']).to_cif(cif_file)
+                    crys = crystals.Crystal.from_database(data['cif'])
+                    # ut.cif2felix(crys,opt='w',out=cif_file)
+                    cif_file=data[val]
             elif val=='pdb' :
                 if data['pdb']:
                     ut.pdb2npy(data['pdb'],cif_file)
@@ -103,6 +105,7 @@ def new_structure():
             #check sucessful import
             if cif_file:
                 crys=ut.import_crys(cif_file)
+                print(cif_file)
                 session['mol']=mol
                 init_session()
                 msg='ok'
@@ -183,7 +186,8 @@ def bloch_fig():
     xm = session['max_res']
     if not xm:
         xm = b0.df_G.q.max()
-    t,qs = np.linspace(0,2*np.pi,100),np.arange(0.25,xm,0.25)
+    dq_ring = session['dq_ring']
+    t,qs = np.linspace(0,2*np.pi,100),np.arange(dq_ring,xm,dq_ring)
     for q0 in qs:
         name='%.2f A' %(1/q0)
         fig.add_trace(go.Scatter(
@@ -216,10 +220,13 @@ def bloch_fig():
 @bw_app.route('/get_frame', methods=['POST'])
 def get_frame():
     data=json.loads(request.data.decode())
-    frame = int(data['frame'])
     zmax  = data['zmax']
-    exp_img = get_img_frame(frame,zmax['exp'],'exp')
-    sim_img = get_img_frame(frame,zmax['sim'],'sim')
+    frame = int(data['frame'])
+    exp_img,sim_img = ['static/images/dummy.png']*2
+    if session['dat']['sim']:
+        sim_img = get_img_frame(frame,zmax['sim'],'sim')
+    if session['dat']['exp']:
+        exp_img = get_img_frame(frame,zmax['exp'],'exp')
     session['frame']=frame  #;print(frame)
     return json.dumps({'exp':exp_img,'sim':sim_img})
 
@@ -261,9 +268,11 @@ def get_img_frame(frame,zmax,key):
     return new_tmp
 
 
-########################
+########################################################################
+########################################################################
 #### Bloch
-########################
+########################################################################
+########################################################################
 @bw_app.route('/update_omega', methods=['POST'])
 def update_omega():
     data=json.loads(request.data.decode())
@@ -318,15 +327,18 @@ def update_bloch():
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
     bloch_args=b_args.copy()
     bloch_args.update({'u':b_str(b_args['u'],4),'thicks':b_str(b_args['thicks'],0)})
-    fig_data = bloch_fig()
+    if session['bloch']['felix']:
+        fig_data=go.Figure().to_json()
+    else:
+        fig_data = bloch_fig()
     info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,'rings':session['rings'],
         'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
     return info
 
 @bw_app.route('/solve_bloch', methods=['POST'])
 def solve_bloch():
-    b0 = ut.load_pkl(get_pkl(session['id']))
-    b0.solve(opts='vts')#opts=session['bloch']['opts'])
+    b0 = ut.load_pkl(session['b0_path'])
+    b0.solve(opts='vts',felix=session['bloch']['felix'])#opts=session['bloch']['opts'])
     # fig_data.show()
     # fig_data=fig_data.to_json()
     return bloch_fig()
@@ -384,6 +396,24 @@ def rock_state():
                 session['rock_state'] = 'done'
     # print(session['rock_state'])
     return json.dumps(session['rock_state'])
+
+@bw_app.route('/bloch_state', methods=['GET'])
+def bloch_state():
+    state='unknown'
+    log = os.path.join(session['path'],'felix/felix.log')
+    # print(glob.glob(session['path']+'/felix/felix.log'))
+    if os.path.exists(log):
+        with open(log,'r') as f:lines=f.readlines()
+        nlines = len(lines)
+        if nlines<11    : state='mpi init'
+        elif nlines<15  : state='structure factors' #Mean inner potential
+        elif nlines<18  : state='Absorption'        #Starting absorption calculation..
+        elif nlines==18 : state='Solving'           #Bloch wave calculation...
+        elif nlines<32  : state='postprocessing'    #Writing simulations for
+        else            : state='Solved'
+        # if any(['Calculation' in l for l in lines]):state='done'
+    session['bloch_state']=state
+    return session['bloch_state'] #json.dumps()
 
 @bw_app.route('/set_rock_frame', methods=['POST'])
 def set_rock_frame():
@@ -556,9 +586,11 @@ def beam_vs_thick():
 ########################
 #### misc
 ########################
-@bw_app.route('/set_max_res', methods=['POST'])
+@bw_app.route('/set_fig1', methods=['POST'])
 def set_max_res():
-    session['max_res'] = json.loads(request.data.decode())['max_res']
+    data =json.loads(request.data.decode())
+    session['max_res'] = data['max_res']
+    session['dq_ring'] = data['dq_ring']
     # print(session['max_res'])
     return bloch_fig()
 
@@ -637,6 +669,7 @@ def init():
         session['mol'] = 'diamond'
         session['path'] = session_path
         session['id']   = id
+        session['b0_path']    = get_pkl(session['id'])
         init_session()
 
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
@@ -647,7 +680,7 @@ def init():
 
     # print('sending init info')
     info=['mol','dat','frame','crys','cif_file',
-        'modes','omega','expand','refl','max_res','graph']
+        'modes','omega','expand','refl','max_res','dq_ring','graph']
     session_data = {k:session[k] for k in info}
     session_data['theta_phi'] = b_str(session['theta_phi'],2)
     session_data['bloch'] = get_session_data('bloch')
@@ -681,8 +714,16 @@ def init_mol():
         'sim':type(sim)==dict,
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets'))}
 
+    # if not os.path.exists(session['b0_path']):
     cif_file = glob.glob(os.path.join(mol_path(mol),'*.cif*'))[0]
+    ##crystals library is rubbish as saved cif messes up the symmetry
+    cif_base = os.path.basename(cif_file)[:-4]
+    if cif_base in crystals.Crystal.builtins:
+        cif_file=cif_base
     crys = ut.import_crys(cif_file)
+    # else:
+    #     b0=ut.load_pkl(session['b0_path'])
+    #     crys,cif_file=b0.crys,b0.cif_file
     crys_dat = {'file':os.path.basename(cif_file)}
     crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
     crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
@@ -701,7 +742,7 @@ def init_mol():
 def init_args():
     rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
     bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
-        'thick':250,'thicks':[0,300,100]}
+        'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200}
     modes = {
         'molecule'  : False,
         'analysis'  : 'bloch',
@@ -709,11 +750,13 @@ def init_args():
         'u'         : 'edit',
         'single'    : False,
     }
-    expand_bloch = {'omega':False,'thick':False,'refl':False,'sim':False,'u':True,}
+    expand_bloch = {'omega':False,'struct':False,'thick':False,
+        'refl':False,'sim':False,'u':True,}
 
     now = time.time()
     # session['mol2']  = mol
     session['rings'] = []
+    session['dq_ring']  = 0.25
     session['omega']    = 157 #in-plane rotation angle
     session['modes']    = modes
     session['max_res']  = 0
@@ -725,7 +768,6 @@ def init_args():
     session['refl']       = []
     session['graph']      = 'thick'
     session['last_time']  = now
-    session['b0_path']    = get_pkl(session['id'])
     session['time'] = now
 
 

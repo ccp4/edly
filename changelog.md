@@ -1,6 +1,15 @@
 # Version log
 
 ## 0.0.2
+### issue#12 FELIX option (Fri 20 May 13:24:16 BST 2022)
+- enable solve from Felix with `bloch_state` recording
+- felix widget with `nbeams` parameter
+- added rings step
+- changed cif file handling due to crystals lib pbs
+- minor change on get_frame
+- left/right for large thickness stepping
+- automatic reflection expand on select and thickness on solved
+
 ### Thu 19 May 12:08:35 BST 2022
 - fixed bug updating thickness for rocking curve simu
 - updating rocking curves thickness
