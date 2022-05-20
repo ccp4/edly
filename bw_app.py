@@ -52,6 +52,11 @@ def login():
             msg='ok'
         return msg
 
+@bw_app.route('/bloch_viewer')
+@login_required
+def bloch_viewer():
+    return redirect(url_for('bw_app.home'))
+
 @bw_app.route('/')
 @login_required
 def home():
