@@ -52,10 +52,11 @@ def login():
             msg='ok'
         return msg
 
-@bw_app.route('/bloch_viewer')
+@bw_app.route('/bloch_viewer',methods=['GET'])
 @login_required
 def bloch_viewer():
-    return redirect(url_for('bw_app.home'))
+    return home()
+    # return redirect(url_for('bw_app.home'))
 
 @bw_app.route('/')
 @login_required
