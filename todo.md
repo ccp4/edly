@@ -12,22 +12,20 @@
 ### issue#17 handle accounts
 - create account for uploading comparison to experiments or saving simulations
 
-### issue#18 save option
+### issue#19 save option
 - save/load sim info with a name
 
-### issue#19 Structure factors from gemmi
-- Use gemmi
-- use resolution instead of Nmax
 
 ### misc
-- generate frame/integrated frame settings
-- long time chrome violation warning
-- include kinematic
-- Fkin vs Fdyn
-- improve speed show_u : ui,uf, u_int
 - occasional crash when updating frames and errors
+- long time chrome violation warning
+- include kinematic Fkin vs Fdyn
+- improve speed show_u : ui,uf, u_int
 - download data
 - uglymol
+- swap u to exp lock when there is pets data
+- enable solve when swapping lock
+- generate frame/integrated frame settings
 
 ### bugs
 

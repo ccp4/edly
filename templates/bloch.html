@@ -244,15 +244,27 @@
                     </td>
                   </tr>
                   <!-- Nmax -->
-                  <tr ng-hide="bloch['felix']">
+                  <tr ng-show="!bloch['felix'] && !bloch['gemmi']">
                     <td class="td-in">
-                      <span>Nmax</span>
+                      <span href="" ng-dblclick="bloch['gemmi']=true">Nmax</span>
                       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['Nmax']=true" ng-mouseleave="popup['Nmax']=false" >
-                        <span class="popuptext" ng-show="popup['Nmax']"> Maximum resolution : reflection index would be (Nmax,Nmax,Nmax) </span>
+                        <span class="popuptext" ng-show="popup['Nmax']"> Largest reflection would be (Nmax,Nmax,Nmax). <br>Double click to specify resolution instead.</span>
                       </span>
                     </td>
                     <td class="td-in">
                       <input type="number" min="0" max="30" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
+                    </td>
+                  </tr>
+                  <!-- dmin -->
+                  <tr ng-show="!bloch['felix'] && bloch['gemmi']">
+                    <td class="td-in">
+                      <span href="" ng-dblclick="bloch['gemmi']=false">dmin</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['dmin']=true" ng-mouseleave="popup['dmin']=false" >
+                        <span class="popuptext" ng-show="popup['dmin']"> Maximum resolution specification(result might be quite different).<br>Double click to specify Nmax </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <input type="number" min="0.25" max="3" ng-model="bloch['dmin']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
                     </td>
                   </tr>
                   <!-- Smax -->
@@ -678,11 +690,11 @@
     <form>
       <fieldset>
         <label for="name">Name</label>
-        <input type="text" name="name" id="name" value="new" class="text ui-widget-content ui-corner-all">
+        <input type="text" name="name" id="name" value="" class="text ui-widget-content ui-corner-all">
         <div> Please, provide a cif file from : </div>
         <label for="radio-1">builtins</label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_cif" >
-        <label for="radio-2">pdb     </label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_pdb">
-        <label for="radio-3">file    </label><input onclick="set_cif()" type="radio" name="radio-1" id="radio_file" checked=true>
+        <label for="radio-2">pdb     </label><input onclick="set_cif()"  type="radio" name="radio-1" id="radio_pdb" checked=true>
+        <label for="radio-3">file    </label><input onclick="set_cif()" type="radio" name="radio-1" id="radio_file" >
         <div id="cif_cif">
           <label for="cif"> Name : </label>
           <select name="cif" id="cif">
@@ -844,7 +856,7 @@ $(document).ready(function () {
            window.location='/'
          }
          else{
-           show_error(data)
+           show_error(data,true)
          }
       }
     });
@@ -875,8 +887,8 @@ function upload_cif(){
     }
     else{
       // console.log(file.size);
-      if (file.size > 1000*1024) {
-        show_error('max upload size is 1Mo',true);return
+      if (file.size > 10000*1024) {
+        show_error('max upload size is 10Mo',true);return
       }
       else{
         // console.log(file);

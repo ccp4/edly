@@ -1,6 +1,13 @@
 # Version log
 
-## 0.0.2
+## 0.0.3
+### issue#18 (Sat 21 May 17:44:05 BST 2022)
+- Use gemmi
+- use resolution dmin instead of Nmax
+- changed import style when doing new structure(pdb saved to file now)  
+- create object at `init_mol` and only `update` it after
+
+
 ### issue#12 FELIX option (Fri 20 May 13:24:16 BST 2022)
 - enable solve from Felix with `bloch_state` recording
 - felix widget with `nbeams` parameter
@@ -10,6 +17,7 @@
 - left/right for large thickness stepping
 - automatic reflection expand on select and thickness on solved
 
+## 0.0.2
 ### Thu 19 May 12:08:35 BST 2022
 - fixed bug updating thickness for rocking curve simu
 - updating rocking curves thickness

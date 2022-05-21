@@ -75,17 +75,17 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
       var update={'visible':true};
     }
     if ( curve_nb<$scope.rings[0]){
+      Plotly.restyle('fig1', update,[curve_nb]);
       $http.post('set_visible',JSON.stringify({'key':dat.name,'v':update.visible}))
       .then(function(response){
         // $log.log(response.data);
-        Plotly.restyle('fig1', update,[curve_nb]);
       });
     }
     else{
+      Plotly.restyle('fig1', update,$scope.rings);
       $http.post('set_visible',JSON.stringify({'key':'rings','v':update.visible}))
       .then(function(response){
         // $log.log(response.data);
-        Plotly.restyle('fig1', update,$scope.rings);
       });
     }
 
@@ -245,7 +245,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
               $log.log('completed');
               $scope.fig1 = response.data;//JSON.parse(response.data.fig);
               $scope.update_graph();
-              $scope.bloch_solve_set('Solved');
+              $scope.bloch_solve_set('Completed');
               $interval.cancel(interval);
             })
             // $interval.cancel(interval);
@@ -262,7 +262,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
               .then(function(response){
                 $scope.fig1 = response.data;//JSON.parse(response.data.fig);
                 $scope.update_graph();
-                $scope.bloch_solve_set('Solved');
+                $scope.bloch_solve_set('Completed');
               });
             }
           }
@@ -276,7 +276,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     .then(function(response){
       $scope.fig1 = response.data;//JSON.parse(response.data.fig);
       $scope.update_graph();
-      $scope.bloch_solve_set('Solved');
+      $scope.bloch_solve_set('Completed');
     });
   }
 
@@ -700,7 +700,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     scat:{type:'scat',desc:'scattering factors'}}
   $scope.graphs=JSON.parse(JSON.stringify($scope.all_graphs));
   var mode_style = {"border-style":'solid','background-color':'#18327c'};
-  var bloch_colors={'Solve':'#337ab7','Solving':'red','Solved':'green'}
+  var bloch_colors={'Solve':'#337ab7','Solving':'red','Completed':'green'}
   $scope.show={}
 
   // $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}

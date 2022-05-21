@@ -58,39 +58,40 @@ def new_structure():
     path=mol_path(mol)
     cif_file=os.path.join(path,data[val])
     if val=='cif':cif_file+='.cif'
-    elif val=='pdb':cif_file+='.cif.npy'
+    elif val=='pdb':cif_file+='.pdb'
+    # elif val=='file':cif_file.replace('.cif','.struct.cif')
 
     msg = 'cif file issue'
-    if not mol or mol=='new':
-        msg='Choose a name for the structure'
-    if not os.path.exists(path):
-        try:
-            check_output('mkdir %s' %path,shell=True)
-            if   val=='cif' :
-                if data['cif'] in crystals.Crystal.builtins:
-                    crys = crystals.Crystal.from_database(data['cif'])
-                    # ut.cif2felix(crys,opt='w',out=cif_file)
-                    cif_file=data[val]
-            elif val=='pdb' :
-                if data['pdb']:
-                    ut.pdb2npy(data['pdb'],cif_file)
-            elif val=='file':
-                cif_path=os.path.join(session['path'],data['file'])
-                if os.path.exists(cif_path):
-                    check_output('cp %s %s' %(cif_path,cif_file),shell=True)
-
-            #check sucessful import
-            if cif_file:
-                crys=ut.import_crys(cif_file)
-                print(cif_file)
-                session['mol']=mol
-                init_session()
-                msg='ok'
-        except Exception as e:
-            check_output('rm -rf %s' %path,shell=True)
-            msg=e.__str__()
+    if not mol :#or mol=="new":
+        msg='Choose a proper name for the structure'
     else:
-        msg='%s already exists' %mol
+        if not os.path.exists(path):
+            try:
+                check_output('mkdir %s' %path,shell=True)
+                if   val=='cif' :
+                    crys = crystals.Crystal.from_database(data['cif'])
+                    ut.crys2felix(crys,opt='w',out=cif_file)
+                    cif_file=data[val]
+                elif val=='pdb' :
+                    crys = crystals.Crystal.from_pdb(data['pdb'],download_dir='.')
+                    check_output('mv pdb%s.ent %s' %(data['pdb'],cif_file),shell=True)
+                elif val=='file':
+                    cif_path=os.path.join(session['path'],data['file'])
+                    if os.path.exists(cif_path):
+                        check_output('cp %s %s' %(cif_path,cif_file),shell=True)
+
+                #check sucessful import
+                if cif_file:
+                    session['mol']=mol
+                    init_session()
+                    msg='ok'
+            except Exception as e:
+                check_output('rm -rf %s' %path,shell=True)
+                raise Exception(e)
+                msg=e.__str__()
+        else:
+            msg='%s already exists' %mol
+    print(msg)
     return msg
 
 
@@ -295,9 +296,9 @@ def update_bloch():
     b_args = session['bloch']#.copy()
     # print(b_args['u'])
     # b_args['thicks']=None
-    b0 = bloch.Bloch(session['cif_file'],path=session['path'],
-        name='b',solve=False,**b_args)
-    b0.save()
+    b0 = ut.load_pkl(session['b0_path'])
+    b0.update(**b_args)
+    # b0.save()
 
     # session['modes']['analysis'] = 'bloch'
     session['b0_path'] = get_pkl(session['id'])
@@ -387,8 +388,9 @@ def bloch_state():
         elif nlines<18  : state='Absorption'        #Starting absorption calculation..
         elif nlines==18 : state='Solving'           #Bloch wave calculation...
         elif nlines<32  : state='postprocessing'    #Writing simulations for
-        else            : state='Solved'
-        # if any(['Calculation' in l for l in lines]):state='done'
+        else            : state='Completed'
+        if any(['Error' in l for l in lines]):state='error'
+
     session['bloch_state']=state
     return session['bloch_state'] #json.dumps()
 
@@ -647,7 +649,7 @@ def init():
         session['mol'] = 'diamond'
         session['path'] = session_path
         session['id']   = id
-        session['b0_path']    = get_pkl(session['id'])
+        session['b0_path'] = get_pkl(session['id'])
         init_session()
 
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
@@ -692,16 +694,21 @@ def init_mol():
         'sim':type(sim)==dict,
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets'))}
 
-    # if not os.path.exists(session['b0_path']):
-    cif_file = glob.glob(os.path.join(mol_path(mol),'*.cif*'))[0]
-    ##crystals library is rubbish as saved cif messes up the symmetry
-    cif_base = os.path.basename(cif_file)[:-4]
-    if cif_base in crystals.Crystal.builtins:
-        cif_file=cif_base
-    crys = ut.import_crys(cif_file)
-    # else:
-    #     b0=ut.load_pkl(session['b0_path'])
-    #     crys,cif_file=b0.crys,b0.cif_file
+    # if not os.path.exists(session['b0_path']) or new:
+    struct_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
+    if len(struct_files):
+        struct_file=struct_files[0]
+        base_file = os.path.basename(struct_file)[:-4]
+        ##crystals library is rubbish as saved cif messes up the symmetry
+        if base_file in crystals.Crystal.builtins:struct_file=base_file
+    else:
+        struct_file = glob.glob(os.path.join(mol_path(mol),'*.pdb'))[0]
+    # elif os.path.basename(struct_file)[-3:]=='pdb':
+    print(struct_file)
+    b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
+    # b0=ut.load_pkl(session['b0_path'])
+
+    crys,cif_file=b0.crys,b0.cif_file
     crys_dat = {'file':os.path.basename(cif_file)}
     crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
     crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
@@ -719,7 +726,8 @@ def init_mol():
 
 def init_args():
     rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
-    bloch_args={'keV':200,'u':[0,0,1],'Nmax':4,'Smax':0.02,
+    bloch_args={'keV':200,'u':[0,0,1],
+        'Nmax':4,'dmin':1,'gemmi':False,'Smax':0.02,
         'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200}
     modes = {
         'molecule'  : False,
