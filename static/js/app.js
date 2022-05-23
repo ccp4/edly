@@ -69,27 +69,30 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     }
     let dat = event.data[curve_nb];
     if (dat.visible==true){
-      var update={'visible':'legendonly'};
+      var visible='legendonly';
     }
     else{
-      var update={'visible':true};
+      var visible=true;
     }
-    if ( curve_nb<$scope.rings[0]){
-      Plotly.restyle('fig1', update,[curve_nb]);
-      $http.post('set_visible',JSON.stringify({'key':dat.name,'v':update.visible}))
-      .then(function(response){
-        // $log.log(response.data);
-      });
-    }
-    else{
-      Plotly.restyle('fig1', update,$scope.rings);
-      $http.post('set_visible',JSON.stringify({'key':'rings','v':update.visible}))
-      .then(function(response){
-        // $log.log(response.data);
-      });
-    }
-
+    $scope.set_visible(dat.name,curve_nb,visible);
     return false;
+  }
+
+  $scope.set_visible=function(name,curve_nb,visible){
+    if ( curve_nb<$scope.rings[0]){
+      Plotly.restyle('fig1', {'visible':visible},[curve_nb]);
+      $http.post('set_visible',JSON.stringify({'key':name,'v':visible}))
+      .then(function(response){
+        // $log.log(response.data);
+      });
+    }
+    else{
+      Plotly.restyle('fig1', {'visible':visible},$scope.rings);
+      $http.post('set_visible',JSON.stringify({'key':'rings','v':visible}))
+      .then(function(response){
+        // $log.log(response.data);
+      });
+    }
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -271,14 +274,14 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     }
   };
 
-  $scope.solve_bloch=function(){
-    $http.post('solve_bloch',JSON.stringify())
-    .then(function(response){
-      $scope.fig1 = response.data;//JSON.parse(response.data.fig);
-      $scope.update_graph();
-      $scope.bloch_solve_set('Completed');
-    });
-  }
+  // $scope.solve_bloch=function(){
+  //   $http.post('solve_bloch',JSON.stringify())
+  //   .then(function(response){
+  //     $scope.fig1 = response.data;//JSON.parse(response.data.fig);
+  //     $scope.update_graph();
+  //     $scope.bloch_solve_set('Completed');
+  //   });
+  // }
 
   $scope.bloch_solve_set=function(state){
     $scope.bloch_solve_btn=state;
@@ -298,6 +301,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.rings     = data.rings;
     $scope.nbeams    = data.nbeams;
     $scope.theta_phi = data.theta_phi.split(',');
+    $log.log($scope.rings)
   }
 
   $scope.show_u=function(){
@@ -561,7 +565,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.bloch_solve_reset()
   }
 
-  $scope.update_omega = function (e) {
+  $scope.update_omega=function (e) {
     if (event.key=='Enter') {
       $http.post('update_omega',JSON.stringify({'omega':$scope.omega}))
       .then(function(response){
@@ -570,7 +574,8 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     }
   }
 
-  $scope.update = function(){
+  $scope.update=function(){
+    // return new Promise(function(resolve, reject){
     switch ($scope.modes['analysis']){
       case 'bloch':
         if ( ! ($scope.modes['manual'] && $scope.modes['u']=='rock')){
@@ -585,6 +590,8 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
       case 'ms':
         $log.log('ms');break;
     }
+    //   resolve($log.log($scope.rings));
+    // });
   }
 
   $scope.update_graph=function(){
@@ -664,6 +671,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.mode_style[$scope.modes['analysis']]=mode_style;
         $scope.max_res=response.data.max_res;
         $scope.dq_ring=response.data.dq_ring;
+        $scope.rings=$scope.rings;
         var refl=response.data.refl;
         for (let h of refl){
           addRow_tagTable(h);
@@ -671,8 +679,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
         $scope.structures = response.data.structures;
         // $scope.gifs = response.data.gifs;
         $scope.bloch_solve_reset();
+
         $scope.update()
-      });
+    });
   }
 
   var changed=true;

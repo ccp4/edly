@@ -12,6 +12,11 @@ pets_path=lambda mol:glob.glob(os.path.join(mol_path(mol),'pets','*.pts'))[0]
 get_pkl  =lambda id:'static/data/tmp/%s/b.pkl' %id
 rock_path=lambda id:'static/data/tmp/%s/rock_.pkl' %id
 
+
+structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s=="static/data/tmp"]
+builtins = crystals.Crystal.builtins
+gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
+
 def b_str(x,i):
     if i:
         n=10**i

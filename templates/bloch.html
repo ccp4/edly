@@ -95,10 +95,11 @@
           <!-- Structure -->
           <div class="panel">
             <div class="">
-              <a class="btn btn-primary myBtn popup jmol" ng-click="toggle_mode('molecule')" ng-mouseenter="showIt('mol')" ng-mouseleave="hideIt('mol')">
+              <a class="btn btn-primary myBtn popup jmol" ng-mouseenter="showIt('mol')" ng-mouseleave="hideIt('mol')">
+                 <!-- ng-click="toggle_mode('molecule')"> -->
                 <img ng-hide="modes['molecule']" src="/static/images/jsmol.png"/>
                 <img ng-show="modes['molecule']" src="/static/images/edly.png"/>
-                <span class="popuptext" ng-show="popup['mol']"> show/hide molecule </span>
+                <span class="popuptext" ng-show="popup['mol']"> show/hide molecule (not active yet) </span>
               </a>
             </div>
             <div style="font-size:25px">  {a structure a} </div>
@@ -293,7 +294,7 @@
                   </tr>
                 <!-- FELIX option -->
                 </table></td>
-                <td class="td-in" style="width:35%">
+                <td class="td-in" style="width:35%" ng-show="false">
                   <div style="width: 60%;margin:5px"><img src="/static/images/felix.png"/></div>
                   <input type="checkbox" ng-model="bloch['felix']" ng-change="toggle_felix()"/>
                   <span>  Felix </span>
@@ -543,7 +544,7 @@
                   <tr>
                     <td class="td-in popup" ng-mouseenter="popup['thicks']=true" ng-mouseleave="popup['thicks']=false">
                       Range
-                      <span class="popuptext" ng-show="popup['thicks']"> Thickness range for beam vs thickness (t0,t1,nb_points) </span>
+                      <span class="popuptext" ng-show="popup['thicks']"> Thickness range for beam vs thickness (t0,t1,npts)  </span>
                     </td>
                     <td class="td-in">
                       <input ng-key-enter="beam_vs_thickness()" type="text" ng-model="bloch['thicks']"  class="mid_input">
@@ -553,7 +554,7 @@
                         <img style="width: 90%;" src="/static/images/beam_vs_thick.png"/>
                       </a>
                       <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['beams_thick']=true" ng-mouseleave="popup['beams_thick']=false" style="top:-10px;">
-                      <span class="popuptext" ng-show="popup['beams_thick']"> Show beam vs thickness </span>
+                      <span class="popuptext" ng-show="popup['beams_thick']"> Show beam vs thickness (init_thick,final_thick,nb_points) </span>
                     </td>
                   </tr>
                 </table>
@@ -571,10 +572,11 @@
                 <div style="font-size:14px;margin-bottom:5px;">Selected reflections
                   <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['sel_refl']=true" ng-mouseleave="popup['sel_refl']=false" >
                     <span ng-show="popup['sel_refl']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
-                      Reflections used for displaying :
+                      <b> Click on diffraction pattern to select reflections : </b>
+                      <br>These are used for displaying :
                       <br> &nbsp;&nbsp;beam_vs_thickness
                       <br> &nbsp;&nbsp;rocking curves
-                      <br> Click on diffraction pattern to select
+
                     </span>
                   </span>
                 </div>
@@ -679,7 +681,8 @@
     <!-- footer  -->
     <footer class="footer">
        Copyright © 2021, CCP4
-       <div>Author : Tarik Drevon<div>
+       <div>Author : Tarik Drevon</div>
+       <div>version : {{version}}</div>
     </footer>
   </div>
 

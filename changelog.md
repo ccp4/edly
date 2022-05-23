@@ -1,5 +1,13 @@
 # Version log
 
+## 0.0.4
+### issue#19 (Mon 23 May 10:46:46 BST 2022)
+- Vga and Sw legendonly at start
+- lock u switching to glycine
+- created `set_viewer` with url parameters
+- introduced server dependent home url
+- added version number 
+
 ## 0.0.3
 ### issue#18 (Sat 21 May 17:44:05 BST 2022)
 - Use gemmi

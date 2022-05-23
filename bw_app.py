@@ -18,9 +18,6 @@ bw_app = Blueprint('bw_app', __name__)
 
 fig_wh=725
 pets_data = {}
-structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s=="static/data/tmp"]
-builtins = crystals.Crystal.builtins
-gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
 
 
 def login_required(f):
@@ -171,7 +168,7 @@ def bloch_fig():
         fig.add_trace(go.Scatter(
             x=q0*np.cos(t),y=q0*np.sin(t),
             legendgroup="resolution rings",
-            legendgrouptitle_text="rings",
+            legendgrouptitle_text="res rings",
             name=name,hovertext=['q=%.3f recA' %q0]*t.size,
             hovertemplate='<b>ring</b><br>%{hovertext}<br>res='+name+'<extra></extra>',
             visible=session['vis']['rings'],
@@ -217,8 +214,10 @@ def update_zmax():
 
 def get_img_frame(frame,zmax,key):
     session['modes']['analysis']='frames'
+    offset = ''
     if key=='sim':
         frame=min(max(1,frame-session['sim']['offset']),session['sim']['max_frame'])
+        offset='(%d frames offset )' %session['sim']['offset']
     frame_str=str(frame).zfill(session[key]['pad'])
     png_file=png_path(session['path'],'%s_%s' %(key,frame_str))
     if not os.path.exists(png_file) or not zmax==session[key]['z_max'][frame-1]:
@@ -227,7 +226,7 @@ def get_img_frame(frame,zmax,key):
         dsp.stddisp(im=[im],caxis=[0,zmax],cmap='viridis',
             figsize=(10,)*2,
             pOpt="p", axPos=[0.05,0.05,0.9,0.9],
-            name=png_file,title='frame %s' %frame_str, opt='sc')
+            name=png_file,title='frame %s %s' %(frame_str,offset), opt='sc')
 
         session[key]['zmax'] = zmax
         session[key]['z_max'][frame-1] = zmax
@@ -625,9 +624,15 @@ def set_structure():
     # print(data)
     session['mol']=data['mol']
     init_mol()
-    if not session['dat']['pets'] and not session['modes']['manual']:
-        session['modes']['manual'] = True
     return session['mol']
+
+# def set_manual_mode():
+#     # session['modes']['manual'] = True
+#     # if session['dat']['pets']:
+#     #     session['modes']['manual'] = False
+#     # if not session['dat']['pets'] and not session['modes']['manual']:
+#     if not session.get('modes'):session.modes={}
+#     session['modes']['manual'] = not session['dat']['pets']
 
 ############################################################################
 #### Init
@@ -638,18 +643,20 @@ def init():
     now = time.time()
     print('username : ' ,session['username'])
     if session.get('id') and os.path.exists(session.get('path')):
+        init_mol()
         if (now-session['last_time'])>24*3600:
             print('warning:session created at %s has expired ' %session['last_time'])
             print(check_output('rm -rf %s/*' %session.get('path'),shell=True).decode())
+            init_args()
     else:
         id = '%s_%s' %(session['username'],create_id())
         session_path=os.path.join('static','data','tmp',id)
         print(check_output('mkdir -p %s' %session_path,shell=True).decode())
         print(colors.green+'creating new session %s' %id+colors.black)
-        session['mol'] = 'diamond'
         session['path'] = session_path
         session['id']   = id
         session['b0_path'] = get_pkl(session['id'])
+        if not session.get('mol'):session['mol'] = 'diamond'
         init_session()
 
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
@@ -660,7 +667,7 @@ def init():
 
     # print('sending init info')
     info=['mol','dat','frame','crys','cif_file',
-        'modes','omega','expand','refl','max_res','dq_ring','graph']
+        'modes','omega','expand','refl','max_res','dq_ring','graph','rings']
     session_data = {k:session[k] for k in info}
     session_data['theta_phi'] = b_str(session['theta_phi'],2)
     session_data['bloch'] = get_session_data('bloch')
@@ -704,7 +711,7 @@ def init_mol():
     else:
         struct_file = glob.glob(os.path.join(mol_path(mol),'*.pdb'))[0]
     # elif os.path.basename(struct_file)[-3:]=='pdb':
-    print(struct_file)
+    # print(struct_file)
     b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
     # b0=ut.load_pkl(session['b0_path'])
 
@@ -714,6 +721,10 @@ def init_mol():
     crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
         b_str(crys.lattice_parameters,2).split(',') )))
 
+    if not session.get('modes'):session['modes']={'analysis':'bloch'}
+    session['modes']['manual'] = not dat['pets']
+    if not session.get('frame'):session['frame'] = 1
+
     now = time.time()
     session['cif_file'] = cif_file
     session['crys']     = crys_dat
@@ -721,33 +732,35 @@ def init_mol():
     session['sim'] = sim
     session['exp'] = exp
     session['zm_counter'] = 0 #dummy variable
-    session['frame'] = 1
     session['time']  = now
 
 def init_args():
     rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
-    bloch_args={'keV':200,'u':[0,0,1],
+    bloch_args={
+        'keV':200,'u':[0,0,1],
         'Nmax':4,'dmin':1,'gemmi':False,'Smax':0.02,
-        'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200}
+        'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200
+        }
+    if not session.get('modes'):session['modes'] = {'analysis'  : 'bloch'}
     modes = {
         'molecule'  : False,
-        'analysis'  : 'bloch',
-        'manual'    : not session['dat']['pets'],
         'u'         : 'edit',
         'single'    : False,
-    }
+        }
+
     expand_bloch = {'omega':False,'struct':False,'thick':False,
         'refl':False,'sim':False,'u':True,}
 
     now = time.time()
     # session['mol2']  = mol
-    session['rings'] = []
     session['dq_ring']  = 0.25
+    session['rings']    = []
     session['omega']    = 157 #in-plane rotation angle
-    session['modes']    = modes
     session['max_res']  = 0
     session['expand']   = expand_bloch
-    session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
+    session['modes'].update(modes)
+    # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
+    session['vis']      = {'I':True,'Vga':'legendonly','Sw':'legendonly','I_pets':True,'rings':True}
     session['theta_phi']  = [0,0]
     session['bloch']      = bloch_args
     session['rock']       = rock_args
