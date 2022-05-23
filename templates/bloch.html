@@ -63,15 +63,17 @@
           </div>
          </div>
          <div class="dropdown">
-          <button class="dropbtn">How to</button>
+          <button class="dropbtn">Help</button>
           <div class="dropdown-content">
             <!-- <a href="" ng-repeat="(tle,gif) in gifs" ng-bind="tle" onclick="dialog_gif(this,tle,gif)" > -->
               <!-- ng-mouseenter="showIt(tle)" ng-mouseleave="hideIt(tle)" > -->
-          {% for (tle,gif) in gifs.items() %}
-            <a href="" onclick="open_gif_dialog(this,'{{tle}}','{{gif}}')" >
-             {{tle}}
-            </a>
-          {% endfor %}
+            <a href="" onclick="open_link('static/vids/intro.mp4')" > Intro Video </a>
+            <div><b> How to : </b></div>
+            {% for (tle,gif) in gifs.items() %}
+              <a href="" onclick="open_gif_dialog(this,'{{tle}}','{{gif}}')" >
+               {{tle}}
+              </a>
+            {% endfor %}
           </div>
          </div>
         </div><!-- menu -->
