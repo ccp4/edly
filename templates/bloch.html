@@ -850,13 +850,13 @@ $(document).ready(function () {
     // console.log(formData);
     $.ajax({
       type:'POST',
-      url:'/new_structure',
+      url:'new_structure',
       data:formData,
       success: function(data){
          // console.log(data);
          if (data=='ok'){
            dialog.dialog( "close" );
-           window.location='/'
+           window.location='viewer'
          }
          else{
            show_error(data,true)
@@ -896,7 +896,7 @@ function upload_cif(){
       else{
         // console.log(file);
         $.ajax({
-         url: '/upload_cif',
+         url: 'upload_cif',
          type: 'POST',
          // data: {'name':file.name},
          data: new FormData($('form')[0]),

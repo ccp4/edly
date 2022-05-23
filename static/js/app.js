@@ -147,7 +147,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.mode_style = {'bloch':'','frames':''};
     $scope.mode_style[val]=mode_style;
     if (changed){
-      $log.log('updating')
+      // $log.log('updating')
       $scope.update();
       changed=false;
     }
@@ -301,7 +301,7 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.rings     = data.rings;
     $scope.nbeams    = data.nbeams;
     $scope.theta_phi = data.theta_phi.split(',');
-    $log.log($scope.rings)
+    // $log.log($scope.rings)
   }
 
   $scope.show_u=function(){
