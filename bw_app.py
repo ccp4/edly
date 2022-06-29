@@ -621,7 +621,8 @@ def set_visible():
 
 @bw_app.route('/set_structure', methods=['POST'])
 def set_structure():
-    data=json.loads(request.data.decode())
+    data = request.form
+    # data=json.loads(request.data.decode())
     # print(data)
     session['mol']=data['mol']
     init_mol()
@@ -708,7 +709,7 @@ def init_mol():
         'exp':type(exp)==dict,
         'sim':type(sim)==dict,
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets')),
-        'felix':os.path.exists(os.path.join(mol_path(mol),'reflprofiles_strong.dat'),
+        'felix':os.path.exists(os.path.join(mol_path(mol),'reflprofiles_strong.dat')),
         }
     # if not os.path.exists(session['b0_path']) or new:
     struct_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))

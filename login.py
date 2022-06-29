@@ -1,4 +1,5 @@
-from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
+from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session
+from flask import render_template,make_response
 import crystals,glob,os,socket,json
 from functools import wraps
 from in_out import structures,builtins,gifs
@@ -48,13 +49,17 @@ def set_viewer():
     print({k : session.get(k) for k in ['mol','modes','frame']})
     return redirect(server_home+url_for('login.viewer'))
 
+# @login.route('/viewer/#/felix',methods=['GET'])
+# @login.route('/viewer/#/bloch',methods=['GET'])
+# @login.route('/viewer/',methods=['GET'])
 @login.route('/viewer',methods=['GET'])
 def viewer():
     if not session.get('logged_in'):
         print('attempt to see bloch viewer while not logged in')
         return redirect(server_home+url_for('login.home'))
     else:
-        return render_template('bloch.html',builtins=builtins,gifs=gifs,version=version)
+        # return make_response(open('templates/bloch.html').read())
+        return make_response(render_template('bloch.html',builtins=builtins,structures=structures,gifs=gifs,version=version))
 
 @login.route('/', methods=['GET', 'POST'])
 def home():
