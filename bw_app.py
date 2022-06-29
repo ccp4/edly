@@ -8,6 +8,7 @@ from blochwave import bloch
 from blochwave import bloch_pp as bl        #;imp.reload(bl)
 from EDutils import utilities as ut
 from EDutils import pets as pt              #;imp.reload(pt)
+from EDutils import felix as fe              #;imp.reload(fe)
 from scattering import scattering_factors as scatf
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
@@ -16,8 +17,8 @@ import plotly.graph_objects as go
 from in_out import*
 bw_app = Blueprint('bw_app', __name__)
 
-fig_wh=725
 pets_data = {}
+felix_data = {}
 
 
 def login_required(f):
@@ -661,6 +662,13 @@ def init():
 
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
         pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
+    if session['dat']['felix'] and not session['mol'] in felix_data.keys():
+        if os.path.exists(felix_path(session['mol'])):
+            felix_data[session['mol']] = fe.load_felix(session['path'])
+        else:
+            felix_data[session['mol']] = fe.Felix(session['path'],session['mol'])
+
+
     rock_state=''
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
         rock_state='done'
@@ -699,8 +707,9 @@ def init_mol():
     dat = {
         'exp':type(exp)==dict,
         'sim':type(sim)==dict,
-        'pets':os.path.exists(os.path.join(mol_path(mol),'pets'))}
-
+        'pets':os.path.exists(os.path.join(mol_path(mol),'pets')),
+        'felix':os.path.exists(os.path.join(mol_path(mol),'reflprofiles_strong.dat'),
+        }
     # if not os.path.exists(session['b0_path']) or new:
     struct_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
     if len(struct_files):
@@ -741,7 +750,11 @@ def init_args():
         'Nmax':4,'dmin':1,'gemmi':False,'Smax':0.02,
         'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200
         }
-    if not session.get('modes'):session['modes'] = {'analysis'  : 'bloch'}
+    felix_args={
+        'keV':200,'ww':40,'wid':200,
+        'np':4,'jobs_done':'69/69','jobs_run':'','jobs_state':'',
+    }
+    if not session.get('modes'):session['modes'] = {'analysis' : 'bloch'}
     modes = {
         'molecule'  : False,
         'u'         : 'edit',
@@ -763,6 +776,7 @@ def init_args():
     session['vis']      = {'I':True,'Vga':'legendonly','Sw':'legendonly','I_pets':True,'rings':True}
     session['theta_phi']  = [0,0]
     session['bloch']      = bloch_args
+    session['felix']      = felix_args
     session['rock']       = rock_args
     session['refl']       = []
     session['graph']      = 'thick'

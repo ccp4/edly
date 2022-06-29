@@ -170,6 +170,10 @@
               <span class="gg-format-justify" style="margin-top:0"></span >
               <span class="popuptext" ng-show="popup['ms_solver']"> Multislice solver </span>
             </a>
+            <a class="btn btn-primary popup tab_btn" ng-style="mode_style['felix']" ng-click="set_analysis_mode('felix')" ng-mouseenter="showIt('felix_tab')" ng-mouseleave="hideIt('felix_tab')">
+              <span class="gg-format-components" style="margin-top:0"></span >
+              <span class="popuptext" ng-show="popup['felix_tab']"> Felix dynamical refinement </span>
+            </a>
           </div>
 
 
@@ -236,7 +240,7 @@
                       </span>
                     </td>
                     <td class="td-in popup">
-                      <input ng-show="show_keV" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" ng-key-enter="update_bloch()" >
+                      <input ng-show="show_keV" type="number" min="1" max="1000" ng-model="bloch['keV']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
                       <span  ng-hide="show_keV" ng-bind="bloch['keV']" ng-dblclick="show_keV=true"></span>
                     </td>
                     <td class="td-in" ng-show="show_keV">
@@ -593,8 +597,146 @@
                 </div>
               </div>
             </div>
-
           </div><!-- Bloch solver -->
+
+
+
+          <!--  ///////////////////////// -->
+          <!-- FELIX PANEL -->
+          <!--  ///////////////////////// -->
+          <div class="panel bloch_panel" ng-show="modes['analysis']=='felix' && !modes['molecule']" >
+            <div class="row">
+              <div class="col-sm-11 bloch_solver" >
+                Felix solver
+              </div>
+            </div>
+
+            <!-- ////////////////////////////////////////////
+            Parameters section
+            //////////////////////////////////////////// -->
+            <!-- Simulation Parameters  -->
+            <div class="row" >
+              <div class="theta_phi" >
+                <a class="popup" ng-click="expand['simFelix']=!expand['simFelix']" ng-mouseenter="showIt('expand_simFelix')" ng-mouseleave="hideIt('expand_simFelix')" style="float:right;bottom:5px">
+                  <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['simFelix'],'glyphicon glyphicon-chevron-up':expand['simFelix']}">
+                    <span class="popuptext" style="" ng-show="popup['expand_simFelix']" ng-bind="expand_str[expand['simFelix']]"></span>
+                  </span>
+                </a>
+                <div style="font-size:14px;margin-bottom:5px;">Simulation parameters :</div>
+                <table style="margin-left: 10px;" ng-show="expand['simFelix']">
+                  <!-- nwx -->
+                  <tr>
+                    <td class="td-in">
+                      <span>ww</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['ww']=true" ng-mouseleave="popup['ww']=false" >
+                        <span class="popuptext" ng-show="popup['ww']"> width of the extracted rocking curve </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <input type="number" min="0" ng-model="felix['ww']" class="bloch_input" ng-key-enter="update_felix()" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="td-in">
+                      <span>wid</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['wid']=true" ng-mouseleave="popup['wid']=false" >
+                        <span class="popuptext" ng-show="popup['wid']"> Radius of the LACBED pattern in pixels (the patterns are 2*wid x 2*wid pixels) </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <input type="number" min="0" max="500" ng-model="felix['wid']" class="bloch_input" ng-key-enter="update_felix()" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="td-in">
+                      <div class="btn-sm btn-primary bloch_solve_param"  ng-click="gen_felix()"> Generate simulations </div>
+                    </td>
+                  </tr>
+                </table>
+              </div><!-- theta_phi frame -->
+            </div><!-- row Sim params -->
+
+            <!-- Run Parameters  -->
+            <div class="row" >
+              <div class="theta_phi" >
+                <a class="popup" ng-click="expand['simFelix']=!expand['simFelix']" ng-mouseenter="showIt('expand_simFelix')" ng-mouseleave="hideIt('expand_simFelix')" style="float:right;bottom:5px">
+                  <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['simFelix'],'glyphicon glyphicon-chevron-up':expand['simFelix']}">
+                    <span class="popuptext" style="" ng-show="popup['expand_simFelix']" ng-bind="expand_str[expand['simFelix']]"></span>
+                  </span>
+                </a>
+                <div style="font-size:14px;margin-bottom:5px;">Simulation parameters :</div>
+                <table style="margin-left: 10px;" ng-show="expand['simFelix']">
+                  <!-- np -->
+                  <tr>
+                    <td class="td-in">
+                      <span>np</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['np']=true" ng-mouseleave="popup['np']=false" >
+                        <span class="popuptext" ng-show="popup['np']"> number of processes per simulations </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <input type="number" min="0" max="16" ng-model="felix['np']" class="bloch_input" ng-key-enter="update_felix()" />
+                    </td>
+                  </tr>
+                  <!-- nodes  -->
+                  <tr>
+                    <td class="td-in">
+                      <span>nodes</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['nodes']=true" ng-mouseleave="popup['nodes']=false" >
+                        <span class="popuptext" ng-show="popup['nodes']"> number of nodes available on cluster </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <span ng-bind="felix['nodes']" />
+                    </td>
+                  </tr>
+                  <!-- launch -->
+                  <tr>
+                    <td class="td-in">
+                      <div class="btn-sm btn-primary bloch_solve_param"  ng-click="run_felix()"> run simulations </div>
+                    </td>
+                  </tr>
+                  <!-- jobs info -->
+                  <tr>
+                    <!-- completed jobs -->
+                    <td class="td-in">
+                      <span>done</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['jobs_done']=true" ng-mouseleave="popup['jobs_done']=false" >
+                        <span class="popuptext" ng-show="popup['jobs_done']"> completed jobs on cluster </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <span ng-bind="felix['jobs_done']" />
+                    </td>
+                    <!-- running jobs -->
+                    <td class="td-in">
+                      <span>run</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['jobs_run']=true" ng-mouseleave="popup['jobs_run']=false" >
+                        <span class="popuptext" ng-show="popup['jobs_run']"> jobs running on cluster </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <span ng-bind="felix['jobs_run']" />
+                    </td>
+                    <!-- average job advance -->
+                    <td class="td-in">
+                      <span>state</span>
+                      <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['jobs_state']=true" ng-mouseleave="popup['jobs_state']=false" >
+                        <span class="popuptext" ng-show="popup['jobs_state']"> state of jobs running on cluster </span>
+                      </span>
+                    </td>
+                    <td class="td-in">
+                      <span ng-bind="felix['jobs_state']" />
+                    </td>
+                  </tr>
+                </table>
+              </div><!-- theta_phi frame -->
+            </div><!-- row run sim -->
+
+          </div><!-- Felix Panel -->
+
+
+
         </div><!-- Main Panel -->
       </div><!-- col-sm-2 -->
 

@@ -332,8 +332,9 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     switch (val){
     //   case 'edit':
     //     break;
-      // case 'move':
-        // break;
+      case 'move':
+        $scope.set_visible('Sw',2,true);
+        break;
       case 'rock':
         // $log.log($scope.rock_state=='done');
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
@@ -557,6 +558,17 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     });
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  //// felix Stuffs
+  //////////////////////////////////////////////////////////////////////////////
+  $scope.get_felix_rock = function () {
+    $http.post('show_felix_rock',JSON.stringify({'refl':$scope.refl}))
+      .then(function(response){
+        $scope.fig2 = response.data;
+        // $log.log()
+    });
+  }
+
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // misc stuffs
@@ -644,6 +656,16 @@ app.controller('viewer', ['$scope','$rootScope','$log','$http', '$interval','$ti
     $scope.set_fig1();
   }
 
+
+  ///////////////////////////////////////////
+  // FELIX
+  ///////////////////////////////////////////
+  $scope.update_felix=function(){
+
+  }
+  $scope.run_felix=function(){
+
+  }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
