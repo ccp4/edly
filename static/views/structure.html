@@ -1,0 +1,43 @@
+<!-- Structure -->
+<div class="panel">
+  <div class="">
+    <a class="btn btn-primary myBtn popup jmol" ng-mouseenter="showIt('mol')" ng-mouseleave="hideIt('mol')">
+       <!-- ng-click="toggle_mode('molecule')"> -->
+      <img ng-hide="modes['molecule']" src="/static/images/jsmol.png"/>
+      <img ng-show="modes['molecule']" src="/static/images/edly.png"/>
+      <span class="popuptext" ng-show="popup['mol']"> show/hide molecule (not active yet) </span>
+    </a>
+  </div>
+  <div style="font-size:25px">  {a structure a} </div>
+  <div class="theta_phi">
+    <a class="popup" ng-click="expand['struct']=!expand['struct']" ng-mouseenter="showIt('expand_struct')" ng-mouseleave="hideIt('expand_struct')" style="float:right;bottom:5px">
+      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
+        <span class="popuptext" style="" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
+      </span>
+    </a>
+    <div style="text-align: left;margin-left:10px;">
+      <span style="font-size:18px;text-align:center" ng-bind="crys['file']"> </span>
+      <span style="display:none" ng-bind="cif_file"> </span>
+    </div>
+    <div ng-show="expand['struct']" >
+      <div style="font-size:16px;margin:5px;">Lattice parameters : </div>
+      <div style="margin-left:10px;">
+        <span>  a=<span ng-bind="crys['a']"/> </span>
+        <span>, b=<span ng-bind="crys['b']"/> </span>
+        <span>, c=<span ng-bind="crys['c']"/> </span>
+      </div>
+      <div style="margin-left:10px;">
+        <!-- <span>  \(alpha\)=<span ng-bind="crys['alpha']"/></span> -->
+        <span>  $\alpha$=<span ng-bind="crys['alpha']"/></span>
+        <span>, $\beta$ =<span ng-bind="crys['beta']" /></span>
+        <span>, $\gamma$=<span ng-bind="crys['gamma']"/></span>
+      </div>
+      <div style="font-size:16px;margin:5px;">Lattice vectors : </div>
+      <div style="margin-left:10px;">
+        <div> $a_1$=<span ng-bind="crys['a1']"/></div>
+        <div> $a_2$=<span ng-bind="crys['a2']"/></div>
+        <div> $a_3$=<span ng-bind="crys['a3']"/></div>
+      </div>
+    </div>
+  </div>
+</div>

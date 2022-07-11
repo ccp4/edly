@@ -6,7 +6,7 @@ from in_out import structures,builtins,gifs
 login = Blueprint('login', __name__)
 server_home='/'
 if socket.gethostname()=='tarik-CCP4':server_home=''
-version='0.0.4'
+version='0.0.5'
 
 @login.route('/login', methods=['GET','POST'])
 def log_in():
@@ -58,8 +58,8 @@ def viewer():
         print('attempt to see bloch viewer while not logged in')
         return redirect(server_home+url_for('login.home'))
     else:
-        # return make_response(open('templates/bloch.html').read())
-        return make_response(render_template('bloch.html',builtins=builtins,structures=structures,gifs=gifs,version=version))
+        # return make_response(open('templates/main.html').read())
+        return make_response(render_template('main.html',builtins=builtins,structures=structures,gifs=gifs,version=version))
 
 @login.route('/', methods=['GET', 'POST'])
 def home():

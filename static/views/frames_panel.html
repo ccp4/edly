@@ -1,0 +1,17 @@
+<!-- Frames panel -->
+<div class="panel" ng-show="!modes['molecule'] && max_frame>0">
+  <div class="row">
+    <div class="col-sm-8">
+      <h4> Frame : </h4>
+    </div>
+  </div>
+  No:
+  <input type="number" min="1" max="max_frame" ng-model="frame" ng-key-enter="update_frame()" style="width: 80px" />
+  <span> / <span ng-bind="max_frame"/></span>
+  <a class="btn-sm btn-primary"  ng-click="dec_frame()">
+    <span class="glyphicon glyphicon-step-backward"></span >
+  </a>
+  <a class="btn-sm btn-primary"  ng-click="inc_frame()">
+    <span class="glyphicon glyphicon-step-forward"></span >
+  </a>
+</div>

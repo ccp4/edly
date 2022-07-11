@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ngTouch','ngAria','ngRoute']);
+var app = angular.module('app',[]); // ['ngTouch','ngAria','ngRoute']);
 app.config(['$interpolateProvider', function($interpolateProvider) {
   $interpolateProvider.startSymbol('{a');
   $interpolateProvider.endSymbol('a}');

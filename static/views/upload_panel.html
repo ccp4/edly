@@ -1,0 +1,18 @@
+<!--  ///////////////////////// -->
+<!-- Exp panel -->
+<!--  ///////////////////////// -->
+<div class="panel bloch_panel"  >
+  <!-- ng-show="modes['analysis']=='frames' && !modes['molecule']"> -->
+  <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="showIt('exp')" ng-mouseleave="hideIt('exp')">
+    <img src="/static/images/exp_button.png" />
+    <span class="popuptext" ng-show="popup['exp']"> Upload experimental dataset </span>
+  </a>
+  <a class="btn btn-primary myBtn popup" ng-click="upload('sim')" ng-mouseenter="showIt('sim')" ng-mouseleave="hideIt('sim')">
+    <img src="/static/images/bloch_button.png" />
+    <span class="popuptext" ng-show="popup['sim']"> Upload simulated dataset </span>
+  </a>
+  <a class="btn btn-primary myBtn popup" ng-click="upload('pets')" ng-mouseenter="showIt('pets')" ng-mouseleave="hideIt('pets')">
+    <img src="/static/images/proc_button.png" />
+    <span class="popuptext" ng-show="popup['pets']"> Import processed data from pets/dials </span>
+  </a>
+</div>

@@ -7,7 +7,7 @@ angular.module('app')
     })
     .when('/bloch', {
       controller: 'bloch_ctrl',
-      templateUrl: '/static/views/debloch.html'
+      templateUrl: '/static/views/felix.html'
     })
     .otherwise('/bloch');
     // $compileProvider.debugInfoEnabled(false);

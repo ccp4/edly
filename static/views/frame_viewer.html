@@ -1,0 +1,31 @@
+
+<div >
+  <!-- Simulated frame  -->
+  <div class="col-sm-6" ng-if="dat['sim']==true">
+    <h3> Simulated Frames </h3>
+    <div class="row">
+      <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['sim']" ng-keypress=update_zmax($event,'sim') style="width: 70px"></div>
+    </div>
+    <div class="row">
+      <div class="frame">
+        <a ng-href="{a img['sim'] a}">
+          <img ng-src="{a img['sim'] a}" />
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- Experimental frame  -->
+  <div class="col-sm-6" ng-if="dat['exp']==true">
+    <h3> Experimental Frames </h3>
+    <div class="row" >
+      <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px"></div>
+    </div>
+    <div class="row">
+      <div class="frame">
+        <a  ng-href="{a img['exp'] a}">
+          <img  ng-src="{a img['exp'] a}" />
+        </a>
+      </div>
+    </div>
+  </div>
+</div><!-- container-->

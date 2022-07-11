@@ -1,0 +1,39 @@
+<table>
+<tr>
+  <td>
+    <table>
+      <tr>
+        <td>
+          <span class="felix_refl" > Choose reflection : </span>
+          <select id="select_erefl" ng-model="refls.e"  ng-change="update_rock()" ng-options="x for x in exp_refls" >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="fig_felix" style="width:100%;margin:5px;border-style:solid;float:left" >
+            <line-plot id=fig1_felix fig="fig1">
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td>
+
+  <!-- Second display -->
+  <td ng-hide="single">
+    <table>
+      <tr>
+        <td>
+          <span class="felix_refl" > Choose reflection : </span>
+          <select id="select_srefl" ng-model="refls.s" ng-change="update_lacbed()" ng-options="x for x in sim_refls" >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div style="width:100%;margin:5px;border-style:solid;float:right" >
+            <line-plot id=fig2_felix fig="fig2">
+        <td>
+    </div>
+  </td>
+
+</tr>
+</table>

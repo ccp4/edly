@@ -19,7 +19,7 @@ function extract_list_indices_from_table() {
 }
 
 function deleteRow(obj) {
-  var TABLE_MILLER=document.getElementById('table_Miller_indices')  
+  var TABLE_MILLER=document.getElementById('table_Miller_indices')
     var index = obj.parentNode.parentNode.rowIndex;
     TABLE_MILLER.deleteRow(index);
 }
@@ -78,6 +78,20 @@ function open_gif_dialog(elt,tle,gif){
   gif_dialog.dialog( "open" );
 };
 
+function set_structure(mol){
+  console.log(mol)
+  // var formData = {'mol':mol}
+  $.ajax({
+    type:'POST',
+    url:'set_structure',
+    data:{'mol':mol},
+    success: function(data){
+       dialog.dialog( "close" );
+       window.location='viewer'
+    }
+  });
+};
+
 
 var dialog, form;
 $(document).ready(function () {
@@ -105,18 +119,6 @@ $(document).ready(function () {
     new_structure();
   });
 
-  function set_structure(mol){
-    // var formData = {'mol':mol}
-    $.ajax({
-      type:'POST',
-      url:'set_structure',
-      data:{'mol':mol},
-      success: function(data){
-         dialog.dialog( "close" );
-         window.location='viewer'
-      }
-    });
-  };
 
   function new_structure(){
   //   // e.preventDefault();

@@ -16,10 +16,13 @@
      <link href="/static/css/dropdown.css" rel="stylesheet">
      <link rel="stylesheet" href="/static/bower_components/jquery-ui/themes/base/jquery-ui.css">
      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-     <script src="/static/bower_components/angular/angular.js"></script>
-     <script src="/static/bower_components/angular-aria/angular-aria.js"></script>
-     <script src="/static/bower_components/angular-touch/angular-touch.js"></script>
-     <script src="/static/bower_components/angular-route/angular-route.js"></script>
+     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+     <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.16/angular.min.js"></script> -->
+     <!-- <script src="/static/bower_components/angular/angular.js"></script> -->
+     <!-- <script src="/static/bower_components/angular-aria/angular-aria.js"></script> -->
+     <!-- <script src="/static/bower_components/angular-touch/angular-touch.js"></script>
+     <script src="/static/bower_components/angular-route/angular-route.js"></script> -->
+     <script src="/static/bower_components/angular-switch/dist/switch.js"></script>
      <script src="https://cdn.plot.ly/plotly-2.12.1.min.js"></script>
      <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
@@ -29,10 +32,12 @@
      <script type="text/javascript" async
       src="/static/bower_components/MathJax/MathJax.js?config=TeX-MML-AM_CHTML">
      </script>
-
      <!-- <script src="/static/jmol/jsmol/JSmol.min.js"></script>
      <script src="/static/jmol/jsmol/js/Jmol2.js"></script>
      <script > jmolInitialize("/static/jmol/jsmol");</script> -->
+     <!-- <script src="/static/js/utils.js"></script> -->
+
+     <script src="/static/js/app.js"></script>
  </head>
 
 
@@ -40,6 +45,7 @@
 
  <body>
   <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
+
     <!--================================================  -->
     <!--================================================  -->
     <!-- HEADER -->
@@ -53,7 +59,7 @@
           <a href="" onclick="dialog_new_structure()">New</a>
           {% for x in structures %}
           <!-- <a href="" ng-repeat="x in structures" ng-click="set_structure(x)">{a x a}</a> -->
-            <a href="" onclick="set_structure(x)">{{ x }}</a>
+            <a href="" onclick="set_structure('{{x}}')">{{ x }}</a>
           {% endfor %}
         </div>
        </div>
@@ -82,38 +88,105 @@
        </div>
       </div><!-- menu -->
     </div><!-- header -->
+
     <!-- Open dialog to show GIFS -->
     <div id="dialog-gif" title="how to" >
       <!-- <div id="gif"></div> -->
     </div>
-    <!-- <div class="row" style="background-color:blue;">
-      <div ng-repeat="(tle,gif) in gifs" ng-show="popup[tle]" class="gif">
-        <a href="{a gif a}"> <img ng-src="{a gif a}"  /></a>
-      </div>
-    </div> -->
 
 
-    <!-- <div class="row">
-      <ol>
-        <li><a href="#bloch">bloch</a></li>
-        <li><a href="#felix">felix</a></li>
-      </ol>
-      <div class="col-sm-12">
-        <h2>See it in action</h2>
-      </div>
-    </div> -->
 
-    <div ng-view></div>
+    <!--================================================  -->
+    <!--================================================  -->
+    <!-- PANEL =================================-->
+    <div class="row" ng-controller="mainCtrl">
+      <div class="col-sm-2" style="padding-left:5px;padding-right:0px;">
+        <div class="panel" style="background-color:#b5ccda">
 
+            <div ng-include="'/static/views/structure.html'"></div>
+
+            <!-- solver tabs  -->
+            <div class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
+              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_analysis_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
+                <span class="gg-stack"></span >
+                <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
+              </a>
+              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_analysis_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
+                <span class="gg-edit-unmask"></span >
+                <span class="popuptext" ng-show="popup['bloch_solver']"> Bloch solver </span>
+              </a>
+              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_analysis_mode('ms')" ng-mouseenter="showIt('ms_solver')" ng-mouseleave="hideIt('ms_solver')">
+                <span class="gg-format-justify" style="margin-top:0"></span >
+                <span class="popuptext" ng-show="popup['ms_solver']"> Multislice solver </span>
+              </a>
+              <a ng-if="dat['felix']" class="btn btn-primary popup tab_btn" ng-style="mode_style['felix']" ng-click="set_analysis_mode('felix')" ng-mouseenter="showIt('felix_tab')" ng-mouseleave="hideIt('felix_tab')">
+                <span class="gg-components" style="margin-top:0"></span >
+                <span class="popuptext" ng-show="popup['felix_tab']"> Felix dynamical refinement </span>
+              </a>
+            </div>
+
+            <!-- solver panel -->
+            <div class="row">
+              <div class="col-sm-11 bloch_solver" >
+                {a titles[mode] a}
+              </div>
+            </div>
+            <div ng-switch="mode">
+              <div ng-switch-when="frames">
+                <div ng-include="'static/views/frames_panel.html'"></div>
+                <div ng-include="'static/views/upload_panel.html'"></div>
+              </div>
+              <div ng-switch-when="felix">
+                <div ng-controller="FelixPanelCtrl" class="panel bloch_panel" >
+                  <div ng-include="'static/views/felix_panel.html'"></div>
+                </div>
+              </div>
+              <div ng-switch-when="bloch">
+                <div ng-include="'static/views/frames_panel.html'"></div>
+                <div ng-controller="BlochPanelCtrl" class="panel bloch_panel" >
+                  <div ng-include="'static/views/bloch_panel.html'"></div>
+                </div>
+              </div>
+            </div><!-- solver panels -->
+
+        </div><!-- Main Panel -->
+      </div><!-- col-sm-2 -->
+
+      <!-- solver views  -->
+      <div class="col-sm-10" >
+        <div ng-switch="mode">
+          <div ng-switch-when="frames">
+            <div ng-include="'static/views/frame_viewer.html'"></div>
+          </div>
+          <div ng-switch-when="felix">
+            <div ng-controller="FelixCtrl" ng-include="'static/views/felix_viewer.html'"></div>
+          </div>
+          <div ng-switch-when="bloch">
+            <div ng-controller="BlochCtrl" ng-include="'static/views/bloch_viewer.html'"></div>
+          </div>
+        </div>
+      </div><!-- solver views  -->
+
+    </div><!-- main Ctrl row -->
+
+
+    <!--================================================  -->
+    <!--================================================  -->
     <!-- footer  -->
     <footer class="footer">
        Copyright © 2021, CCP4
        <div>Author : Tarik Drevon</div>
        <div>version : {{version}}</div>
     </footer>
+
   </div><!-- container -->
 
-  <!-- form -->
+
+
+
+  <!--================================================  -->
+  <!--================================================  -->
+  <!-- new structure form  -->
   <div id="dialog" title="new project">
     <p>Create a new structure?</p>
     <!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span> -->
@@ -150,6 +223,8 @@
   </div>
 
 
+
+
 <script src="/static/js/utils.js"></script>
 <!-- <script src="static/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="static/bower_components/jquery-ui/jquery-ui.js"></script> -->
@@ -157,10 +232,10 @@
 <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="/static/bower_components/jquery-ui/themes/base/jquery-ui.css">
 <!-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" /> -->
-<script src="/static/js/app.js"></script>
+<script src="/static/js/mainCtrl.js"></script>
 <script src="/static/js/felix.js"></script>
 <script src="/static/js/bloch.js"></script>
-<script src="/static/js/config.js"></script>
+<!-- <script src="/static/js/config.js"></script> -->
 
 <!-- <script src="static/js/jsmol.js"></script> -->
 
