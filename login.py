@@ -29,6 +29,11 @@ def log_in():
 
 @login.route('/set_viewer',methods=['GET'])
 def set_viewer():
+    ''' Used to call viewer with parameters
+    usage example :
+set_viewer?mol=glycine&mode=frames&frame=25
+set_viewer?mol=silicon&mode=felix
+    '''
     args = request.args
     # params = {'mol':structures,'modes':['bloch','frames']}
     # for k,v in args:
@@ -38,15 +43,18 @@ def set_viewer():
         if args['mol'] in structures:
             session['mol'] = args['mol']
     if 'mode' in args.keys():
-        if args['mode'] in ['bloch','frames']:
-            if not session.get('modes'):session['modes'] = {}
-            session['modes']['analysis'] = args['mode']
+        if args['mode'] in ['frames','bloch','felix','ms']:
+            session['mode'] = args['mode']
+    # if 'mode' in args.keys():
+    #     if args['mode'] in ['bloch','frames']:
+    #         if not session.get('modes'):session['modes'] = {}
+    #         session['modes']['analysis'] = args['mode']
     if 'frame' in args.keys():
         frame = json.loads(args['frame'])
         if isinstance(frame,int) :
             session['frame'] = frame
-    print('set session info : ')
-    print({k : session.get(k) for k in ['mol','modes','frame']})
+    # print('set session info : ')
+    # print({k : session.get(k) for k in ['mol','modes','frame']})
     return redirect(server_home+url_for('login.viewer'))
 
 # @login.route('/viewer/#/felix',methods=['GET'])
