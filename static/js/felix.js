@@ -26,7 +26,7 @@ angular.module('app')
         if (val=='rock'){
           $scope.info.refls['s']=$scope.info.refls['e']
         }
-        $log.log($scope.info.refls)
+        // $log.log($scope.info.refls)
         self.update_rock()
         self.update_lacbed()
       }
@@ -45,10 +45,21 @@ angular.module('app')
       });
     }
 
+    $scope.toggle_lacbed = function(){
+      $scope.lacbed_quick=!$scope.lacbed_quick
+      // $log.log($scope.lacbed_quick)
+      $scope.update_lacbed();
+    }
     self.update_lacbed = function () {
-      $http.post('show_lacbed',JSON.stringify({'refl':$scope.info.refls['s']}))
+      $http.post('show_lacbed',JSON.stringify({'refl':$scope.info.refls['s'],'png':$scope.lacbed_quick}))
         .then(function(response){
-          self.fig2 = JSON.parse(response.data.fig);
+          if ($scope.lacbed_quick){
+            $scope.lacbed_img=response.data;
+            // $log.log($scope.lacbed_img)
+          }
+          else{
+            self.fig2 = JSON.parse(response.data.fig);
+          }
         })
     }
 
@@ -59,7 +70,8 @@ angular.module('app')
     self.fig2={};
     $scope.info = felix_shared
     $scope.info.single = false
-    $scope.init_felix=function(){
+    $scope.lacbed_quick = false
+    $scope.init_felix = function(){
       $http.post('init_felix')
         .then(function(response){
           self.felix    = response.data.felix;

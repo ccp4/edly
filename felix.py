@@ -17,39 +17,52 @@ def get_form(request):
 
 def plot_rock(refl):
     f = load_felix(session)
-    df = f.df_peak.loc[refl]
-
     fig=go.Figure()
-    fig.add_trace(go.Scatter(
-        x=df.f,y=df.I,name=refl,marker_color='blue',
-        ))
+    if refl in f.df_peak.index:
+        tle ="Experimental rocking curve for : %s " %refl
+        df = f.df_peak.loc[refl]
+        fig.add_trace(go.Scatter(
+            x=df.f,y=df.I,name=refl,marker_color='blue',
+            ))
+    else:
+        tle='%s not found in exp refls' %refl
 
     fig.update_layout(
-        title="Experimental rocking curve for : %s " %refl,
+        title=tle,
         hovermode='closest',
         paper_bgcolor="LightSteelBlue",
         width=fig_wh, height=fig_wh,
         xaxis_title='Frame',yaxis_title='Intensity',
         )
-    session['felix_graph']='felix_rock'
+    # session['felix_graph']='felix_rock'
     return fig.to_json()
 
 def plot_lacbed(refl):
     f = load_felix(session)
     r = f.df_sims.loc[f.df_sims.refl==refl]
     if r.shape[0]==0:
-        new_refl = f.df_sims.refl.values[0]
-        print(colors.red+'warning:%s not found in sims. Setting refl to  %s' %(refl,new_refl) +colors.black)
-        refl = new_refl
-        session['refl'] = refl
-        r = f.df_sims.loc[f.df_sims.refl==refl]
+        # new_refl = f.df_sims.refl.values[0]
+        tle='%s not found in sim refls.' %(refl)
+        fig=go.Figure()
+        fig.update_layout(
+            title=tle,
+            hovermode='closest',
+            paper_bgcolor="LightSteelBlue",
+            width=fig_wh, height=fig_wh,
+            xaxis_title='px',yaxis_title='py',
+            )
+        # tle+=' Setting refl to  %s' %new_refl
+        print(colors.red+'warning:%s' %tle +colors.black)
+        return fig.to_json()
+        # refl = new_refl
+        # session['refl'] = refl
+        # r = f.df_sims.loc[f.df_sims.refl==refl]
     elif r.shape[0]>1:
         print(colors.red+'warning:more than 1 instance of refl %s' %refl+colors.black)
     r = r.iloc[0]
     I = np.reshape(np.fromfile(r.file,
         dtype=np.float64),(int(r.nwx),)*2)
-
-    fig=px.imshow(I,color_continuous_scale='gray', origin='lower')
+    fig = px.imshow(I,color_continuous_scale='gray', origin='lower')
     fig.update_layout(
         title="Simulated lacbed curve for : %s at %s in sim %s" %(refl,r.thick, r.sim),
         hovermode='closest',
@@ -57,11 +70,19 @@ def plot_lacbed(refl):
         width=fig_wh, height=fig_wh,
         xaxis_title='px',yaxis_title='py',
         )
-    session['felix_graph']='felix_lacbed'
+    # session['felix_graph']='felix_lacbed'
     # print('completed...')
     return fig.to_json()
 
-
+def lacbed_png(refl):
+    png_paths = os.path.join(mol_path(session['mol']),
+        'plots','*%s*.png' %refl)
+    lacbed_imgs = glob.glob(png_paths)
+    if len(lacbed_imgs):
+        lacbed_img = lacbed_imgs[0]
+    else :
+        lacbed_img = 'static/images/dummy.png'
+    return lacbed_img
 
 
 ################################################
@@ -83,8 +104,11 @@ def init_felix():
     f = load_felix(session)
     exp_refls = list(f.df_refl.index.unique())# [s[1:-1].replace(' ','') for s in f.df_refl.index.values]
     sim_refls = list(f.df_sims.refl.unique())
-    erefl = exp_refls[0]
-    srefl = sim_refls[0]
+    i=0
+    while exp_refls[i] not in sim_refls:
+        i+=1
+    erefl = exp_refls[i]
+    srefl = sim_refls[i]
     # print(refl)
     session_data = {
         'exp_refls':exp_refls,'sim_refls':sim_refls,
@@ -96,12 +120,16 @@ def init_felix():
 
 @felix.route('/show_lacbed', methods=['POST'])
 def show_lacbed():
-    refl = get_form(request)['refl']
-    # print(refl)
-    return json.dumps({
-        'refl':session['refl'],
-        'fig':plot_lacbed(refl),
-        })
+    form=get_form(request) #;print(form)
+    refl,png = [ form[c] for c in ['refl','png']]
+    # print(colors.red,png,colors.black)
+    if png:
+        return lacbed_png(refl)
+    else:
+        return json.dumps({
+            'refl':session['refl'],
+            'fig':plot_lacbed(refl),
+            })
 
 @felix.route('/show_felix_rock', methods=['POST'])
 def show_felix_rock():

@@ -26,13 +26,27 @@
           <span class="felix_refl" > Choose reflection : </span>
           <select id="select_srefl" ng-model="info.refls.s" ng-change="update('lacbed')" ng-options="x for x in sim_refls" >
         </td>
+        <td>
+          <a class="btn-sm btn-primary popup" ng-click="toggle_lacbed()" ng-mouseenter="showIt('lacbed_quick')" ng-mouseleave="hideIt('lacbed_quick')" style="margin-left: 7px;">
+            <span ng-class="{'glyphicon glyphicon-save':!lacbed_quick,'glyphicon glyphicon-open':lacbed_quick}"/>
+            <span class="popuptext" style="" ng-show="popup['lacbed_quick']">
+              Toggle plotly/static image </span>
+          </a>
+        </td>
       </tr>
       <tr>
-        <td>
-          <div style="width:100%;margin:5px;border-style:solid;float:right" >
+        <td >
+          <div ng-hide="lacbed_quick" style="width:100%;margin:5px;border-style:solid;float:right" >
             <line-plot id=fig2_felix fig="fig2">
+          </div>
+          <div ng-show="lacbed_quick" class="frame">
+            <a ng-href="{a lacbed_img a}">
+              <img ng-src="{a lacbed_img a}" />
+            </a>
+          </div>
         <td>
-    </div>
+      </tr>
+    </table>
   </td>
 
 </tr>
