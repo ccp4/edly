@@ -192,7 +192,8 @@ def update_bloch():
         fig_data=go.Figure().to_json()
     else:
         fig_data = {}#bloch_fig()
-    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,'rings':session['rings'],
+    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
+        'rings':session['rings'],
         'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
     return info
 
@@ -533,10 +534,20 @@ def init_bloch_panel():
     session['bloch']      = bloch_args
     session['rock']       = rock_args
     session['refl']       = []
+    session['dq_ring']  = 0.25
+    session['rings']    = []
+    session['max_res']  = 0
     session['graph']      = 'thick'
     session['last_time']  = now
     session['time'] = now
-    session_data = {k:session[k] for k in ['omega','expand','modes','refl','graph']}
+    session_data = {k:session[k] for k in[
+        'omega','expand','modes','refl','graph',
+        'rings','max_res','dq_ring',
+        ]}
+    session['vis'] = {'I':True,
+        'Vga':'legendonly','Sw':'legendonly','I_pets':True,
+        'rings':True}
+
     session_data['theta_phi'] = b_str(session['theta_phi'],2)
     session_data['bloch'] = get_session_data('bloch')
     session_data['rock']  = get_session_data('rock')
@@ -548,10 +559,4 @@ def init_bloch_panel():
 
 @bloch.route('/init_bloch', methods=['GET'])
 def init_bloch():
-    session['vis']      = {'I':True,'Vga':'legendonly','Sw':'legendonly','I_pets':True,'rings':True}
-    session['dq_ring']  = 0.25
-    session['rings']    = []
-    session['max_res']  = 0
-
-    return json.dumps({k:session[k] for k in
-        ['dq_ring','rings','max_res','modes','vis']})
+    return json.dumps({k:session[k] for k in ['modes']})

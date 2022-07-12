@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 from blochwave import bloch
 from blochwave import bloch_pp as bl            #;imp.reload(bl)
 from in_out import*
-bw_app = Blueprint('bw_app', __name__)
+app = Blueprint('app', __name__)
 
 felix_data = {}
 
@@ -34,7 +34,7 @@ def login_required(f):
 ######################################################
 #### Structure realted
 ######################################################
-@bw_app.route('/upload_cif', methods=['POST'])
+@app.route('/upload_cif', methods=['POST'])
 def upload_cif():
     try:
         f = request.files['file_cif']
@@ -48,7 +48,7 @@ def upload_cif():
         return "%s : %s" %(msg, e.__str__())
 
 
-@bw_app.route('/new_structure', methods=['POST'])
+@app.route('/new_structure', methods=['POST'])
 def new_structure():
     data = request.form
     mol = data['name']
@@ -93,7 +93,7 @@ def new_structure():
     print(msg)
     return msg
 
-@bw_app.route('/set_structure', methods=['POST'])
+@app.route('/set_structure', methods=['POST'])
 def set_structure():
     data = request.form
     # data=json.loads(request.data.decode())
@@ -106,7 +106,7 @@ def set_structure():
 ################################################
 #### frame
 ################################################
-@bw_app.route('/get_frame', methods=['POST'])
+@app.route('/get_frame', methods=['POST'])
 def get_frame():
     data=json.loads(request.data.decode())
     zmax  = data['zmax']
@@ -119,7 +119,7 @@ def get_frame():
     session['frame']=frame  #;print(frame)
     return json.dumps({'exp':exp_img,'sim':sim_img})
 
-@bw_app.route('/update_zmax', methods=['POST'])
+@app.route('/update_zmax', methods=['POST'])
 def update_zmax():
     data=json.loads(request.data.decode())
     img=get_img_frame(session['frame'],data['zmax'],data['key'])
@@ -163,7 +163,7 @@ def get_img_frame(frame,zmax,key):
 ########################
 #### structure related
 ########################
-@bw_app.route('/set_mode', methods=['POST'])
+@app.route('/set_mode', methods=['POST'])
 def set_mode():
     data = json.loads(request.data.decode())
     # print(data)
@@ -172,7 +172,7 @@ def set_mode():
     session['mol']  = session['mol']
     return json.dumps({key:session['modes'][key]})
 
-@bw_app.route('/set_visible', methods=['POST'])
+@app.route('/set_visible', methods=['POST'])
 def set_visible():
     data=json.loads(request.data.decode())
     key = data['key']
@@ -185,7 +185,7 @@ def set_visible():
 #### Init
 ############################################################################
 @login_required
-@bw_app.route('/init', methods=['GET'])
+@app.route('/init', methods=['GET'])
 def init():
     now = time.time()
     print('username : ' ,session['username'])

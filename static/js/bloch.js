@@ -97,9 +97,6 @@ angular.module('app')
       $http.get('init_bloch')
         .then(function(response){
           $scope.single_mode = $scope.modes['single'];
-          $scope.info.max_res = response.data.max_res;
-          $scope.info.dq_ring = response.data.dq_ring;
-          $scope.info.rings   = $scope.rings;
           // $scope.info.graph   = $scope.info.graphs[response.data.graph];
       })
     }
@@ -648,6 +645,9 @@ angular.module('app')
         $scope.expand    = response.data.expand;
         $scope.refl      = response.data.refl;
         $scope.modes     = response.data.modes;
+        $scope.info.max_res = response.data.max_res;
+        $scope.info.dq_ring = response.data.dq_ring;
+        $scope.info.rings   = $scope.rings;        
         //refl
         var refl=response.data.refl;
         for (let h of refl){
