@@ -212,7 +212,6 @@ def init():
 
 
     ####### package info
-    print(colors.red+session['mode']+colors.black)
     info=['mol','dat','frame','crys','cif_file','mode']
     session_data = {k:session[k] for k in info}
     # frames : exp,sim
@@ -251,7 +250,7 @@ def init_session():
 
 
 def init_mol():
-    print(colors.red+'init_mol'+colors.black)
+    # print(colors.red+'init_mol'+colors.black)
     mol = session['mol']
     exp = get_frames(mol,'exp')
     sim = get_frames(mol,'sim',d={'offset':10})

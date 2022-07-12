@@ -136,19 +136,28 @@ display section
 <div class="row" >
   <div class="theta_phi" >
     <div style="font-size:14px;margin-bottom:5px;"> Display :</div>
-    <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="single=true" ng-mouseenter="popup['felix_rock']=true" ng-mouseleave="popup['felix_rock']=false">
+    <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="info.single=true" ng-mouseenter="popup['felix_rock']=true" ng-mouseleave="popup['felix_rock']=false">
       <img style="width: 90%;" src="/static/images/beam_vs_thick.png"/>
       <span class="popuptext" ng-show="popup['felix_rock']"> Rocking curve </span>
     </a>
-    <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="single=false" ng-mouseenter="popup['felix_lacbed']=true" ng-mouseleave="popup['felix_lacbed']=false">
+    <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="info.single=false" ng-mouseenter="popup['felix_lacbed']=true" ng-mouseleave="popup['felix_lacbed']=false">
       <img style="width: 90%;" src="/static/images/lacbed_button.png"/>
       <span class="popuptext" ng-show="popup['felix_lacbed']"> LACBED pattern </span>
     </a>
     <table style="margin-left: 10px;">
-      <!-- <tr><td> exp reflections : {a exp_refls.length a}</td></tr>
-      <tr><td> sim reflections : {a sim_refls.length a}</td></tr> -->
-      <tr><td> active exp refl : <span ng-bind="refls['e']"</span> </td></tr>
-      <tr><td> active sim refl : <span ng-bind="refls['s']"</span> </td></tr>
+      <tr><td> exp reflections : <span ng-bind="info.n_exp_refls"></span></td></tr>
+      <tr><td> sim reflections : <span ng-bind="info.n_sim_refls"></span></td></tr>
+      <tr><td> active exp refl : <span ng-bind="info.refls['e']"></span> </td></tr>
+      <tr>
+        <td> active sim refl : <span ng-bind="info.refls['s']"></span> </td>
+        <td>
+          <a class="btn-sm btn-primary popup" ng-click="info.lock_refl=!info.lock_refl" ng-mouseenter="showIt('lock_refl')" ng-mouseleave="hideIt('lock_refl')" style="margin-left: 7px;">
+            <span ng-class="{'glyphicon glyphicon-lock':!info.lock_refl,'glyphicon glyphicon-pencil':info.lock_refl}"/>
+            <span class="popuptext" style="" ng-show="popup['lock_refl']">
+              Lock exp and sim reflections </span>
+          </a>
+        </td>
+      </tr>
     </table>
   </div>
 </div>
