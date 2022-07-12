@@ -107,19 +107,19 @@
 
             <!-- solver tabs  -->
             <div class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
-              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_analysis_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
+              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
                 <span class="gg-stack"></span >
                 <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
               </a>
-              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_analysis_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
+              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
                 <span class="gg-edit-unmask"></span >
                 <span class="popuptext" ng-show="popup['bloch_solver']"> Bloch solver </span>
               </a>
-              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_analysis_mode('ms')" ng-mouseenter="showIt('ms_solver')" ng-mouseleave="hideIt('ms_solver')">
+              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_mode('ms')" ng-mouseenter="showIt('ms_solver')" ng-mouseleave="hideIt('ms_solver')">
                 <span class="gg-format-justify" style="margin-top:0"></span >
                 <span class="popuptext" ng-show="popup['ms_solver']"> Multislice solver </span>
               </a>
-              <a ng-if="dat['felix']" class="btn btn-primary popup tab_btn" ng-style="mode_style['felix']" ng-click="set_analysis_mode('felix')" ng-mouseenter="showIt('felix_tab')" ng-mouseleave="hideIt('felix_tab')">
+              <a ng-if="dat['felix']" class="btn btn-primary popup tab_btn" ng-click="set_mode('felix')" ng-mouseenter="showIt('felix_tab')" ng-mouseleave="hideIt('felix_tab')" ng-style="mode_style['felix']">
                 <span class="gg-components" style="margin-top:0"></span >
                 <span class="popuptext" ng-show="popup['felix_tab']"> Felix dynamical refinement </span>
               </a>

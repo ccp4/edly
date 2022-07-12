@@ -82,7 +82,7 @@ def new_structure():
                 #check sucessful import
                 if cif_file:
                     session['mol']=mol
-                    init_session()
+                    init_mol()
                     msg='ok'
             except Exception as e:
                 check_output('rm -rf %s' %path,shell=True)
@@ -165,11 +165,19 @@ def get_img_frame(frame,zmax,key):
 ########################
 @app.route('/set_mode', methods=['POST'])
 def set_mode():
+    data = request.data.decode() #json.loads(request.data.decode())
+    session['mode'] = data
+    print(colors.red+session['mode']+colors.black)
+    return session['mode']
+
+@app.route('/set_mode_u', methods=['POST'])
+def set_mode_u():
     data = json.loads(request.data.decode())
     # print(data)
     key  = data['key']
     session['modes'][key] = data['val']
     session['mol']  = session['mol']
+    session['mol']  = data['mod']
     return json.dumps({key:session['modes'][key]})
 
 @app.route('/set_visible', methods=['POST'])
@@ -189,23 +197,13 @@ def set_visible():
 def init():
     now = time.time()
     print('username : ' ,session['username'])
+    days = 7
     if session.get('id') and os.path.exists(session.get('path')):
-        init_mol()
-        if (now-session['last_time'])>24*3600:
-            print('warning:session created at %s has expired ' %session['last_time'])
-            print(check_output('rm -rf %s' %session.get('path'),shell=True).decode())
-            # init_args()
+        if (now-session['last_time'])>days*24*3600:
+            clear_session()
     else:
-        id = '%s_%s' %(session['username'],create_id())
-        session_path=os.path.join('static','data','tmp',id)
-        print(check_output('mkdir -p %s' %session_path,shell=True).decode())
-        print(colors.green+'creating new session %s' %id+colors.black)
-        session['path'] = session_path
-        session['id']   = id
-        session['b0_path'] = get_pkl(session['id'])
-        if not session.get('mol'):session['mol'] = 'glycine'
         init_session()
-
+    init_mol()
     # if session['dat']['felix'] and not session['mol'] in felix_data.keys():
     #     if os.path.exists(felix_pkl(session['mol'])):
     #         felix_data[session['mol']] = fe.load_felix(session['path'])
@@ -213,8 +211,8 @@ def init():
     #         felix_data[session['mol']] = fe.Felix(session['path'],session['mol'])
 
 
-
-    # print('sending init info')
+    ####### package info
+    print(colors.red+session['mode']+colors.black)
     info=['mol','dat','frame','crys','cif_file','mode']
     session_data = {k:session[k] for k in info}
     # frames : exp,sim
@@ -231,11 +229,29 @@ def init():
     # session_data['gifs'] = gifs
     return json.dumps(session_data)
 
-def init_session():
-    init_mol()
+
+def clear_session():
+    print('warning:tmp directory %s not used since %d days. Removing content ...' %(session.get('path'),days))
+    print(check_output('rm -rf %s/*' %session.get('path'),shell=True).decode())
     # init_args()
+    print(colors.red+'init0'+colors.black)
+
+def init_session():
+    id = '%s_%s' %(session['username'],create_id())
+    session_path=os.path.join('static','data','tmp',id)
+    print(check_output('mkdir -p %s' %session_path,shell=True).decode())
+    print(colors.green+'creating new session %s' %id+colors.black)
+
+    session['path'] = session_path
+    session['id']   = id
+    session['mol'] = 'silicon'
+    session['mode']  = 'bloch'
+    session['b0_path'] = get_pkl(session['id'])
+    print(colors.red+'init_session'+colors.black)
+
 
 def init_mol():
+    print(colors.red+'init_mol'+colors.black)
     mol = session['mol']
     exp = get_frames(mol,'exp')
     sim = get_frames(mol,'sim',d={'offset':10})
@@ -280,7 +296,6 @@ def init_mol():
     session['zm_counter'] = 0 #dummy variable
     session['last_time']  = now
     session['time']  = now
-    session['mode']  = 'bloch'
 
 
 def get_frames(mol,dat,d={}):

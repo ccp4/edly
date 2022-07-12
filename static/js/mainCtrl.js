@@ -4,16 +4,14 @@ angular.module('app').
     var sel_style = {"border-style":'solid','background-color':'#18327c'};
     var timer;
 
-  $scope.set_analysis_mode=function(val){
+  $scope.set_mode=function(val){
     $scope.mode = val;
     $scope.mode_style = {'bloch':'','frames':''};
     $scope.mode_style[val]=sel_style;
-    $http.post('set_mode',JSON.stringify({'key':key,'val':val}))
+    $http.post('set_mode',val) //JSON.stringify({'val':val}))
     .then(function(response){
-        $log.log(response.data);
+        $log.log($scope.mode,response.data)
       });
-
-    // console.log($scope.mode)
   }
 
 

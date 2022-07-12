@@ -131,8 +131,8 @@ angular.module('app')
   ///////////////////////////////////////////////////////////////////
   // Toggles
   ///////////////////////////////////////////////////////////////////
-  $scope.set_mode=function(key){
-    $http.post('set_mode',JSON.stringify({'key':key,'val':$scope.modes[key]}))
+  $scope.set_mode_u=function(key){
+    $http.post('set_mode_u',JSON.stringify({'key':key,'val':$scope.modes[key]}))
     // .then(function(response){
       //   $log.log(response.data);
       // });
@@ -647,7 +647,7 @@ angular.module('app')
         $scope.modes     = response.data.modes;
         $scope.info.max_res = response.data.max_res;
         $scope.info.dq_ring = response.data.dq_ring;
-        $scope.info.rings   = $scope.rings;        
+        $scope.info.rings   = $scope.rings;
         //refl
         var refl=response.data.refl;
         for (let h of refl){
