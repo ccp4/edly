@@ -23,7 +23,7 @@ pets_data = {}
 #### functions
 ########################
 def bloch_fig():
-    b0 = ut.load_pkl(session['b0_path'])
+    b0 = load_b0()
     toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
 
     omega=session['omega']
@@ -96,6 +96,7 @@ def bloch_fig():
     offset=3+session['dat']['pets']
     rings=list(range(offset,offset+qs.size))
     session['rings']=rings#json.dumps(rings)
+    session['last_time'] = time.time()
 
     # print(session['bloch'])
     fig.update_layout(
@@ -137,6 +138,7 @@ def set_max_res():
 def update_omega():
     data=json.loads(request.data.decode())
     session['omega']=data['omega']
+    # print(data['omega'])
     return bloch_fig()
 
 @bloch.route('/bloch_rotation', methods=['POST'])
@@ -179,7 +181,7 @@ def update_bloch():
     b_args = session['bloch']#.copy()
     # print(b_args['u'])
     # b_args['thicks']=None
-    b0 = ut.load_pkl(session['b0_path'])
+    b0 = load_b0()
     b0.update(**b_args)
     # b0.save()
 
@@ -193,17 +195,17 @@ def update_bloch():
     else:
         fig_data = {}#bloch_fig()
     info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
-        'rings':session['rings'],
         'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
     return info
 
 @bloch.route('/solve_bloch', methods=['POST'])
 def solve_bloch():
-    b0 = ut.load_pkl(session['b0_path'])
+
+    b0 = load_b0()
     b0.solve(opts='vts',felix=session['bloch']['felix'])#opts=session['bloch']['opts'])
-    # fig_data.show()
-    # fig_data=fig_data.to_json()
-    return bloch_fig()
+    fig_data = bloch_fig()
+    # print(colors.red,session['rings'],colors.black)
+    return json.dumps({'rings':session['rings'],'fig':fig_data})
 
 @bloch.route('/show_u', methods=['POST'])
 def show_u():
@@ -394,7 +396,7 @@ def update_rock_thickness():
 @bloch.route('/update_thickness', methods=['POST'])
 def update_thickness():
     thick = json.loads(request.data.decode())['thick']
-    b0 = ut.load_pkl(session['b0_path'])
+    b0 = load_b0()
     b0.set_thickness(thick=thick)
     b0.save(session['b0_path'])
     session['bloch']['thick'] = thick
@@ -420,7 +422,7 @@ def beam_vs_thick():
     b0_path=session['b0_path']
     refl = data['refl']
 
-    b0  = ut.load_pkl(b0_path)
+    b0  = load_b0()
     idx = b0.get_beam(refl=refl)
     b0._set_beams_vs_thickness(thicks=thicks)
     Iz  = b0.get_beams_vs_thickness(idx=idx,dict_opt=True)
@@ -451,7 +453,7 @@ def beam_vs_thick():
 ########################
 @bloch.route('/show_sf', methods=['POST'])
 def show_sf():
-    b0 = ut.load_pkl(session['b0_path'])
+    b0 = load_b0()
     q  = np.linspace(0,max(session['max_res'],b0.df_G.q.max()),500)
     Z = list(b0.crys.chemical_composition)#;print(Z)
     q,fq = scatf.get_elec_atomic_factors(Z,q)
@@ -498,23 +500,43 @@ def get_session_data(key):
 
 @bloch.route('/init_bloch_panel', methods=['GET'])
 def init_bloch_panel():
-    rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
-    bloch_args={
-        'keV':200,'u':[0,0,1],
-        'Nmax':6,'dmin':1,'gemmi':False,'Smax':0.02,
-        'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200
-        }
-    if not session.get('modes'):
-        session['modes'] = {'analysis' : 'bloch'}
-    modes = {
-        'molecule'  : False,
-        'u'         : 'edit',
-        'single'    : False,
-        }
+    if session['new'] :
+        rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
+        bloch_args={
+            'keV':200,'u':[0,0,1],
+            'Nmax':6,'dmin':1,'gemmi':False,'Smax':0.02,
+            'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200
+            }
+        if not session.get('modes'):
+            session['modes'] = {'analysis' : 'bloch'}
+        modes = {
+            'molecule'  : False,
+            'u'         : 'edit',
+            'single'    : False,
+            }
 
-    expand_bloch = {
-        'omega':False,'struct':False,'thick':False,
-        'refl':False,'sim':False,'u':True,}
+        expand_bloch = {
+            'omega':False,'struct':False,'thick':False,
+            'refl':False,'sim':False,'u':True,}
+
+        vis = {'I':True,
+            'Vga':'legendonly','Sw':'legendonly','I_pets':True,
+            'rings':True}
+
+        # session['mol2']  = mol
+        session['omega']    = 157 #in-plane rotation angle
+        session['expand']   = expand_bloch
+        session['modes'].update(modes)
+        # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
+        session['theta_phi']  = [0,0]
+        session['bloch']      = bloch_args
+        session['rock']       = rock_args
+        session['refl']       = []
+        session['dq_ring']  = 0.25
+        session['rings']    = []
+        session['max_res']  = 0
+        session['graph']    = 'thick'
+        session['vis']      = vis
 
     rock_state=''
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
@@ -522,32 +544,22 @@ def init_bloch_panel():
 
 
     if session['dat']['pets'] and not session['mol'] in pets_data.keys():
-        pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
+        if os.path.exists(os.path.join(mol_path(session['mol']),'pets','reflections.txt')):
+            dat_type='dials'
+            pets_data[session['mol']]=pt.Dials(dials_path(session['mol']))
+        else:
+            dat_type='pets'
+            pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
+        print(colors.red+'found processed data type : %s' %dat_type+colors.black)
 
     now = time.time()
-    # session['mol2']  = mol
-    session['omega']    = 157 #in-plane rotation angle
-    session['expand']   = expand_bloch
-    session['modes'].update(modes)
-    # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
-    session['theta_phi']  = [0,0]
-    session['bloch']      = bloch_args
-    session['rock']       = rock_args
-    session['refl']       = []
-    session['dq_ring']  = 0.25
-    session['rings']    = []
-    session['max_res']  = 0
-    session['graph']      = 'thick'
     session['last_time']  = now
     session['time'] = now
+
     session_data = {k:session[k] for k in[
         'omega','expand','modes','refl','graph',
         'rings','max_res','dq_ring',
         ]}
-    session['vis'] = {'I':True,
-        'Vga':'legendonly','Sw':'legendonly','I_pets':True,
-        'rings':True}
-
     session_data['theta_phi'] = b_str(session['theta_phi'],2)
     session_data['bloch'] = get_session_data('bloch')
     session_data['rock']  = get_session_data('rock')
@@ -560,3 +572,14 @@ def init_bloch_panel():
 @bloch.route('/init_bloch', methods=['GET'])
 def init_bloch():
     return json.dumps({k:session[k] for k in ['modes']})
+
+
+def load_b0():
+    try:
+        b0 = ut.load_pkl(session['b0_path'])
+    except Exception as e:
+        print(colors.red,e,colors.black)
+        # if type(e)=EOFError
+        time.sleep(0.25)
+        b0 = ut.load_pkl(session['b0_path'])
+    return b0

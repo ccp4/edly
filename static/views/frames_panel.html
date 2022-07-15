@@ -5,13 +5,24 @@
       <h4> Frame : </h4>
     </div>
   </div>
-  No:
-  <input type="number" min="1" max="max_frame" ng-model="frame" ng-key-enter="update_frame()" style="width: 80px" />
-  <span> / <span ng-bind="max_frame"/></span>
-  <a class="btn-sm btn-primary"  ng-click="dec_frame()">
-    <span class="glyphicon glyphicon-step-backward"></span >
-  </a>
-  <a class="btn-sm btn-primary"  ng-click="inc_frame()">
-    <span class="glyphicon glyphicon-step-forward"></span >
-  </a>
+  <table>
+    <tr><td>
+      No:
+      <input type="number" min="1" max="max_frame" ng-model="frames.active_frame" ng-key-enter="update_frame()" style="width: 80px" />
+      <span> / <span ng-bind="max_frame"/></span>
+      <a class="btn-sm btn-primary"  ng-click="dec_frame()">
+        <span class="glyphicon glyphicon-step-backward"></span >
+      </a>
+      <a class="btn-sm btn-primary"  ng-click="inc_frame()">
+        <span class="glyphicon glyphicon-step-forward"></span >
+      </a>
+      <a class="btn-sm btn-primary"  ng-click="toggle_reload()" ng-style="mode_style['reload']">
+        <span class="glyphicon glyphicon-refresh"></span >
+      </a>
+    </td></tr>
+    <tr><td>
+      Simlation frames offset:
+      <input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" />
+    </td></tr>
+  </table>
 </div>

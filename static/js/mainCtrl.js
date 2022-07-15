@@ -1,16 +1,18 @@
 angular.module('app').
   controller('mainCtrl',['$scope','$rootScope','$log','$http', '$interval','$timeout',function ($scope,$rootScope,$log,$http,$interval,$timeout) {
 
-    var sel_style = {"border-style":'solid','background-color':'#18327c'};
-    var timer;
+
+  var timer;
+  var sel_style = {"border-style":'solid','background-color':'#18327c'};
 
   $scope.set_mode=function(val){
+    $scope.mode_style[$scope.mode] = '';
     $scope.mode = val;
-    $scope.mode_style = {'bloch':'','frames':''};
     $scope.mode_style[val]=sel_style;
     $http.post('set_mode',val) //JSON.stringify({'val':val}))
     .then(function(response){
-        $log.log($scope.mode,response.data)
+        $scope.update()
+        // $log.log($scope.mode,response.data)
       });
   }
 
@@ -32,12 +34,9 @@ angular.module('app').
     // return new Promise(function(resolve, reject){
     switch ($scope.mode){
       case 'bloch':
-        // if ( ! ($scope.modes['manual'] && $scope.modes['u']=='rock')){
-        //   $scope.update_bloch();
-        // }
-        // else{
-        //   $scope.get_rock_sim();
-        // }
+        if ($scope.init_done){
+          $rootScope.$emit('update_bloch');
+        }
         break;
       case 'frames':
         $scope.update_img();break;
@@ -53,14 +52,16 @@ angular.module('app').
   // Frames
   ///////////////////////////////////////////////////////////////////
   $scope.inc_frame=function(){
-    $scope.frame+=1;//=Math.min($scope.max_frame,$scope.frame+1);
+    $scope.frames.active_frame+=1;//=Math.min($scope.max_frame,$scope.frame+1);
     $scope.update_frame();
   };
   $scope.dec_frame=function(){
-    $scope.frame-=1;//=Math.max(1,$scope.frame-1);
+    $scope.frames.active_frame-=1;//=Math.max(1,$scope.frame-1);
     $scope.update_frame();
   };
   $scope.update_frame=function(){
+    // $log.log($scope.frames.active_frame)
+    $scope.frame = $scope.frames.active_frame;
     $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
     // $log.log($scope.frame)
     changed=true;
@@ -80,15 +81,41 @@ angular.module('app').
   }
 
   $scope.update_img=function(){
+    $scope.frames.active_frame = $scope.frame;
+    // $log.log('reloading frame',$scope.frames)
     $http.post('get_frame',JSON.stringify({'frame':$scope.frame,'zmax':$scope.zmax}))
       .then(function(response){
         $scope.img = response.data;
     });
   }
 
+  $scope.update_keyval=function(key,val){
+    // $log.log('upadting offset to',$scope.frames.offset )
+    $http.post('update_keyval',JSON.stringify({key:key,val:val}))
+      .then(function(response){
+        $scope.update_frame();
+    });
+  }
+
+  $scope.update_offset = function(){
+    $scope.update_keyval('offset',$scope.frames.offset);
+  }
+
+  $scope.toggle_reload=function(){
+    $scope.frames.reload=!$scope.frames.reload
+    $scope.update_keyval('reload',$scope.frames.reload)
+    if ($scope.frames.reload){
+      $scope.mode_style['reload']=sel_style
+    }
+    else{
+      $scope.mode_style['reload']=''
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
+  $scope.init_done=false
   $scope.init = function(){
     $http.get('init')
       .then(function(response){
@@ -99,22 +126,27 @@ angular.module('app').
         $scope.cif_file  = response.data.cif_file;
         $scope.max_frame = response.data.max_frame;
         $scope.zmax      = response.data.zmax;
-        $scope.mode      = response.data.mode;
-        $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
+        $scope.frames.offset = response.data.offset;
+        $scope.frames.active_frame = response.data.frame;
+        $scope.frames.reload = response.data.reload;
+        if ($scope.frames.reload){
+          $scope.mode_style['reload']=sel_style;
+        }
+        $scope.mode         = response.data.mode;
         $scope.mode_style[$scope.mode]=sel_style;
         $scope.update();
+        $scope.init_done=true
     });
   }
 
-
+  $scope.frames = {offset:0,active_frame:0,reload:true}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={};
   $scope.popup={};
 
 
   $scope.modes={'molecule':false};
-  $scope.u_style = {'edit':'','move':'','rock':''};
-  $scope.mode_style = {'bloch':'','frames':''};
+  $scope.mode_style = {bloch:'',frames:'',felix:'',reload:''};
   $scope.titles={'frames':'Frames Viewer','bloch':'Bloch solver','ms':'Multislice solver','felix':'Felix Solver'}
   $scope.init();
 }]);

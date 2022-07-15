@@ -1,6 +1,6 @@
 # import importlib as imp
 from subprocess import check_output,Popen,PIPE
-import json,tifffile,os,sys,glob,time,datetime,crystals #,base64,hashlib
+import json,tifffile,mrcfile,os,sys,glob,time,datetime,crystals,re #,base64,hashlib
 from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
 from functools import wraps
 import numpy as np,pandas as pd
@@ -15,6 +15,7 @@ from blochwave import bloch_pp as bl            #;imp.reload(bl)
 from in_out import*
 app = Blueprint('app', __name__)
 
+dsp.plt.switch_backend('agg')
 felix_data = {}
 
 
@@ -126,37 +127,14 @@ def update_zmax():
     session['zm_counter']+=1
     return img
 
-def get_img_frame(frame,zmax,key):
-    session['modes']['analysis']='frames'
-    offset = ''
-    if key=='sim':
-        frame=min(max(1,frame-session['sim']['offset']),session['sim']['max_frame'])
-        offset='(%d frames offset )' %session['sim']['offset']
-    frame_str=str(frame).zfill(session[key]['pad'])
-    png_file=png_path(session['path'],'%s_%s' %(key,frame_str))
-    if not os.path.exists(png_file) or not zmax==session[key]['z_max'][frame-1]:
-        tiff_file=get_path(session['mol'],key,frame_str)
-        im = tifffile.imread(tiff_file)
-        dsp.stddisp(im=[im],caxis=[0,zmax],cmap='viridis',
-            figsize=(10,)*2,
-            pOpt="p", axPos=[0.05,0.05,0.9,0.9],
-            name=png_file,title='frame %s %s' %(frame_str,offset), opt='sc')
-
-        session[key]['zmax'] = zmax
-        session[key]['z_max'][frame-1] = zmax
-
-    ##### Dirty fix for automatic reload
-    # The image is stored as `png_file`. It is copied and sent back
-    # to angularJS as `new_tmp` to force reloading
-    tmp=session[key]['tmp']
-    old_tmp=png_path(session['path'],'tmp_%s_%d' %(key,tmp))
-    new_tmp=png_path(session['path'],'tmp_%s_%d' %(key,tmp+1))
-    p=Popen('rm %s;cp %s %s' %(old_tmp,png_file,new_tmp),shell=True,stdout=PIPE,stderr=PIPE)
-    o,e=p.communicate()
-    if e:print(e.decode())
-    session[key]['tmp']+=1
-    # print(session[key]['tmp'])
-    return new_tmp
+@app.route('/update_keyval', methods=['POST'])
+def update_keyval():
+    form = json.loads(request.data.decode())
+    # print(form)
+    session[form['key']]=form['val']
+    # print(colors.red,form['key'],session[form['key']],colors.black)
+    session['last_time']=time.time()
+    return json.dumps({'key':form['key'],'val':session[form['key']]})
 
 
 
@@ -199,10 +177,13 @@ def init():
     print('username : ' ,session['username'])
     days = 7
     if session.get('id') and os.path.exists(session.get('path')):
+        session['new'] = False
         if (now-session['last_time'])>days*24*3600:
             clear_session()
+            session['new'] = True
     else:
         init_session()
+        session['new'] = True
     init_mol()
     # if session['dat']['felix'] and not session['mol'] in felix_data.keys():
     #     if os.path.exists(felix_pkl(session['mol'])):
@@ -212,7 +193,8 @@ def init():
 
 
     ####### package info
-    info=['mol','dat','frame','crys','cif_file','mode']
+    info=['mol','dat','frame','crys','cif_file','mode',
+        'offset','reload']
     session_data = {k:session[k] for k in info}
     # frames : exp,sim
     session_data['zmax'] = {}
@@ -243,8 +225,9 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol'] = 'silicon'
-    session['mode']  = 'bloch'
+    session['mol']  = 'silicon'
+    session['mode']   = 'bloch'
+    session['reload'] = False
     session['b0_path'] = get_pkl(session['id'])
     print(colors.red+'init_session'+colors.black)
 
@@ -253,7 +236,7 @@ def init_mol():
     # print(colors.red+'init_mol'+colors.black)
     mol = session['mol']
     exp = get_frames(mol,'exp')
-    sim = get_frames(mol,'sim',d={'offset':10})
+    sim = get_frames(mol,'sim')
     dat = {
         'exp':type(exp)==dict,
         'sim':type(sim)==dict,
@@ -285,6 +268,7 @@ def init_mol():
     if not session.get('modes'):session['modes']={'analysis':'bloch'}
     session['modes']['manual'] = not dat['pets']
     if not session.get('frame'):session['frame'] = 1
+    if not session.get('offset'):session['offset'] = 0
 
     now = time.time()
     session['cif_file'] = cif_file
@@ -297,15 +281,83 @@ def init_mol():
     session['time']  = now
 
 
-def get_frames(mol,dat,d={}):
-    frames = glob.glob(get_path(mol,dat,'*'))
-    max_frame=len(frames)
+def get_frames(mol,dat):
     frames_dict=None
-    if max_frame>0:
-        pad = len(os.path.basename(frames[0]).replace('.tiff',''))
+    frames = glob.glob(get_path(mol,dat,'*'))
+    if len(frames)==0:
+        return
+    fmt,i = '',0
+    while fmt not in fmts:
+        fmt = frames[i].split('.')[-1]
+        i+=1
+    print(colors.red+'format found %s' %fmt+colors.black)
+    # print(colors.red,get_path(mol,dat,'*'),colors.black)
+    if fmt:
+        frames = glob.glob(get_path(mol,dat,'*.%s' %fmt))
+        max_frame=len(frames)
+        min_pad = int(np.ceil(np.log10(max_frame)))
+        frame0=os.path.basename(frames[0]).replace('.'+fmt,'')
+        frame_str = re.findall("[0-9]{%d,}" %min_pad,frame0)[0]
+        prefix = frame0.replace(frame_str,'')
+        pad = len(frame_str)
+        # print(frame0,frame_str,pad,prefix)
         frames_dict = {
             'tmp':0,'zmax':50, 'z_max':[50]*max_frame,
-            'max_frame':max_frame,'pad':pad
+            'max_frame':max_frame,'pad':pad,'fmt':fmt,
+            'prefix':prefix,
         }
-        frames_dict.update(d)
+        # frames_dict.update(d)
     return frames_dict
+
+fmts = ['mrc','tiff']
+def tiff_reader(tiff_file)  :
+    with open(tiff_file,'rb') as f:
+        I =tifffile.imread(f)
+    return I
+def mrc_reader(mrc_file):
+    with mrcfile.open(mrc_file) as mrc:
+        return mrc.data
+img_readers = {
+    'mrc' : mrc_reader,
+    'tiff': tiff_reader,
+}
+
+def get_img_frame(frame,zmax,key):
+    session['modes']['analysis']='frames'
+    offset = ''
+    if key=='sim':
+        frame=min(max(1,frame-session['offset']),session['sim']['max_frame'])
+        offset='(%d frames offset )' %session['offset']
+    frame_str=str(frame).zfill(session[key]['pad'])
+    png_file=png_path(session['path'],'%s_%s' %(key,frame_str))
+    # print(colors.red,'reload:',session['reload'],colors.black)
+    if session['reload'] or not os.path.exists(png_file) or not zmax==session[key]['z_max'][frame-1]:
+        img_file = get_path(session['mol'],key,
+            '%s%s.%s' %(session[key]['prefix'],frame_str,session[key]['fmt']))
+        fmt = img_file.split('.')[-1]
+        im = img_readers[fmt](img_file)
+
+        dsp.stddisp(im=[im],caxis=[0,zmax],cmap='viridis',
+            figsize=(10,)*2,
+            pOpt="p", axPos=[0.05,0.05,0.9,0.9],
+            name=png_file,title='frame %s %s' %(frame_str,offset),
+            opt='sc')
+        dsp.plt.close()
+
+        session[key]['zmax'] = zmax
+        session[key]['z_max'][frame-1] = zmax
+
+    ##### Dirty fix for automatic reload
+    # The image is stored as `png_file`. It is copied and sent back
+    # to angularJS as `new_tmp` to force reloading
+    tmp=session[key]['tmp']
+    old_tmp=png_path(session['path'],'tmp_%s_%d' %(key,tmp))
+    new_tmp=png_path(session['path'],'tmp_%s_%d' %(key,tmp+1))
+    if os.path.exists(old_tmp):
+        p=Popen('rm %s' %(old_tmp),shell=True,stdout=PIPE,stderr=PIPE)
+    p=Popen('cp %s %s' %(png_file,new_tmp),shell=True,stdout=PIPE,stderr=PIPE)
+    o,e=p.communicate()
+    if e:print(e.decode())
+    session[key]['tmp']+=1
+    # print(session[key]['tmp'])
+    return new_tmp

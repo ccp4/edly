@@ -31,7 +31,7 @@ def log_in():
 def set_viewer():
     ''' Used to call viewer with parameters
     usage example :
-set_viewer?mol=glycine&mode=frames&frame=25
+set_viewer?mol=glycine&mode=frames&frame=25&offset=10
 set_viewer?mol=silicon&mode=felix
     '''
     args = request.args
@@ -45,6 +45,10 @@ set_viewer?mol=silicon&mode=felix
     if 'mode' in args.keys():
         if args['mode'] in ['frames','bloch','felix','ms']:
             session['mode'] = args['mode']
+    if 'offset' in args.keys():
+        offset = json.loads(args['offset'])
+        if isinstance(offset,int) :
+            session['offset'] = offset
     # if 'mode' in args.keys():
     #     if args['mode'] in ['bloch','frames']:
     #         if not session.get('modes'):session['modes'] = {}

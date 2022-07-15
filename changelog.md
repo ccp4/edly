@@ -1,5 +1,20 @@
 # Version log
 
+## 0.0.5
+### dials import(Fri 15 Jul 20:19:58 BST 2022)
+- fixed bug reload image when changing frames
+- fixed bug reload frames when switching to frames
+- fixed init bug for structures with no available images  
+- fixed bug with update_visible
+- fixed omega update bug
+- dials import functionalities
+- fixed bloch init session data
+- image toggle reload button
+
+### (Tue Jul 12 15:50:46 2022 +0100)
+- added felix support
+- lacbed patterns
+
 ## 0.0.4
 ### Mon 23 May 10:46:46 BST 2022
 - Vga and Sw legendonly at start

@@ -28,9 +28,11 @@ angular.module('app')
 
     $scope.leg_click=function(event){
       var curve_nb=event.curveNumber;
+      // $log.log($scope.info.rings)
       if ( !(curve_nb<$scope.info.rings[0])){
         curve_nb=$scope.info.rings[0];
       }
+      // $log.log(event.data,curve_nb)
       let dat = event.data[curve_nb];
       if (dat.visible==true){
         var visible='legendonly';
@@ -188,6 +190,13 @@ angular.module('app')
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Bloch
   ////////////////////////////////////////////////////////////////////////////////////////////////
+  $rootScope.$on('update_bloch',function(){
+      // $log.log('updateing bloch at frame',$scope.frame)
+      $scope.bloch_solve_reset()
+      $scope.update_bloch();
+  })
+
+
   $scope.update_bloch=function(){
     // $log.log($scope.bloch['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
@@ -224,8 +233,9 @@ angular.module('app')
               $scope.bloch_solve_set('Solving');
               $http.post('solve_bloch',JSON.stringify())
               .then(function(response){
+                $scope.info.rings = response.data.rings;
                 // $scope.fig1 = response.data;//JSON.parse(response.data.fig);
-                $rootScope.$emit('load_fig1',response.data)
+                $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
                 $scope.update_graph();
                 $scope.bloch_solve_set('Completed');
               });
@@ -258,7 +268,6 @@ angular.module('app')
   }
 
   $scope.load_bloch = function (data){
-    $scope.info.rings = data.rings;
     $scope.bloch     = data.bloch;
     $scope.nbeams    = data.nbeams;
     $scope.theta_phi = data.theta_phi.split(',');
@@ -496,7 +505,7 @@ angular.module('app')
 
   $scope.update_omega=function (e) {
     if (event.key=='Enter') {
-      $http.post('update_omega',JSON.stringify({'omega':$scope.omega}))
+      $http.post('update_omega',JSON.stringify({'omega':$scope.info.omega}))
       .then(function(response){
         $rootScope.$emit('load_fig1',response.data)
         // $scope.fig1 = response.data;
@@ -640,14 +649,16 @@ angular.module('app')
         $scope.theta_phi = response.data.theta_phi.split(',');
         $scope.bloch     = response.data.bloch;
         $scope.rock      = response.data.rock;
-        $scope.omega     = response.data.omega;
         $scope.rock_state= response.data.rock_state;
         $scope.expand    = response.data.expand;
         $scope.refl      = response.data.refl;
         $scope.modes     = response.data.modes;
+        $scope.info.omega = response.data.omega;
         $scope.info.max_res = response.data.max_res;
         $scope.info.dq_ring = response.data.dq_ring;
-        $scope.info.rings   = $scope.rings;
+        $scope.info.rings   = response.data.rings;
+        $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
+
         //refl
         var refl=response.data.refl;
         for (let h of refl){
@@ -675,6 +686,8 @@ angular.module('app')
   $scope.popup={}
   $scope.sim_rock = 1;
   $scope.rock_sim = 1;
+  $scope.u_style = {'edit':'','move':'','rock':''};
+
   // $scope.rock_done = false;
   $scope.input={'theta':false,'phi':false,'dtp':false ,'rock_sim':true};
   // $scope.structures = [];
