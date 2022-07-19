@@ -2,13 +2,13 @@
   <tr>
     <td>
       <a class="btn-sm btn-primary popup" style="margin-right:3px" ng-click="toggle_mode('single')" ng-mouseenter="showIt('single_mode')" ng-mouseleave="hideIt('single_mode')">
-        <span ng-class="{'glyphicon glyphicon-duplicate':modes['single'],'glyphicon glyphicon-file':!modes['single']}" />
+        <span ng-class="{'glyphicon glyphicon-duplicate':info.modes.single,'glyphicon glyphicon-file':!info.modes.single}" />
         <span class="popuptext" style="" ng-show="popup['single_mode']"> toggle single/dual mode </span>
       </a>
       <span>max res (recA)              : <input class="sm_input" type="number" ng-model="info.max_res" min="0"  ng-key-enter="set_max_res()"></span>
       <span>&nbsp; rings spacing (recA) : <input class="sm_input" type="number" ng-model="info.dq_ring" min="0"  ng-key-enter="set_ring_spacing()"></span>
     </td>
-    <td ng-hide="single_mode">
+    <td ng-hide="info.modes.single">
       <select ng-model="info.graph" ng-options="x.desc for x in info.graphs" ng-change="update_graph()"></select>
     </td>
   </tr>
@@ -19,7 +19,7 @@
         <line-plot id=fig1 fig="fig1">
       </div>
     </td>
-    <td ng-hide="single_mode">
+    <td ng-hide="info.modes.single">
       <div style="width:100%;margin:5px;border-style:solid;float:right" >
         <line-plot id=fig2 fig="fig2">
       </div>

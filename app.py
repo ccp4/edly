@@ -149,23 +149,6 @@ def set_mode():
     print(colors.red+session['mode']+colors.black)
     return session['mode']
 
-@app.route('/set_mode_u', methods=['POST'])
-def set_mode_u():
-    data = json.loads(request.data.decode())
-    # print(data)
-    key  = data['key']
-    session['modes'][key] = data['val']
-    session['mol']  = session['mol']
-    session['mol']  = data['mod']
-    return json.dumps({key:session['modes'][key]})
-
-@app.route('/set_visible', methods=['POST'])
-def set_visible():
-    data=json.loads(request.data.decode())
-    key = data['key']
-    session['time']=time.time()
-    session['vis'][key]=data['v']
-    return json.dumps({key:session['vis'][key]})
 
 
 ############################################################################

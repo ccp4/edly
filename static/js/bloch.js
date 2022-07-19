@@ -2,7 +2,7 @@
   'use strict';
 
 app.factory('bloch_shared', function(){
-  return {graphs:'',graph:''}
+  return {graphs:'',graph:'',modes:{}}
 });
 
 
@@ -66,8 +66,10 @@ angular.module('app')
     }
 
     $scope.update_graph=function(){
-      // $log.log($scope.info.graph);
-      $rootScope.$emit('update_graph');
+      if (!$scope.info.modes.single){
+        $log.log($scope.info.graph);
+        $rootScope.$emit('update_graph');
+      }
     }
 
     $scope.set_fig1 = function(){
@@ -88,6 +90,15 @@ angular.module('app')
       $scope.set_fig1();
     }
 
+    $scope.toggle_mode=function(key){
+      $scope.info.modes[key]=!$scope.info.modes[key];
+      // $log.log(val,'$scope.info.modes')
+      $http.post('set_mode_val',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
+      .then(function(response){
+          // $scope.update()
+          // $log.log(respo nse.data)
+        });
+    }
 
 
     //////////////////////////////////////////////////////////////
@@ -95,16 +106,16 @@ angular.module('app')
     //////////////////////////////////////////////////////////////
     $scope.fig1={};
     $scope.fig2={};
-    $scope.init = function(){
-      $http.get('init_bloch')
-        .then(function(response){
-          $scope.single_mode = $scope.modes['single'];
-          // $scope.info.graph   = $scope.info.graphs[response.data.graph];
-      })
-    }
+    // $scope.init = function(){
+    //   $http.get('init_bloch')
+    //     .then(function(response){
+    //       $scope.single_mode = $scope.info.modes['single'];
+    //       // $scope.info.graph   = $scope.info.graphs[response.data.graph];
+    //   })
+    // }
 
     $scope.info=bloch_shared;
-    $scope.init();
+    // $scope.init();
 
 }]);
 
@@ -134,11 +145,11 @@ angular.module('app')
   // Toggles
   ///////////////////////////////////////////////////////////////////
   $scope.set_mode_u=function(key){
-    $http.post('set_mode_u',JSON.stringify({'key':key,'val':$scope.modes[key]}))
+    $http.post('set_mode_u',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
     // .then(function(response){
       //   $log.log(response.data);
       // });
-    if (!$scope.modes['manual'] && key=='rock' ){
+    if (!$scope.info.modes['manual'] && key=='rock' ){
     }
     else{
       // if ($scope.graph==$scope.graphs['rock']){
@@ -148,13 +159,9 @@ angular.module('app')
     }
   }
 
-  $scope.toggle_mode=function(key){
-    $scope.modes[key]=!$scope.modes[key];
-    $scope.set_mode(key);
-  }
 
   $scope.set_analysis_mode=function(val){
-    $scope.modes['analysis']=val;
+    $scope.info.modes['analysis']=val;
     $scope.set_mode('analysis',val);
     $scope.mode_style = {'bloch':'','frames':''};
     $scope.mode_style[val]=mode_style;
@@ -167,7 +174,7 @@ angular.module('app')
 
   $scope.toggle_manual_mode=function(){
     $scope.toggle_mode('manual');
-    if (!$scope.modes['manual']){
+    if (!$scope.info.modes['manual']){
       $scope.update();
     }
   }
@@ -201,7 +208,7 @@ angular.module('app')
     // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
         $scope.bloch_solve_set('Preparing');
-        $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.modes['manual']}))
+        $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.info.modes['manual']}))
         .then(function(response){
           $scope.load_bloch(response.data);
           // FELIX
@@ -276,7 +283,7 @@ angular.module('app')
 
 
   $scope.set_u_mode=function(val){
-    $scope.modes['u']=val;
+    $scope.info.modes['u']=val;
     $scope.set_mode('u');
     $scope.u_style = {'edit':'','move':'','rock':''};
     $scope.u_style[val]={"border-style":'solid'};
@@ -486,7 +493,7 @@ angular.module('app')
       .then(function(response){
         // $scope.fig1 = response.data;
         $rootScope.$emit('load_fig1',response.data)
-        if ($scope.modes['u']=='rock'){
+        if ($scope.info.modes['u']=='rock'){
           $scope.show_rock();
         }
       });
@@ -515,10 +522,10 @@ angular.module('app')
 
   $scope.update = function(){
     // return new Promise(function(resolve, reject){
-    // switch ($scope.modes['analysis']){
+    // switch ($scope.info.modes['analysis']){
     //   case 'bloch':
-    $log.log('init bloch',$scope.modes['manual'],$scope.modes['u'])
-    if ( ! ($scope.modes['manual'] && $scope.modes['u']=='rock')){
+    $log.log('init bloch',$scope.info.modes['manual'],$scope.info.modes['u'])
+    if ( ! ($scope.info.modes['manual'] && $scope.info.modes['u']=='rock')){
       $scope.update_bloch();
     }
     else{
@@ -537,7 +544,7 @@ angular.module('app')
   //////////////////////////////////////////////////////////////
   $scope.show_u=function(){
     $scope.info.graph=$scope.info.graphs['u3d']
-    $scope.modes['single']=false;
+    $scope.info.modes['single']=false;
     $http.post('show_u',JSON.stringify({'rock':$scope.rock,'u':$scope.bloch['u']}))
       .then(function(response){
         $rootScope.$emit('load_fig2',response.data)
@@ -548,7 +555,7 @@ angular.module('app')
 
   $scope.show_scat=function(){
     $scope.info.graph=$scope.info.graphs['scat']
-    $scope.modes['single']=false;
+    $scope.info.modes['single']=false;
     $http.post('show_sf')
       .then(function(response){
         $rootScope.$emit('load_fig2',response.data)
@@ -558,7 +565,7 @@ angular.module('app')
   }
 
   $scope.show_rock=function(){
-    $scope.modes['single']=false;
+    $scope.info.modes['single']=false;
     $scope.update_refl();
     $scope.info.graph=$scope.info.graphs['rock']
     $http.post('show_rock',JSON.stringify({'refl':$scope.refl}))
@@ -573,15 +580,15 @@ angular.module('app')
     $scope.info.graph=$scope.info.graphs['thick']
     $http.post('beam_vs_thick',JSON.stringify({'thicks':$scope.bloch['thicks'],'refl':$scope.refl}))
       .then(function(response){
-        $scope.modes['single']=false;
+        $scope.info.modes['single']=false;
         $rootScope.$emit('load_fig2',response.data)
         // $scope.fig2 = response.data;
     });
   }
 
   $scope.update_graph=function(){
-    // $log.log($scope.graph);
-    if (!$scope.single_mode){
+    $log.log('update_graph',$scope.info.modes.single);
+    if (!$scope.info.modes.single){
       switch ($scope.info.graph.type){
         case 'thick':
           $scope.beam_vs_thickness();
@@ -605,6 +612,7 @@ angular.module('app')
 
 
   $rootScope.$on('update_graph',function(){
+    $log.log('update_graph')
     $scope.update_graph();
   })
 
@@ -653,12 +661,12 @@ angular.module('app')
         $scope.rock_state= response.data.rock_state;
         $scope.expand    = response.data.expand;
         $scope.refl      = response.data.refl;
-        $scope.modes     = response.data.modes;
+        $scope.info.modes = response.data.modes;
         $scope.info.omega = response.data.omega;
         $scope.info.max_res = response.data.max_res;
         $scope.info.dq_ring = response.data.dq_ring;
         $scope.info.rings   = response.data.rings;
-        $scope.u_style[$scope.modes['u']]={"border-style":'solid'};
+        $scope.u_style[$scope.info.modes['u']]={"border-style":'solid'};
 
         //refl
         var refl=response.data.refl;

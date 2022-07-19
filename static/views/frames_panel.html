@@ -12,8 +12,13 @@
   </div>
   <table>
     <tr><td>
-      No:
-      <input type="number" min="1" max="max_frame" ng-model="frames.active_frame" ng-key-enter="update_frame()" style="width: 80px" />
+      <span >
+        <a href=""  ng-click="frames.manual=false">
+          No:
+        </a>
+        <span  ng-hide="frames.manual" ng-bind="frames.active_frame" tabindex="1" class="btn-sm btn-primary" ng-keydown="update_frame_event($event)"  ng-dblclick="frames.manual=true" ></span>
+        <input ng-show="frames.manual" ng-model="frames.active_frame" min="1" max="max_frame" ng-key-enter="update_frame()" style="width:30px;">
+      </span>
       <span> / <span ng-bind="max_frame"/></span>
       <a class="btn-sm btn-primary"  ng-click="dec_frame()">
         <span class="glyphicon glyphicon-step-backward"></span >

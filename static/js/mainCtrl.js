@@ -59,6 +59,20 @@ angular.module('app').
     $scope.frames.active_frame-=1;//=Math.max(1,$scope.frame-1);
     $scope.update_frame();
   };
+
+  $scope.update_frame_event=function(e){
+    switch (e.keyCode){
+      case 37: $scope.dec_frame();break;
+      case 39: $scope.inc_frame();break;
+      case 13:
+        $scope.toggle_reload();
+        // $scope.toggle_reload();
+        // $scope.update_frame();
+        break;
+    }
+  }
+
+
   $scope.update_frame=function(){
     // $log.log($scope.frames.active_frame)
     $scope.frame = $scope.frames.active_frame;
@@ -145,6 +159,7 @@ angular.module('app').
           $scope.mode_style['reload']=sel_style;
         }
         $scope.mode = response.data.mode;
+        $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
         // $scope.init_panels();
         $scope.update();
@@ -153,7 +168,7 @@ angular.module('app').
   }
 
   $scope.frame_offset_on=false;
-  $scope.frames = {offset:0,active_frame:0,reload:true}
+  $scope.frames = {offset:0,active_frame:0,reload:true,manual:true}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={};
   $scope.popup={};

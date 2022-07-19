@@ -480,9 +480,38 @@ def show_sf():
 
 
 
+
+
 #####################################################
 #### MISC
 #####################################################
+@bloch.route('/set_mode_val', methods=['POST'])
+def set_mode_val():
+    data = json.loads(request.data.decode())
+    session['modes'][data['key']] = data['val']
+    # print(colors.red,data['key'],session['modes'][data['key']],colors.black)
+    session['last_time']=time.time()
+    return 'ok'
+
+@bloch.route('/set_mode_u', methods=['POST'])
+def set_mode_u():
+    data = json.loads(request.data.decode())
+    # print(data)
+    key  = data['key']
+    session['modes'][key] = data['val']
+    session['mol']  = session['mol']
+    session['mol']  = data['mod']
+    return json.dumps({key:session['modes'][key]})
+
+@bloch.route('/set_visible', methods=['POST'])
+def set_visible():
+    data=json.loads(request.data.decode())
+    key = data['key']
+    session['time']=time.time()
+    session['vis'][key]=data['v']
+    return json.dumps({key:session['vis'][key]})
+
+
 def get_session_data(key):
     if key=='bloch':
         data=session['bloch'].copy()
@@ -579,14 +608,15 @@ def init_bloch():
 
 
 def load_b0():
-    i,n_try,e=0,4,1
-    while i<n_try and e :
-        e=0
+    i,n_try=0,4
+    err=1
+    while i<n_try and err :
+        err=0
         try:
             b0 = ut.load_pkl(session['b0_path'])
-        except Exception as e:
-            print(colors.red,e,colors.black)
+        except Exception as err:
+            print(colors.red,err,colors.black)
             # if type(e)=EOFError
             time.sleep(0.25)
-            b0 = ut.load_pkl(session['b0_path'])
+            # b0 = ut.load_pkl(session['b0_path'])
     return b0

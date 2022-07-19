@@ -111,13 +111,13 @@ Parameters Panel
       <div class="row" style="margin-bottom: 10px">
         <span ng-show="dat['pets']">
           <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="showIt('manual')" ng-mouseleave="hideIt('manual')" style="margin-left: 7px;">
-            <span ng-class="{'glyphicon glyphicon-wrench':!modes['manual'],'glyphicon glyphicon-lock':modes['manual']}" />
+            <span ng-class="{'glyphicon glyphicon-wrench':!info.modes['manual'],'glyphicon glyphicon-lock':info.modes['manual']}" />
             <span class="popuptext" style="" ng-show="popup['manual']">
-              <div ng-show="modes['manual']"> Lock u to experimental frames  </div>
-              <div ng-hide="modes['manual']"> Set u manually   </div></span>
+              <div ng-show="info.modes['manual']"> Lock u to experimental frames  </div>
+              <div ng-hide="info.modes['manual']"> Set u manually   </div></span>
           </a>
         </span>
-        <span ng-show="modes['manual']" style="margin-left:5px;">
+        <span ng-show="info.modes['manual']" style="margin-left:5px;">
           <a class="btn-sm btn-primary popup" ng-style="u_style['edit']" ng-click="set_u_mode('edit')" ng-mouseenter="showIt('u_edit')" ng-mouseleave="hideIt('u_edit')">
             <span class="glyphicon glyphicon-pencil" />
             <span class="popuptext" style="" ng-show="popup['u_edit']"> Edit u manually  </span>
@@ -138,18 +138,18 @@ Parameters Panel
       </div>
 
       <!-- frame mode or edit mode -->
-      <div class="bloch_param" ng-hide="modes['manual'] && modes['u']!='edit'">
+      <div class="bloch_param" ng-hide="info.modes['manual'] && info.modes['u']!='edit'">
           <span> u </span>
           <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['u_info']=true" ng-mouseleave="popup['u_info']=false">
             <span class="popuptext" ng-show="popup['u_info']"> Beam orientation based on experimental frame </span>
           </span>
           <span> = </span>
-          <span  ng-show="!modes['manual']"                      ng-bind="bloch['u']" ></span>
-          <input ng-show="modes['manual'] && modes['u']=='edit'" ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
+          <span  ng-show="!info.modes['manual']"                      ng-bind="bloch['u']" ></span>
+          <input ng-show="info.modes['manual'] && info.modes['u']=='edit'" ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
       </div>
 
       <!-- move mode-->
-      <div ng-show="modes['manual'] && modes['u']=='move'" >
+      <div ng-show="info.modes['manual'] && info.modes['u']=='move'" >
         <span style="float:right;"class="popup glyphicon glyphicon-question-sign " ng-mouseenter="popup['rot_help']=true" ng-mouseleave="popup['rot_help']=false">
           <div class="popuptext" style=";width:200px;text-align:left" ng-show="popup['rot_help']">
             <div> click on the hand and press hotkeys :
@@ -181,7 +181,7 @@ Parameters Panel
       </div>
 
       <!-- rock mode -->
-      <div ng-show="modes['manual'] && modes['u']=='rock'" class="">
+      <div ng-show="info.modes['manual'] && info.modes['u']=='rock'" class="">
         <span style="float:right;" class="popup glyphicon glyphicon-question-sign " ng-mouseenter="popup['rock_help']=true" ng-mouseleave="popup['rock_help']=false">
           <div class="popuptext" style=";width:200px;text-align:left" ng-show="popup['rock_help']">
             <div> Rocking curve settings  :
@@ -260,7 +260,7 @@ Parameters Panel
 </div><!-- u -->
 
 <!-- solve button -->
-<div class="row " ng-hide="modes['manual'] && modes['u']=='rock'">
+<div class="row " ng-hide="info.modes['manual'] && info.modes['u']=='rock'">
   <table style="margin-left: 5px;"><tr>
     <td class="td-in" style="width: 50%;">
       <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()" ng-style="bloch_solve_style" ng-bind="bloch_solve_btn"></div>
