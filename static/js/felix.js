@@ -3,7 +3,7 @@
 
 app.factory('felix_shared', function(){
   return { refls:{e:'',s:''},n_refls:{e:0,s:0},
-    lock_refl:true, single:false};
+    lock_refl:true, single:false,is_sim:false};
 });
 
 angular.module('app')
@@ -19,6 +19,7 @@ angular.module('app')
     }
 
     self.update = function(val){
+      $log.log(val)
       if ($scope.info.lock_refl){
         if (val=='lacbed'){
           $scope.info.refls['e']=$scope.info.refls['s']
@@ -51,7 +52,8 @@ angular.module('app')
       $scope.update_lacbed();
     }
     self.update_lacbed = function () {
-      $http.post('show_lacbed',JSON.stringify({'refl':$scope.info.refls['s'],'png':$scope.lacbed_quick}))
+      if ($scope.is_sim){
+        $http.post('show_lacbed',JSON.stringify({'refl':$scope.info.refls['s'],'png':$scope.lacbed_quick}))
         .then(function(response){
           if ($scope.lacbed_quick){
             $scope.lacbed_img=response.data;
@@ -61,6 +63,7 @@ angular.module('app')
             self.fig2 = JSON.parse(response.data.fig);
           }
         })
+      }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +80,7 @@ angular.module('app')
           self.felix    = response.data.felix;
           self.exp_refls = response.data.exp_refls;
           self.sim_refls = response.data.sim_refls;
-          // $scope.refls = response.data.refls;
+          $scope.info.is_sim = response.data.is_sim;
           $scope.info.refls['e'] = response.data.refls['e']
           $scope.info.refls['s'] = response.data.refls['s']
           $scope.info.n_refls['e'] = self.exp_refls.length;
@@ -85,8 +88,11 @@ angular.module('app')
           self.update('rock');
         })
     }
-    $scope.init_felix();
 
+    // $rootScope.$on('init_felix',function(){
+    //   $scope.init_felix();
+    // })
+    $scope.init_felix();
 }]);
 
 

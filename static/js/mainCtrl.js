@@ -112,6 +112,18 @@ angular.module('app').
     }
   }
 
+  // $scope.init_panels=function(){
+  //   if ($scope.mode in {'felix':'',bloch:''}){
+  //     // $rootScope.$emit('init_'+$scope.mode)
+  //     switch($scope.mode){
+  //       case 'felix':
+  //         $rootScope.$emit('init_felix');break
+  //       case 'bloch':
+  //         $rootScope.$emit('init_bloch');break
+  //       }
+  //   }
+  // }
+
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,13 +144,15 @@ angular.module('app').
         if ($scope.frames.reload){
           $scope.mode_style['reload']=sel_style;
         }
-        $scope.mode         = response.data.mode;
+        $scope.mode = response.data.mode;
         $scope.mode_style[$scope.mode]=sel_style;
+        // $scope.init_panels();
         $scope.update();
         $scope.init_done=true
     });
   }
 
+  $scope.frame_offset_on=false;
   $scope.frames = {offset:0,active_frame:0,reload:true}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={};

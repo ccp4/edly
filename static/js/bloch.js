@@ -191,14 +191,14 @@ angular.module('app')
   // Bloch
   ////////////////////////////////////////////////////////////////////////////////////////////////
   $rootScope.$on('update_bloch',function(){
-      // $log.log('updateing bloch at frame',$scope.frame)
+      $log.log('updating bloch at frame',$scope.frame)
       $scope.bloch_solve_reset()
       $scope.update_bloch();
   })
 
 
   $scope.update_bloch=function(){
-    // $log.log($scope.bloch['Smax'],$scope.bloch['Nmax'])
+    // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
         $scope.bloch_solve_set('Preparing');
         $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.modes['manual']}))
@@ -517,6 +517,7 @@ angular.module('app')
     // return new Promise(function(resolve, reject){
     // switch ($scope.modes['analysis']){
     //   case 'bloch':
+    $log.log('init bloch',$scope.modes['manual'],$scope.modes['u'])
     if ( ! ($scope.modes['manual'] && $scope.modes['u']=='rock')){
       $scope.update_bloch();
     }
@@ -668,6 +669,7 @@ angular.module('app')
         $scope.info.graph = $scope.info.graphs[response.data.graph]
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
         $scope.bloch_solve_reset();
+        // $log.log('init bloch')
         $scope.update()
     });
   }
@@ -701,6 +703,11 @@ angular.module('app')
   $scope.show={}
   // $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}
   // $scope.expand_str={false:'expand',true:'minimize'};
+
+  // $rootScope.$on('init_bloch',function(event,data){
+  //   $log.log('init bloch')
+  //   $scope.init();
+  // })
   $scope.init();
 
 }]);

@@ -519,10 +519,6 @@ def init_bloch_panel():
             'omega':False,'struct':False,'thick':False,
             'refl':False,'sim':False,'u':True,}
 
-        vis = {'I':True,
-            'Vga':'legendonly','Sw':'legendonly','I_pets':True,
-            'rings':True}
-
         # session['mol2']  = mol
         session['omega']    = 157 #in-plane rotation angle
         session['expand']   = expand_bloch
@@ -531,12 +527,20 @@ def init_bloch_panel():
         session['theta_phi']  = [0,0]
         session['bloch']      = bloch_args
         session['rock']       = rock_args
-        session['refl']       = []
         session['dq_ring']  = 0.25
         session['rings']    = []
         session['max_res']  = 0
-        session['graph']    = 'thick'
-        session['vis']      = vis
+
+    vis = {'I':True,
+        'Vga':'legendonly','Sw':'legendonly','I_pets':True,
+        'rings':True}
+
+    session['graph'] = 'thick'
+    session['vis']   = vis
+    session['refl']  = []
+    # if not session['dat']['pets']:
+    #     print(colors.red+'pets not found : setting vis["I_pets"] to false'+colors.black)
+    #     session['vis']['I_pets']=False
 
     rock_state=''
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
@@ -575,11 +579,14 @@ def init_bloch():
 
 
 def load_b0():
-    try:
-        b0 = ut.load_pkl(session['b0_path'])
-    except Exception as e:
-        print(colors.red,e,colors.black)
-        # if type(e)=EOFError
-        time.sleep(0.25)
-        b0 = ut.load_pkl(session['b0_path'])
+    i,n_try,e=0,4,1
+    while i<n_try and e :
+        e=0
+        try:
+            b0 = ut.load_pkl(session['b0_path'])
+        except Exception as e:
+            print(colors.red,e,colors.black)
+            # if type(e)=EOFError
+            time.sleep(0.25)
+            b0 = ut.load_pkl(session['b0_path'])
     return b0

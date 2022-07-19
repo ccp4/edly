@@ -1,9 +1,14 @@
 <!-- Frames panel -->
 <div class="panel" ng-show="!modes['molecule'] && max_frame>0">
   <div class="row">
-    <div class="col-sm-8">
-      <h4> Frame : </h4>
-    </div>
+    <!-- <div class="col-sm-8"> -->
+      <h4>
+        <span> Frames (sim vs exp) : </span>
+        <span class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!frame_offset_on,'glyphicon-minus-sign':frame_offset_on}" ng-click="frame_offset_on=!frame_offset_on" ng-mouseenter="popup['frame_offset']=true" ng-mouseleave="popup['frame_offset']=false" >
+          <span class="popuptext" ng-show="popup['frame_offset']"> select an offset for simulated frames  </span>
+        </span>
+      </h4>
+    <!-- </div> -->
   </div>
   <table>
     <tr><td>
@@ -20,7 +25,7 @@
         <span class="glyphicon glyphicon-refresh"></span >
       </a>
     </td></tr>
-    <tr><td>
+    <tr ng-show="frame_offset_on"><td>
       Simlation frames offset:
       <input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" />
     </td></tr>

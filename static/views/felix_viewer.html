@@ -19,8 +19,8 @@
   </td>
 
   <!-- Second display -->
-  <td ng-hide="info.single">
-    <table>
+  <td ng-if="info.is_sim">
+    <table ng-hide="info.single">
       <tr>
         <td>
           <span class="felix_refl" > Choose reflection : </span>

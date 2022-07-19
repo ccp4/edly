@@ -140,7 +140,7 @@ display section
       <img style="width: 90%;" src="/static/images/beam_vs_thick.png"/>
       <span class="popuptext" ng-show="popup['felix_rock']"> Rocking curve </span>
     </a>
-    <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="info.single=false" ng-mouseenter="popup['felix_lacbed']=true" ng-mouseleave="popup['felix_lacbed']=false">
+    <a ng-show="info.is_sim" class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="info.single=false" ng-mouseenter="popup['felix_lacbed']=true" ng-mouseleave="popup['felix_lacbed']=false">
       <img style="width: 90%;" src="/static/images/lacbed_button.png"/>
       <span class="popuptext" ng-show="popup['felix_lacbed']"> LACBED pattern </span>
     </a>

@@ -1,6 +1,13 @@
 # Version log
 
 ## 0.0.5
+### (Tue 19 Jul 17:08:56 BST 2022)
+- changed felix path to dedicated directory
+- added more attempts in load_b0
+- added lacbed option only if available in felix
+- retractable frame offset
+- biotin dataset imported with pets 
+
 ### dials import(Fri 15 Jul 20:19:58 BST 2022)
 - fixed bug reload image when changing frames
 - fixed bug reload frames when switching to frames

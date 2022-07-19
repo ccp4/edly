@@ -16,7 +16,8 @@ from in_out import*
 app = Blueprint('app', __name__)
 
 dsp.plt.switch_backend('agg')
-felix_data = {}
+# felix_data = {}
+# pets_data = {}
 
 
 def login_required(f):
@@ -185,14 +186,15 @@ def init():
         init_session()
         session['new'] = True
     init_mol()
-    # if session['dat']['felix'] and not session['mol'] in felix_data.keys():
-    #     if os.path.exists(felix_pkl(session['mol'])):
-    #         felix_data[session['mol']] = fe.load_felix(session['path'])
-    #     else:
-    #         felix_data[session['mol']] = fe.Felix(session['path'],session['mol'])
 
 
     ####### package info
+    if session['mode']=='felix' and not session['dat']['felix']:
+        session['mode'] = 'bloch'
+    if session['dat']['exp'] :
+        if session['frame']>session['exp']['max_frame']:
+            session['frame']=1
+
     info=['mol','dat','frame','crys','cif_file','mode',
         'offset','reload']
     session_data = {k:session[k] for k in info}
@@ -241,7 +243,7 @@ def init_mol():
         'exp':type(exp)==dict,
         'sim':type(sim)==dict,
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets')),
-        'felix':os.path.exists(os.path.join(mol_path(mol),'reflprofiles_strong.dat')),
+        'felix':os.path.exists(os.path.join(mol_path(mol),'felix')),
         }
     # if not os.path.exists(session['b0_path']) or new:
     struct_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))

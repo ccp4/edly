@@ -11,6 +11,8 @@ from in_out import*
 
 felix = Blueprint('felix', __name__)
 
+# felix_data = {}
+
 def get_form(request):
     return json.loads(request.data.decode())
 
@@ -88,35 +90,6 @@ def lacbed_png(refl):
 ################################################
 #### calls
 ################################################
-@felix.route('/init_felix_panel', methods=['POST'])
-def init_felix_panel():
-    felix_args={
-        'keV':200,'ww':40,'wid':200,
-        'np':4,'nodes':20,
-        'jobs_done':'69/69','jobs_run':'none','jobs_state':'none',
-    }
-    session['felix'] = felix_args
-    return json.dumps({'felix':session['felix']})
-
-
-@felix.route('/init_felix', methods=['POST'])
-def init_felix():
-    f = load_felix(session)
-    exp_refls = list(f.df_refl.index.unique())# [s[1:-1].replace(' ','') for s in f.df_refl.index.values]
-    sim_refls = list(f.df_sims.refl.unique())
-    i=0
-    while exp_refls[i] not in sim_refls:
-        i+=1
-    erefl = exp_refls[i]
-    srefl = sim_refls[i]
-    # print(refl)
-    session_data = {
-        'exp_refls':exp_refls,'sim_refls':sim_refls,
-        'refls':{'e':erefl,'s':srefl},
-        'fig1':plot_rock(erefl),
-        'fig2':plot_lacbed(srefl),
-        }
-    return json.dumps(session_data)
 
 @felix.route('/show_lacbed', methods=['POST'])
 def show_lacbed():
@@ -143,3 +116,50 @@ def gen_felix():
     data = get_form(request)
     # print(data)
     return 'ok'
+
+
+
+@felix.route('/init_felix', methods=['POST'])
+def init_felix():
+    f = load_felix(session)
+    exp_refls = list(f.df_refl.index.unique())# [s[1:-1].replace(' ','') for s in f.df_refl.index.values]
+    erefl = exp_refls[0]
+    sim_refls,srefl,fig2 = [],'',{}
+    is_sim = 'df_sims' in f.__dict__.keys()
+    if is_sim:
+        i=0
+        sim_refls = list(f.df_sims.refl.unique())
+        while exp_refls[i] not in sim_refls:
+            i+=1
+        erefl = exp_refls[i]
+        srefl = sim_refls[i]
+        fig2 = plot_lacbed(srefl)
+    # print(refl)
+    session_data = {
+        'exp_refls':exp_refls,'sim_refls':sim_refls,
+        'refls':{'e':erefl,'s':srefl},
+        # 'fig1':plot_rock(erefl),
+        # 'fig2':fig2,
+        'is_sim':is_sim,
+        }
+    return json.dumps(session_data)
+
+@felix.route('/init_felix_panel', methods=['POST'])
+def init_felix_panel():
+    # if not session['mol'] in felix_data.keys():
+    #     if not os.path.exists(felix_pkl(session['mol'])):
+    #         felix_data[session['mol']] = fe.load_felix(session['path'])
+    #     else:
+    # if not os.path.exists(felix_pkl(session['mol'])):
+    #
+    #         felix_path = os.path.join(session['mol'],'pets')
+    #         print(felix_path,glob.glob(felix_path+'/*.dyn.cif_pets'))
+    #         felix_data[session['mol']] = fe.Felix(felix_path,session['mol'])
+
+    felix_args={
+        'keV':200,'ww':40,'wid':200,
+        'np':4,'nodes':20,
+        'jobs_done':'69/69','jobs_run':'none','jobs_state':'none',
+    }
+    session['felix'] = felix_args
+    return json.dumps({'felix':session['felix']})
