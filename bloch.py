@@ -26,6 +26,16 @@ def bloch_fig():
     b0 = load_b0()
     toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
 
+    is_px = session['is_px']
+    pred_info = session['pred_info']
+    if session['dat']['pets'] :
+        pets = pets_data[session['mol']]
+        if is_px:
+            is_px = 'aper' in pets.__dict__
+        pred_info = pred_info and 'df_pred' in pets.__dict__
+    else:
+        is_px = False
+
     omega=session['omega']
     # session['vis']
     if omega and session['dat']['pets']:
@@ -34,6 +44,18 @@ def bloch_fig():
         # print(qy_b[0])
         qx,qy = ct*qx_b-st*qy_b,st*qx_b+ct*qy_b
         toplot['px'],toplot['py'] = qx,qy
+    if is_px:
+        if pred_info:
+            hkl = [h for h in b0.df_G.index if h in pets.df_pred.index]
+
+            pxy = pets.df_pred.loc[hkl]
+            toplot['px'] = pxy['px']
+            toplot['py'] = pxy['py']
+        else:
+            cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
+            toplot['px'] = qx/pets.aper + cx
+            toplot['py'] = qy/pets.aper + cy
+
 
     plts = {
         'I'  :['Ix','blue' ,'circle'     ],
@@ -62,12 +84,15 @@ def bloch_fig():
     #### pets
     if session['dat']['pets']:
         pets = pets_data[session['mol']]
-        df_pets=pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
-        pt_plot=df_pets[['qx','qy','I','hkl','F']].copy()
+        df_pets = pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
+        df_pets = df_pets.loc[~(df_pets.hkl == str((0,0,0)))]
+        pt_plot=df_pets[['px','py','qx','qy','I','hkl','F']].copy()
+        px,py='qx','qy'
+        if is_px:px,py='px','py'
         pt_plot['Ix']=normalize(np.log10(np.maximum(abs(pt_plot['I']),1e-2)))
 
         fig.add_trace(go.Scatter(
-            x=pt_plot['qx'],y=-pt_plot['qy'],marker_size=pt_plot['Ix'],
+            x=pt_plot[px],y=pt_plot[py],marker_size=pt_plot['Ix'],
             name='I_pets',
             visible=session['vis']['I_pets'],
             hovertext=['I_pets']*len(pt_plot),
@@ -78,14 +103,27 @@ def bloch_fig():
         ))
 
     xm = session['max_res']
-    if not xm:
-        xm = b0.df_G.q.max()
+    if not xm:xm = b0.df_G.q.max()
+    xr,yr=[-xm,xm],[xm,-xm]
+    if is_px:
+        x_m = pets.nxy #pt_plot['px'].max() #*np.sqrt(2)
+        xr,yr=[0,x_m],[0,x_m]
+
     dq_ring = session['dq_ring']
     t,qs = np.linspace(0,2*np.pi,100),np.arange(dq_ring,xm,dq_ring)
-    for q0 in qs:
+    qr=qs
+    ct,st = np.cos(t),np.sin(t)
+    rx = lambda r:r*ct; ry=lambda r:r*st
+    if is_px :
+         qr = qs/(pets.aper*np.sqrt(2))
+         if pred_info:
+             cx,cy = (x_m/2,)*2
+         rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
+
+    for q0,r0 in zip(qs,qr):
         name='%.2f A' %(1/q0)
         fig.add_trace(go.Scatter(
-            x=q0*np.cos(t),y=q0*np.sin(t),
+            x=rx(r0),y=ry(r0),
             legendgroup="resolution rings",
             legendgrouptitle_text="res rings",
             name=name,hovertext=['q=%.3f recA' %q0]*t.size,
@@ -106,8 +144,8 @@ def bloch_fig():
         width=fig_wh, height=fig_wh,
     )
     # fig.update_traces(mode='markers')
-    fig.update_xaxes(range=[-xm,xm])
-    fig.update_yaxes(range=[xm,-xm])
+    fig.update_xaxes(range=xr)
+    fig.update_yaxes(range=yr)
     return fig.to_json()
 
 
@@ -559,6 +597,8 @@ def init_bloch_panel():
         session['dq_ring']  = 0.25
         session['rings']    = []
         session['max_res']  = 0
+        session['is_px']     = True # use pixels instead of recA
+        session['pred_info'] = True # use dials predicted refl
 
     vis = {'I':True,
         'Vga':'legendonly','Sw':'legendonly','I_pets':True,
@@ -608,8 +648,9 @@ def init_bloch():
 
 
 def load_b0():
+    ### sometimes the file is not saved yet and does not exist so we may need to re-try
     i,n_try=0,4
-    err=1
+    err=1;print(err)
     while i<n_try and err :
         err=0
         try:

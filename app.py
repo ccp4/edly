@@ -5,7 +5,7 @@ from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,rende
 from functools import wraps
 import numpy as np,pandas as pd
 from EDutils import utilities as ut             #;imp.reload(ut)
-from EDutils import felix as fe                 #;imp.reload(fe)
+# from EDutils import felix as fe                 #;imp.reload(fe)
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
 import plotly.express as px

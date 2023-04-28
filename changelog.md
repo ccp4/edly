@@ -1,11 +1,18 @@
 # Version log
 
 ## 0.0.5
+### (Fri 28 Apr 17:44:15 BST 2023)
+- remove (0,0,0) dials exp reflections
+- fix omega bug when using `pred_info` with dials
+
+### (Thu 28 Jul 15:33:06 BST 2022)
+- enabled display pattern in pixels (stable for all dials/pets/no_data)
+- enable to choose between pixel and rec space
+
 ### (Tue 19 Jul 18:19:22 BST 2022)
 - implement tab index for frames
 - moved bloch related calls to bloch.py
 - reactivated modes.single (other modes are still buggy)
-
 
 ### (Tue 19 Jul 17:08:56 BST 2022)
 - changed felix path to dedicated directory
