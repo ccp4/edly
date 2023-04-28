@@ -18,6 +18,9 @@
 
 
 ### misc
+- dynamical refinement mode but rocking including experimental should be in the bloch solver mode
+- LACBED useful
+- fix bug
 - occasional crash when updating frames and errors
 - long time chrome violation warning
 - include kinematic Fkin vs Fdyn
