@@ -1,5 +1,7 @@
 # Version log
 
+## 0.0.6dev
+
 ## 0.0.5
 ### (Fri 28 Apr 17:44:15 BST 2023)
 - remove (0,0,0) dials exp reflections

@@ -1,12 +1,15 @@
 from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session
 from flask import render_template,make_response
+from subprocess import check_output
 import crystals,glob,os,socket,json
 from functools import wraps
 from in_out import structures,builtins,gifs
 login = Blueprint('login', __name__)
 server_home='/'
 if socket.gethostname()=='tarik-CCP4':server_home=''
-version='0.0.5'
+version_cmd=r'grep "## [0-9]" changelog.md  | head -n1 | cut -d" " -f2'
+version=check_output(version_cmd,shell=True).decode()
+
 
 @login.route('/login', methods=['GET','POST'])
 def log_in():
