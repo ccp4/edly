@@ -1,7 +1,7 @@
 from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session
 from flask import render_template,make_response
 from subprocess import check_output
-import crystals,glob,os,socket,json
+import crystals,glob,os,socket,json,datetime
 from functools import wraps
 from in_out import structures,builtins,gifs
 login = Blueprint('login', __name__)
@@ -9,7 +9,7 @@ server_home='/'
 if socket.gethostname()=='tarik-CCP4':server_home=''
 version_cmd=r'grep "## [0-9]" changelog.md  | head -n1 | cut -d" " -f2'
 version=check_output(version_cmd,shell=True).decode()
-
+year = datetime.date.today().strftime('%Y')
 
 @login.route('/login', methods=['GET','POST'])
 def log_in():
@@ -74,7 +74,7 @@ def viewer():
         return redirect(server_home+url_for('login.home'))
     else:
         # return make_response(open('templates/main.html').read())
-        return make_response(render_template('main.html',builtins=builtins,structures=structures,gifs=gifs,version=version))
+        return make_response(render_template('main.html',builtins=builtins,structures=structures,gifs=gifs,version=version,year=year))
 
 @login.route('/', methods=['GET', 'POST'])
 def home():
