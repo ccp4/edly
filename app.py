@@ -34,7 +34,7 @@ def login_required(f):
 
 
 ######################################################
-#### Structure realted
+#### Structure related
 ######################################################
 @app.route('/upload_cif', methods=['POST'])
 def upload_cif():
@@ -249,6 +249,8 @@ def init_mol():
     crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
     crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
         b_str(crys.lattice_parameters,2).split(',') )))
+    crys_dat['chemical_formula'] = crys.chemical_formula
+    print(crys.chemical_formula)
 
     if not session.get('modes'):session['modes']={'analysis':'bloch'}
     session['modes']['manual'] = not dat['pets']
@@ -263,7 +265,7 @@ def init_mol():
     session['exp'] = exp
     session['zm_counter'] = 0 #dummy variable
     session['last_time']  = now
-    session['time']  = now
+    session['time']       = now
 
 
 def get_frames(mol,dat):
@@ -320,6 +322,7 @@ def get_img_frame(frame,zmax,key):
         img_file = get_path(session['mol'],key,
             '%s%s.%s' %(session[key]['prefix'],frame_str,session[key]['fmt']))
         fmt = img_file.split('.')[-1]
+        print(img_file)
         im = img_readers[fmt](img_file)
 
         dsp.stddisp(im=[im],caxis=[0,zmax],cmap='viridis',

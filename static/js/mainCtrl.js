@@ -126,6 +126,11 @@ angular.module('app').
     }
   }
 
+  $scope.update_formula = function(){
+    update_formula();
+    // $scope.log('offset',$scope.frames.offset);
+  }
+
   // $scope.init_panels=function(){
   //   if ($scope.mode in {'felix':'',bloch:''}){
   //     // $rootScope.$emit('init_'+$scope.mode)
@@ -164,6 +169,7 @@ angular.module('app').
         // $scope.init_panels();
         $scope.update();
         $scope.init_done=true
+        update_formula();
     });
   }
 
