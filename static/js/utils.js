@@ -1,3 +1,16 @@
+function draw_frame(frame_type,dats,wh){
+
+  const canvas = document.getElementById("canvas_"+frame_type);
+  canvas.width=wh;
+  canvas.height=wh;
+  const ctx = canvas.getContext("2d");
+  // Initialize a new ImageData object
+  let imageData = new ImageData(dats, wh);
+  // Draw image data to the canvas
+  ctx.putImageData(imageData, 0, 0);
+  // console.log('all drawn');
+}
+
 function addRow_tagTable(miller_indices) {
   var TABLE_MILLER=document.getElementById('table_Miller_indices')
     if (!extract_list_indices_from_table().includes(miller_indices)) {
@@ -222,3 +235,11 @@ function open_link(link){
   // console.log(link);
   window.open(link)
 };
+
+
+function update_formula(formula){
+  var math = MathJax.Hub.getAllJax("formula")[0];
+  console.log(math)
+
+  MathJax.Hub.Queue(["Text",math,formula]);
+}

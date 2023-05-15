@@ -1,6 +1,9 @@
 # TODO
 
 
+### fix bug next frame #34
+-
+
 ### issue#13 CBED
 - CBED panel
 - run CBED

@@ -1,6 +1,10 @@
 # Version log
 
 ## 0.0.6dev
+### Mon 15 May 20:11:43 BST 2023
+- issue#34 : implemented canvas
+- fixed bug with chemical formula was not fully working
+- fixed bug with frame overflow and frame numbering (biotin starts at 0, glycine starts at 1)
 
 ## 0.0.5
 ### (Fri 28 Apr 17:44:15 BST 2023)

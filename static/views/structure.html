@@ -10,7 +10,7 @@
   </div>
   <div style="font-size:25px">  {a structure a} </div>
   <div class="theta_phi">
-    <a class="popup" ng-click="expand['struct']=!expand['struct']" ng-mouseenter="showIt('expand_struct')" ng-mouseleave="hideIt('expand_struct')" style="float:right;bottom:5px">
+    <a class="popup" ng-click="show_structure()" ng-mouseenter="showIt('expand_struct')" ng-mouseleave="hideIt('expand_struct')" style="float:right;bottom:5px">
       <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
         <span class="popuptext" style="" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
       </span>
@@ -45,10 +45,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  function update_formula(){
-    var math = MathJax.Hub.getAllJax("formula")[0];
-    MathJax.Hub.Queue(["Text",math,"SiO_2"]);
-  }
-</script>

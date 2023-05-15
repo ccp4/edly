@@ -26,13 +26,17 @@
       <a class="btn-sm btn-primary"  ng-click="inc_frame()">
         <span class="glyphicon glyphicon-step-forward"></span >
       </a>
-      <a class="btn-sm btn-primary"  ng-click="toggle_reload()" ng-style="mode_style['reload']">
+      <!-- <a class="btn-sm btn-primary"  ng-click="toggle_reload()" ng-style="mode_style['reload']">
         <span class="glyphicon glyphicon-refresh"></span >
-      </a>
+      </a> -->
     </td></tr>
     <tr ng-show="frame_offset_on"><td>
-      Simlation frames offset:
+      Simulation frames offset:
       <input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" />
+    </td></tr>
+    <tr ><td style="padding-top:10px" >
+      color map :
+      <select ng-model="caxis.cmap" ng-options="x for x in cmaps" ng-change="change_heatmap()"></select>
     </td></tr>
   </table>
 </div>

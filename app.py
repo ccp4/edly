@@ -111,22 +111,15 @@ def set_structure():
 @app.route('/get_frame', methods=['POST'])
 def get_frame():
     data=json.loads(request.data.decode())
-    zmax  = data['zmax']
+    # zmax  = data['zmax']
     frame = int(data['frame'])
     exp_img,sim_img = ['static/images/dummy.png']*2
     if session['dat']['sim']:
-        sim_img = get_img_frame(frame,zmax['sim'],'sim')
+        sim_img = get_frame_img(frame,'sim').tolist()
     if session['dat']['exp']:
-        exp_img = get_img_frame(frame,zmax['exp'],'exp')
+        exp_img = get_frame_img(frame,'exp').tolist()
     session['frame']=frame  #;print(frame)
     return json.dumps({'exp':exp_img,'sim':sim_img})
-
-@app.route('/update_zmax', methods=['POST'])
-def update_zmax():
-    data=json.loads(request.data.decode())
-    img=get_img_frame(session['frame'],data['zmax'],data['key'])
-    session['zm_counter']+=1
-    return img
 
 @app.route('/update_keyval', methods=['POST'])
 def update_keyval():
@@ -170,26 +163,27 @@ def init():
         session['new'] = True
     init_mol()
 
-
     ####### package info
+    #### Done at every refresh
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
     if session['dat']['exp'] :
         if session['frame']>session['exp']['max_frame']:
             session['frame']=1
 
-    info=['mol','dat','frame','crys','cif_file','mode',
-        'offset','reload']
+    info=['mol','dat','frame','crys','cif_file','mode','zmax',
+        'offset','reload','cmap','cmaps','heatmaps','nb_colors']
     session_data = {k:session[k] for k in info}
     # frames : exp,sim
-    session_data['zmax'] = {}
+    # session_data['zmax'] = {}
     session_data['max_frame'] = 0
     if session['sim']:
-        session_data['max_frame']   = session['sim']['max_frame']
-        session_data['zmax']['sim'] = session['sim']['zmax']
+        session_data['max_frame']   = session['sim']['nb_frames']
+        # session_data['zmax']['sim'] = session['sim']['zmax']
     if session['exp']:
-        session_data['max_frame']   = max(session['exp']['max_frame'],session_data['max_frame'])
-        session_data['zmax']['exp'] = session['exp']['zmax']
+        session_data['max_frame']   = max(session['exp']['nb_frames'],session_data['max_frame'])
+        # session_data['zmax']['exp'] = session['exp']['zmax']
+
     # print(session_data['max_frame'])
     # session_data['structures'] = [s for s in structures if s!=session['mol']]
     # session_data['gifs'] = gifs
@@ -210,12 +204,18 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol']  = 'silicon'
-    session['mode']   = 'bloch'
+    session['mol']  = 'glycine'
+    session['mode']   = 'frames'
     session['reload'] = False
     session['b0_path'] = get_pkl(session['id'])
     print(colors.red+'init_session'+colors.black)
-
+    #colormaps
+    session['zmax']      = dict(zip(['sim','exp'],[50]*2))
+    session['nb_colors'] = 100
+    session['cmap']      = 'hot'
+    session['cmaps']     = ['hot','viridis','Greys_r','Spectral']
+    session['heatmaps']  = {k:np.array(255 * np.array(dsp.getCs(k, session['nb_colors'])).flatten(), dtype=np.uint8).tolist()
+        for k in session['cmaps']}
 
 def init_mol():
     # print(colors.red+'init_mol'+colors.black)
@@ -249,8 +249,9 @@ def init_mol():
     crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
     crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
         b_str(crys.lattice_parameters,2).split(',') )))
-    crys_dat['chemical_formula'] = crys.chemical_formula
-    print(crys.chemical_formula)
+    formula = re.sub("([0-9]+)", r"_{\1}", crys.chemical_formula).replace(' ','')
+    crys_dat['chemical_formula'] = formula
+    # print(formula)
 
     if not session.get('modes'):session['modes']={'analysis':'bloch'}
     session['modes']['manual'] = not dat['pets']
@@ -263,7 +264,6 @@ def init_mol():
     session['dat'] = dat
     session['sim'] = sim
     session['exp'] = exp
-    session['zm_counter'] = 0 #dummy variable
     session['last_time']  = now
     session['time']       = now
 
@@ -280,16 +280,20 @@ def get_frames(mol,dat):
     print(colors.red+'format found %s' %fmt+colors.black)
     # print(colors.red,get_path(mol,dat,'*'),colors.black)
     if fmt:
-        frames = glob.glob(get_path(mol,dat,'*.%s' %fmt))
-        max_frame=len(frames)
-        min_pad = int(np.ceil(np.log10(max_frame)))
-        frame0=os.path.basename(frames[0]).replace('.'+fmt,'')
+        frames    = np.sort(glob.glob(get_path(mol,dat,'*.%s' %fmt))).tolist()
+        nb_frames = len(frames)
+        min_pad   = int(np.ceil(np.log10(nb_frames)))
+        frame0    = os.path.basename(frames[0]).replace('.'+fmt,'')
         frame_str = re.findall("[0-9]{%d,}" %min_pad,frame0)[0]
-        prefix = frame0.replace(frame_str,'')
-        pad = len(frame_str)
-        # print(frame0,frame_str,pad,prefix)
+        prefix    = frame0.replace(frame_str,'')
+        pad       = len(frame_str)
+        min_frame = int(frame_str)
+
+        max_frame    = int(os.path.basename(frames[-1]).replace('.'+fmt,'').replace(prefix,''))
+        # print(frame0,frame_str,pad,prefix,' ',min_frame,max_frame)
         frames_dict = {
-            'tmp':0,'zmax':50, 'z_max':[50]*max_frame,
+            'nb_frames' : nb_frames,
+            'min_frame':min_frame,
             'max_frame':max_frame,'pad':pad,'fmt':fmt,
             'prefix':prefix,
         }
@@ -309,43 +313,24 @@ img_readers = {
     'tiff': tiff_reader,
 }
 
-def get_img_frame(frame,zmax,key):
+def get_frame_img(frame,key):
     session['modes']['analysis']='frames'
     offset = ''
     if key=='sim':
-        frame=min(max(1,frame-session['offset']),session['sim']['max_frame'])
+        frame=min(max(0,frame-session['offset']),session['sim']['nb_frames']-1)
         offset='(%d frames offset )' %session['offset']
-    frame_str=str(frame).zfill(session[key]['pad'])
-    png_file=png_path(session['path'],'%s_%s' %(key,frame_str))
-    # print(colors.red,'reload:',session['reload'],colors.black)
-    if session['reload'] or not os.path.exists(png_file) or not zmax==session[key]['z_max'][frame-1]:
-        img_file = get_path(session['mol'],key,
-            '%s%s.%s' %(session[key]['prefix'],frame_str,session[key]['fmt']))
-        fmt = img_file.split('.')[-1]
-        print(img_file)
-        im = img_readers[fmt](img_file)
-
-        dsp.stddisp(im=[im],caxis=[0,zmax],cmap='viridis',
-            figsize=(10,)*2,
-            pOpt="p", axPos=[0.05,0.05,0.9,0.9],
-            name=png_file,title='frame %s %s' %(frame_str,offset),
-            opt='sc')
-        dsp.plt.close()
-
-        session[key]['zmax'] = zmax
-        session[key]['z_max'][frame-1] = zmax
-
-    ##### Dirty fix for automatic reload
-    # The image is stored as `png_file`. It is copied and sent back
-    # to angularJS as `new_tmp` to force reloading
-    tmp=session[key]['tmp']
-    old_tmp=png_path(session['path'],'tmp_%s_%d' %(key,tmp))
-    new_tmp=png_path(session['path'],'tmp_%s_%d' %(key,tmp+1))
-    if os.path.exists(old_tmp):
-        p=Popen('rm %s' %(old_tmp),shell=True,stdout=PIPE,stderr=PIPE)
-    p=Popen('cp %s %s' %(png_file,new_tmp),shell=True,stdout=PIPE,stderr=PIPE)
-    o,e=p.communicate()
-    if e:print(e.decode())
-    session[key]['tmp']+=1
-    # print(session[key]['tmp'])
-    return new_tmp
+    else:
+        frame=min(max(0,frame),session['exp']['nb_frames']-1)
+    frame_str=str(frame+session[key]['min_frame']).zfill(session[key]['pad'])
+    # print(session[key]['pad'],frame,session[key]['min_frame'],frame_str)
+    img_file = get_path(session['mol'],key,
+        '%s%s.%s' %(session[key]['prefix'],frame_str,session[key]['fmt']))
+    fmt = img_file.split('.')[-1]
+    im = img_readers[fmt](img_file)
+    wh = im.shape[0]
+    step=1
+    if wh>512:
+        step = wh//512#int(np.ceil())
+        im = im[::step,::step]
+    # print(im.shape)
+    return im.flatten()

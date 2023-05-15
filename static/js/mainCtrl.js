@@ -83,52 +83,97 @@ angular.module('app').
     $scope.update();
   }
 
-  $scope.update_zmax=function(event,val){
+  $scope.update_zmax=function(event,frame_type){
     if (event.key=='Enter'){
-      if ($scope.zmax[val]>0){
-        $http.post('update_zmax',JSON.stringify({'zmax':$scope.zmax[val],'key':val}))
-          .then(function(response){
-            $scope.img[val] = response.data;
-        });
-      }
+      $scope.update_keyval('zmax',$scope.zmax,0);
+      $scope.draw_frame(frame_type);
+      // $http.post('update_zmax',JSON.stringify({'frame_type':frame_type,'zmax':$scope.zmax[frame_type]}))
+      // .then(function(response){
+      //   // $log.log(response.data);
+      // });
     }
+  }
+
+  $scope.draw_frame=function(frame_type){
+    dats = $scope.data[frame_type];
+    const npts = dats.length;
+    const wh   = Math.sqrt(npts)
+    $log.log(wh);
+
+    const vals = new Uint8ClampedArray(npts);
+    for (let i = 0; i < vals.length; i += 1) {
+      vals[i] = Math.floor((Math.min(dats[i],$scope.zmax[frame_type]-1)/$scope.zmax[frame_type])*$scope.nb_colors);
+    }
+
+    var cs   = $scope.heatmaps[$scope.caxis.cmap];//$scope.caxis.cmap;//.vals;
+    const arr = new Uint8ClampedArray(4*dats.length);
+    // Fill the array with the RGBA values of the colormap
+    for (let i = 0; i < dats.length; i += 1) {
+      // var idx=3*dats[Math.floor(i/4)]
+      arr[4*i + 0] = cs[3*vals[i]+0]; // R value
+      arr[4*i + 1] = cs[3*vals[i]+1]; // G value
+      arr[4*i + 2] = cs[3*vals[i]+2]; // B value
+      arr[4*i + 3] = 255;
+      // console.log(dats[i]);
+    }
+    draw_frame(frame_type,arr,wh);//,$scope.cmap);
+  }
+
+  $scope.change_heatmap=function(){
+    // $log.log($scope.caxis.cmap);
+    $scope.draw_frame("exp");
+    if ($scope.dat['sim']==true){
+      $scope.draw_frame("sim");
+    }
+    $scope.update_keyval('cmap',$scope.caxis.cmap,0);
   }
 
   $scope.update_img=function(){
     $scope.frames.active_frame = $scope.frame;
     // $log.log('reloading frame',$scope.frames)
-    $http.post('get_frame',JSON.stringify({'frame':$scope.frame,'zmax':$scope.zmax}))
+    $http.post('get_frame',JSON.stringify({'frame':$scope.frame-1}))//,'zmax':$scope.zmax}))
       .then(function(response){
-        $scope.img = response.data;
+        $scope.data['exp'] = response.data.exp;
+        $scope.draw_frame("exp");
+
+        if ($scope.dat['sim']==true){
+          $scope.data['sim'] = response.data.sim;
+          $scope.draw_frame("sim");
+
+        }
     });
   }
 
-  $scope.update_keyval=function(key,val){
+  $scope.update_keyval=function(key,val,refresh){
     // $log.log('upadting offset to',$scope.frames.offset )
     $http.post('update_keyval',JSON.stringify({key:key,val:val}))
       .then(function(response){
-        $scope.update_frame();
+        if (refresh){
+          $scope.update_frame();
+        }
+        // $log.log(response.data.val);
     });
   }
 
   $scope.update_offset = function(){
-    $scope.update_keyval('offset',$scope.frames.offset);
+    $scope.update_keyval('offset',$scope.frames.offset,1);
   }
 
-  $scope.toggle_reload=function(){
-    $scope.frames.reload=!$scope.frames.reload
-    $scope.update_keyval('reload',$scope.frames.reload)
-    if ($scope.frames.reload){
-      $scope.mode_style['reload']=sel_style
-    }
-    else{
-      $scope.mode_style['reload']=''
-    }
-  }
+  // $scope.toggle_reload=function(){
+  //   $scope.frames.reload=!$scope.frames.reload
+  //   $scope.update_keyval('reload',$scope.frames.reload)
+  //   if ($scope.frames.reload){
+  //     $scope.mode_style['reload']=sel_style
+  //   }
+  //   else{
+  //     $scope.mode_style['reload']=''
+  //   }
+  // }
 
-  $scope.update_formula = function(){
-    update_formula();
-    // $scope.log('offset',$scope.frames.offset);
+  $scope.show_structure = function(){
+    $scope.expand['struct']=!$scope.expand['struct']
+    // $log.log($scope.crys.chemical_formula)
+    update_formula($scope.crys.chemical_formula);
   }
 
   // $scope.init_panels=function(){
@@ -156,20 +201,26 @@ angular.module('app').
         $scope.crys      = response.data.crys;
         $scope.cif_file  = response.data.cif_file;
         $scope.max_frame = response.data.max_frame;
+        $scope.data      = {'exp':0,'sim':0};
         $scope.zmax      = response.data.zmax;
+        $scope.nb_colors = response.data.nb_colors;
+        $scope.heatmaps  = response.data.heatmaps;
+        $scope.cmaps     = response.data.cmaps;
+        $scope.caxis     = {'cmap':response.data.cmap};
+
         $scope.frames.offset = response.data.offset;
         $scope.frames.active_frame = response.data.frame;
-        $scope.frames.reload = response.data.reload;
-        if ($scope.frames.reload){
-          $scope.mode_style['reload']=sel_style;
-        }
+        // $scope.frames.reload = response.data.reload;
+        // if ($scope.frames.reload){
+        //   $scope.mode_style['reload']=sel_style;
+        // }
         $scope.mode = response.data.mode;
         $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
         // $scope.init_panels();
         $scope.update();
         $scope.init_done=true
-        update_formula();
+        // $log.log($scope.crys.chemical_formula);
     });
   }
 
