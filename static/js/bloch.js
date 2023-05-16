@@ -197,8 +197,8 @@ angular.module('app')
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Bloch
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  $rootScope.$on('update_bloch',function(){
-      $log.log('updating bloch at frame',$scope.frame)
+  $rootScope.$on('update_bloch',function(event,frame){
+      $scope.frame=frame;
       $scope.bloch_solve_reset()
       $scope.update_bloch();
   })
@@ -208,6 +208,7 @@ angular.module('app')
     // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
         $scope.bloch_solve_set('Preparing');
+        // $log.log('solving bloch for frame ',$scope.frame)
         $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.info.modes['manual']}))
         .then(function(response){
           $scope.load_bloch(response.data);
@@ -587,7 +588,7 @@ angular.module('app')
   }
 
   $scope.update_graph=function(){
-    $log.log('update_graph',$scope.info.modes.single);
+    // $log.log('update_graph',$scope.info.modes.single);
     if (!$scope.info.modes.single){
       switch ($scope.info.graph.type){
         case 'thick':
@@ -612,7 +613,7 @@ angular.module('app')
 
 
   $rootScope.$on('update_graph',function(){
-    $log.log('update_graph')
+    // $log.log('update_graph')
     $scope.update_graph();
   })
 
@@ -677,15 +678,15 @@ angular.module('app')
         $scope.info.graph = $scope.info.graphs[response.data.graph]
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
         $scope.bloch_solve_reset();
-        // $log.log('init bloch')
-        $scope.update()
+        $log.log('bloch init done');
+        // $scope.update()
     });
   }
 
   $scope.info=bloch_shared;
   var changed=true;
-  // $scope.frame = 1;
-  $scope.nbeams=0;
+  $scope.frame  = 1;
+  $scope.nbeams = 0;
   $scope.nrock_beams=0;
   $scope.show_buttons=false;
   $scope.dtheta_phi=0.1;

@@ -139,7 +139,7 @@ def update_keyval():
 def set_mode():
     data = request.data.decode() #json.loads(request.data.decode())
     session['mode'] = data
-    print(colors.red+session['mode']+colors.black)
+    # print(colors.red+session['mode']+colors.black)
     return session['mode']
 
 
@@ -164,6 +164,7 @@ def init():
     init_mol()
 
     ####### package info
+    print('init with session mode : '+colors.red+session['mode']+colors.black)
     #### Done at every refresh
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
@@ -183,7 +184,10 @@ def init():
     if session['exp']:
         session_data['max_frame']   = max(session['exp']['nb_frames'],session_data['max_frame'])
         # session_data['zmax']['exp'] = session['exp']['zmax']
-
+    if session['dat']['pets']:
+        pets = load_pets(session)
+        pets_frames = pets.uvw.shape[0]
+        session_data['max_frame'] = min(pets_frames,session_data['max_frame'])
     # print(session_data['max_frame'])
     # session_data['structures'] = [s for s in structures if s!=session['mol']]
     # session_data['gifs'] = gifs

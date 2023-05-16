@@ -9,10 +9,17 @@ angular.module('app').
     $scope.mode_style[$scope.mode] = '';
     $scope.mode = val;
     $scope.mode_style[val]=sel_style;
+    // $log.log($scope.mode)
     $http.post('set_mode',val) //JSON.stringify({'val':val}))
     .then(function(response){
-        $scope.update()
+      if ($scope.changed==true){
         // $log.log($scope.mode,response.data)
+        $scope.update();
+        // if ($scope.mode=='frames'){
+        //   $scope.update_img();
+        // }
+        $scope.changed=false;
+        }
       });
   }
 
@@ -31,20 +38,15 @@ angular.module('app').
 
 
   $scope.update = function(){
-    // return new Promise(function(resolve, reject){
     switch ($scope.mode){
       case 'bloch':
-        if ($scope.init_done){
-          $rootScope.$emit('update_bloch');
-        }
+          $rootScope.$emit('update_bloch',$scope.frame);
         break;
       case 'frames':
         $scope.update_img();break;
       case 'ms':
         $log.log('ms');break;
     }
-    //   resolve($log.log($scope.rings));
-    // });
   }
 
 
@@ -74,13 +76,17 @@ angular.module('app').
 
 
   $scope.update_frame=function(){
-    // $log.log($scope.frames.active_frame)
-    $scope.frame = $scope.frames.active_frame;
-    $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
-    // $log.log($scope.frame)
-    changed=true;
+    $scope.frame=Math.max(1,Math.min($scope.frames.active_frame,$scope.max_frame));
+    // $log.log($scope.frame,$scope.frames.active_frame)
+    if ($scope.frame == $scope.frames.active_frame){
+      $scope.changed=true;
+      $scope.update();
+    }
+    $scope.frames.active_frame=$scope.frame;
+
+    // $scope.frame = $scope.frames.active_frame;
+    // $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
     // $scope.bloch_solve_reset();
-    $scope.update();
   }
 
   $scope.update_zmax=function(event,frame_type){
@@ -98,7 +104,7 @@ angular.module('app').
     dats = $scope.data[frame_type];
     const npts = dats.length;
     const wh   = Math.sqrt(npts)
-    $log.log(wh);
+    // $log.log(wh);
 
     const vals = new Uint8ClampedArray(npts);
     for (let i = 0; i < vals.length; i += 1) {
@@ -191,7 +197,7 @@ angular.module('app').
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  $scope.init_done=false
+  // $scope.init_done=false
   $scope.init = function(){
     $http.get('init')
       .then(function(response){
@@ -219,11 +225,12 @@ angular.module('app').
         $scope.mode_style[$scope.mode]=sel_style;
         // $scope.init_panels();
         $scope.update();
-        $scope.init_done=true
+        // $scope.init_done=true
         // $log.log($scope.crys.chemical_formula);
     });
   }
 
+  $scope.changed=true;
   $scope.frame_offset_on=false;
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true}
   $scope.expand_str={false:'expand',true:'minimize'};

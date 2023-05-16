@@ -1,6 +1,13 @@
 # Version log
 
 ## 0.0.6dev
+### T
+- issue#34 :
+  - fixed bloch frame overflow (pets.uvw does not contain the 5 last tiff images )
+  - bloch not recalculated if the frame actually did not change
+  - heatmap option only shown when in frames mode
+  - bloch does not recalculate when switching mode if frame has not changed (repaced ng-switch directive with ng-show and moved controllers div outside of the ng-show directive so initialization does not happen every time the div is shown)
+
 ### Mon 15 May 20:11:43 BST 2023
 - issue#34 : implemented canvas
 - fixed bug with chemical formula was not fully working

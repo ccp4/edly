@@ -3,7 +3,8 @@ import os,glob,crystals,numpy as np
 from subprocess import check_output
 from crystals import Crystal as Crys
 from utils import glob_colors as colors
-from EDutils import felix as fe              #;imp.reload(fe)
+from EDutils import felix as fe        #;imp.reload(fe)
+from EDutils import pets               #;imp.reload(pets)
 
 chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol
@@ -16,6 +17,12 @@ get_pkl   = lambda id:'static/data/tmp/%s/b.pkl' %id
 rock_path = lambda id:'static/data/tmp/%s/rock_.pkl' %id
 felix_path = lambda mol:os.path.join(mol_path(mol),'felix')
 felix_pkl  = lambda session:os.path.join(felix_path(session['mol']),'felix.pkl')
+
+def load_pets(session):
+    pts_file = pets_path(session['mol'])
+    if os.path.exists(pts_file):
+        return pets.Pets(pts_file)
+
 
 def load_felix(session):
     if not os.path.exists(felix_pkl(session)):
