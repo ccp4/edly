@@ -112,15 +112,15 @@
                 <span class="gg-stack"></span >
                 <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
               </a>
-              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
+              <a ng-show="cif_file" class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
                 <span class="gg-edit-unmask"></span >
                 <span class="popuptext" ng-show="popup['bloch_solver']"> Bloch solver </span>
               </a>
-              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_mode('ms')" ng-mouseenter="showIt('ms_solver')" ng-mouseleave="hideIt('ms_solver')">
+              <a ng-show="cif_file" class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_mode('ms')" ng-mouseenter="showIt('ms_solver')" ng-mouseleave="hideIt('ms_solver')">
                 <span class="gg-format-justify" style="margin-top:0"></span >
                 <span class="popuptext" ng-show="popup['ms_solver']"> Multislice solver </span>
               </a>
-              <a ng-if="dat['felix']" class="btn btn-primary popup tab_btn" ng-click="set_mode('felix')" ng-mouseenter="showIt('felix_tab')" ng-mouseleave="hideIt('felix_tab')" ng-style="mode_style['felix']">
+              <a ng-show="cif_file && dat['felix']" class="btn btn-primary popup tab_btn" ng-click="set_mode('felix')" ng-mouseenter="showIt('felix_tab')" ng-mouseleave="hideIt('felix_tab')" ng-style="mode_style['felix']">
                 <span class="gg-components" style="margin-top:0"></span >
                 <span class="popuptext" ng-show="popup['felix_tab']"> Felix dynamical refinement </span>
               </a>
@@ -132,20 +132,18 @@
                 {a titles[mode] a}
               </div>
             </div>
-            <!-- <div ng-switch="mode"> -->
             <div ng-include="'static/views/frames_panel.html'"></div>
             <div ng-show="mode=='frames'">
               <div ng-include="'static/views/upload_panel.html'"></div>
             </div>
-              <!-- <div ng-switch-when="felix">
-                <div ng-controller="FelixPanelCtrl" class="panel bloch_panel" >
-                  <div ng-include="'static/views/felix_panel.html'"></div>
-                </div>
-              </div> -->
-              <!-- <div ng-include="'static/views/frames_panel.html'"> -->
             <div ng-controller="BlochPanelCtrl" class="panel bloch_panel" >
               <div ng-show="mode=='bloch'">
                 <div ng-include="'static/views/bloch_panel.html'"></div>
+              </div>
+            </div>
+            <div ng-controller="FelixPanelCtrl" class="panel bloch_panel" >
+              <div ng-show="mode=='felix'">
+                <div ng-include="'static/views/felix_panel.html'"></div>
               </div>
             </div>
         </div><!-- Main Panel -->
@@ -153,7 +151,6 @@
 
       <!-- solver views  -->
       <div class="col-sm-10" >
-        <!-- <div ng-switch="mode"> -->
           <div ng-show="mode=='frames'">
             <div ng-include="'static/views/frame_viewer.html'"></div>
           </div>

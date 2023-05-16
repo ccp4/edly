@@ -77,15 +77,16 @@ angular.module('app')
     $scope.init_felix = function(){
       $http.post('init_felix')
         .then(function(response){
-          self.felix    = response.data.felix;
-          self.exp_refls = response.data.exp_refls;
-          self.sim_refls = response.data.sim_refls;
-          $scope.info.is_sim = response.data.is_sim;
-          $scope.info.refls['e'] = response.data.refls['e']
-          $scope.info.refls['s'] = response.data.refls['s']
-          $scope.info.n_refls['e'] = self.exp_refls.length;
-          $scope.info.n_refls['s'] = self.sim_refls.length;
-          self.update('rock');
+          if (response.data.felix){
+            self.exp_refls = response.data.exp_refls;
+            self.sim_refls = response.data.sim_refls;
+            $scope.info.is_sim = response.data.is_sim;
+            $scope.info.refls['e'] = response.data.refls['e']
+            $scope.info.refls['s'] = response.data.refls['s']
+            $scope.info.n_refls['e'] = self.exp_refls.length;
+            $scope.info.n_refls['s'] = self.sim_refls.length;
+            self.update('rock');
+          }
         })
     }
 

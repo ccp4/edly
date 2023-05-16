@@ -121,28 +121,31 @@ def gen_felix():
 
 @felix.route('/init_felix', methods=['POST'])
 def init_felix():
-    f = load_felix(session)
-    exp_refls = list(f.df_refl.index.unique())# [s[1:-1].replace(' ','') for s in f.df_refl.index.values]
-    erefl = exp_refls[0]
-    sim_refls,srefl,fig2 = [],'',{}
-    is_sim = 'df_sims' in f.__dict__.keys()
-    if is_sim:
-        i=0
-        sim_refls = list(f.df_sims.refl.unique())
-        while exp_refls[i] not in sim_refls:
-            i+=1
-        erefl = exp_refls[i]
-        srefl = sim_refls[i]
-        fig2 = plot_lacbed(srefl)
-    # print(refl)
-    session_data = {
-        'exp_refls':exp_refls,'sim_refls':sim_refls,
-        'refls':{'e':erefl,'s':srefl},
-        # 'fig1':plot_rock(erefl),
-        # 'fig2':fig2,
-        'is_sim':is_sim,
-        }
+    session_data = {'felix':False}
+    if os.path.exists(felix_path(session['mol'])):
+        f = load_felix(session)
+        exp_refls = list(f.df_refl.index.unique())# [s[1:-1].replace(' ','') for s in f.df_refl.index.values]
+        erefl = exp_refls[0]
+        sim_refls,srefl,fig2 = [],'',{}
+        is_sim = 'df_sims' in f.__dict__.keys()
+        if is_sim:
+            i=0
+            sim_refls = list(f.df_sims.refl.unique())
+            while exp_refls[i] not in sim_refls:
+                i+=1
+            erefl = exp_refls[i]
+            srefl = sim_refls[i]
+            fig2 = plot_lacbed(srefl)
+        # print(refl)
+        session_data = {
+            'exp_refls':exp_refls,'sim_refls':sim_refls,
+            'refls':{'e':erefl,'s':srefl},
+            # 'fig1':plot_rock(erefl),
+            # 'fig2':fig2,
+            'is_sim':is_sim,'felix':True,
+            }
     return json.dumps(session_data)
+
 
 @felix.route('/init_felix_panel', methods=['POST'])
 def init_felix_panel():

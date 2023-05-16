@@ -1,7 +1,17 @@
 # Version log
 
 ## 0.0.6dev
-### T
+### Tue 16 May 19:12:01 BST 2023
+- issue#35 refactor import dataset :
+  - datasets loaded in `in_out.py`
+- issue#31 :
+  - enable reading exp frames without `cif_file`
+  - disable solvers if `cif_file` not provided
+- modified naming for nb_frames
+- added cbf reader
+- cleaned code
+
+### Tue 16 May 13:32:48 BST 2023
 - issue#34 :
   - fixed bloch frame overflow (pets.uvw does not contain the 5 last tiff images )
   - bloch not recalculated if the frame actually did not change

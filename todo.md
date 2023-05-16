@@ -1,8 +1,6 @@
 # TODO
 
-
-### fix bug next frame #34
--
+move TODO to github issues
 
 ### issue#13 CBED
 - CBED panel
@@ -33,9 +31,3 @@
 - swap u to exp lock when there is pets data
 - enable solve when swapping lock
 - generate frame/integrated frame settings
-
-### bugs
-
-### Challenge:
-- trouver une lib heatmap tres rudimentaire mais rapide -> niveau interaction forcement reduit comparé a plotly
-    - try plotly.image

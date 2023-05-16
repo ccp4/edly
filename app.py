@@ -1,6 +1,7 @@
 # import importlib as imp
 from subprocess import check_output,Popen,PIPE
-import json,tifffile,mrcfile,os,sys,glob,time,datetime,crystals,re #,base64,hashlib
+import json,os,sys,glob,time,datetime,crystals,re #,base64,hashlib
+import tifffile,mrcfile,cbf
 from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
 from functools import wraps
 import numpy as np,pandas as pd
@@ -163,42 +164,25 @@ def init():
         session['new'] = True
     init_mol()
 
-    ####### package info
-    print('init with session mode : '+colors.red+session['mode']+colors.black)
+
     #### Done at every refresh
+    # print('init with session mode : '+colors.red+session['mode']+colors.black)
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
     if session['dat']['exp'] :
-        if session['frame']>session['exp']['max_frame']:
+        if session['frame']>session['nb_frames']:
             session['frame']=1
 
-    info=['mol','dat','frame','crys','cif_file','mode','zmax',
+    ####### package info to frontend
+    info=['mol','dat','frame','crys','cif_file','mode','zmax','nb_frames',
         'offset','reload','cmap','cmaps','heatmaps','nb_colors']
     session_data = {k:session[k] for k in info}
-    # frames : exp,sim
-    # session_data['zmax'] = {}
-    session_data['max_frame'] = 0
-    if session['sim']:
-        session_data['max_frame']   = session['sim']['nb_frames']
-        # session_data['zmax']['sim'] = session['sim']['zmax']
-    if session['exp']:
-        session_data['max_frame']   = max(session['exp']['nb_frames'],session_data['max_frame'])
-        # session_data['zmax']['exp'] = session['exp']['zmax']
-    if session['dat']['pets']:
-        pets = load_pets(session)
-        pets_frames = pets.uvw.shape[0]
-        session_data['max_frame'] = min(pets_frames,session_data['max_frame'])
+
     # print(session_data['max_frame'])
     # session_data['structures'] = [s for s in structures if s!=session['mol']]
     # session_data['gifs'] = gifs
     return json.dumps(session_data)
 
-
-def clear_session():
-    print('warning:tmp directory %s not used since %d days. Removing content ...' %(session.get('path'),days))
-    print(check_output('rm -rf %s/*' %session.get('path'),shell=True).decode())
-    # init_args()
-    print(colors.red+'init0'+colors.black)
 
 def init_session():
     id = '%s_%s' %(session['username'],create_id())
@@ -209,8 +193,8 @@ def init_session():
     session['path'] = session_path
     session['id']   = id
     session['mol']  = 'glycine'
-    session['mode']   = 'frames'
-    session['reload'] = False
+    session['mode']    = 'bloch'
+    # session['reload']  = False
     session['b0_path'] = get_pkl(session['id'])
     print(colors.red+'init_session'+colors.black)
     #colormaps
@@ -224,37 +208,47 @@ def init_session():
 def init_mol():
     # print(colors.red+'init_mol'+colors.black)
     mol = session['mol']
-    exp = get_frames(mol,'exp')
     sim = get_frames(mol,'sim')
+    exp = get_frames(mol,'exp')
     dat = {
         'exp':type(exp)==dict,
         'sim':type(sim)==dict,
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets')),
         'felix':os.path.exists(os.path.join(mol_path(mol),'felix')),
         }
-    # if not os.path.exists(session['b0_path']) or new:
-    struct_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
-    if len(struct_files):
-        struct_file=struct_files[0]
-        base_file = os.path.basename(struct_file)[:-4]
-        ##crystals library is rubbish as saved cif messes up the symmetry
-        if base_file in crystals.Crystal.builtins:struct_file=base_file
+
+    # get the max number of frames for frontend from frames simulated/experimental frames
+    # or processed data.
+    # Note : sometimes processed datasets may have discarded experimental frames
+    # so only keep those ones then
+    nb_frames = 0
+    if session['sim']:
+        nb_frames = session['sim']['nb_frames']
+    if session['exp']:
+        nb_frames = max(session['exp']['nb_frames'],nb_frames)
+    if dat['pets'] and not mol in pets_data.keys():
+        update_exp_data(mol)
+        pets = pets_data[mol]
+        pets_frames = pets.uvw.shape[0]
+        nb_frames = min(pets_frames,nb_frames)
+
+    ## initialize structure
+    struct_file = get_structure_file()
+    if struct_file:
+        b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
+        # b0=ut.load_pkl(session['b0_path'])
+
+        crys,cif_file=b0.crys,b0.cif_file
+        crys_dat = {'file':os.path.basename(cif_file)}
+        crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
+        crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
+            b_str(crys.lattice_parameters,2).split(',') )))
+        formula = re.sub("([0-9]+)", r"_{\1}", crys.chemical_formula).replace(' ','')
+        crys_dat['chemical_formula'] = formula
     else:
-        struct_file = glob.glob(os.path.join(mol_path(mol),'*.pdb'))[0]
-    # elif os.path.basename(struct_file)[-3:]=='pdb':
-    # print(struct_file)
-
-
-    b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
-    # b0=ut.load_pkl(session['b0_path'])
-
-    crys,cif_file=b0.crys,b0.cif_file
-    crys_dat = {'file':os.path.basename(cif_file)}
-    crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
-    crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
-        b_str(crys.lattice_parameters,2).split(',') )))
-    formula = re.sub("([0-9]+)", r"_{\1}", crys.chemical_formula).replace(' ','')
-    crys_dat['chemical_formula'] = formula
+        crys_dat=dict(zip(
+        ['file','a','b','c','alpha','beta','gamma','a1', 'a2', 'a3','chemical_formula'],
+        ['?']*11))
     # print(formula)
 
     if not session.get('modes'):session['modes']={'analysis':'bloch'}
@@ -263,58 +257,101 @@ def init_mol():
     if not session.get('offset'):session['offset'] = 0
 
     now = time.time()
-    session['cif_file'] = cif_file
+    # session['cif_file'] = struct_file
     session['crys']     = crys_dat
-    session['dat'] = dat
-    session['sim'] = sim
-    session['exp'] = exp
+    session['dat']      = dat
+    session['sim']      = sim
+    session['exp']      = exp
+    session['nb_frames']  = nb_frames
     session['last_time']  = now
     session['time']       = now
 
 
-def get_frames(mol,dat):
+
+def clear_session():
+    print('warning:tmp directory %s not used since %d days. Removing content ...' %(session.get('path'),days))
+    print(check_output('rm -rf %s/*' %session.get('path'),shell=True).decode())
+    # init_args()
+    print(colors.red+'init0'+colors.black)
+
+def get_structure_file():
+    '''reading priorities:
+    - built-in
+    - cif
+    - pdb
+    '''
+    struct_file=''
+    mol = session['mol']
+    if mol in crystals.Crystal.builtins:
+        struct_file=mol
+    else:
+        cif_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
+        if len(cif_files):
+            struct_file=cif_files[0]
+            base_file = os.path.basename(struct_file)[:-4]
+            ##crystals library is rubbish as saved cif messes up the symmetry
+        else:
+            pdb_files = glob.glob(os.path.join(mol_path(mol),'*.pdb'))
+            if len(pdb_files):
+                struct_file = pdb_files[0]
+    return struct_file
+
+def get_frames(mol,frame_type):
     frames_dict=None
-    frames = glob.glob(get_path(mol,dat,'*'))
-    if len(frames)==0:
+    files = glob.glob(get_path(mol,frame_type,'*.*'))
+    if not len(files):
         return
     fmt,i = '',0
     while fmt not in fmts:
-        fmt = frames[i].split('.')[-1]
+        fmt = files[i].split('.')[-1]
         i+=1
-    print(colors.red+'format found %s' %fmt+colors.black)
+    print(colors.red+'format detected for %s frames : %s' %(frame_type,fmt) +colors.black)
     # print(colors.red,get_path(mol,dat,'*'),colors.black)
     if fmt:
-        frames    = np.sort(glob.glob(get_path(mol,dat,'*.%s' %fmt))).tolist()
+        frames    = np.sort(glob.glob(get_path(mol,frame_type,'*.%s' %fmt))).tolist()
         nb_frames = len(frames)
         min_pad   = int(np.ceil(np.log10(nb_frames)))
-        frame0    = os.path.basename(frames[0]).replace('.'+fmt,'')
-        frame_str = re.findall("[0-9]{%d,}" %min_pad,frame0)[0]
-        prefix    = frame0.replace(frame_str,'')
+        ###It is assumed that the frame number comes just before the extension
+        frame0    = os.path.basename(frames[0])
+        frame_str = re.findall(
+            r"[0-9]{%d,}\.%s" %(min_pad,fmt),
+            frame0)[0].replace('.%s' %fmt,'')
+        prefix    = frame0.replace('.%s' %fmt,'').replace(frame_str,'')
         pad       = len(frame_str)
         min_frame = int(frame_str)
 
+        # print('frames info : ', frame0,frame_str,pad,prefix,' ',min_frame)
         max_frame    = int(os.path.basename(frames[-1]).replace('.'+fmt,'').replace(prefix,''))
-        # print(frame0,frame_str,pad,prefix,' ',min_frame,max_frame)
         frames_dict = {
-            'nb_frames' : nb_frames,
+            'nb_frames':nb_frames,
             'min_frame':min_frame,
             'max_frame':max_frame,'pad':pad,'fmt':fmt,
             'prefix':prefix,
         }
-        # frames_dict.update(d)
+        # print(frames_dict)
     return frames_dict
 
-fmts = ['mrc','tiff']
+fmts = ['mrc','tiff','cbf']
 def tiff_reader(tiff_file)  :
     with open(tiff_file,'rb') as f:
-        I =tifffile.imread(f)
+        I = tifffile.imread(f)
     return I
+
+def cbf_reader(cbf_file):
+    content = cbf.read(cbf_file)
+    numpy_array_with_data = content.data
+    # header_metadata = content.metadata
+    # print(colors.blue,header_metadata,colors.black)
+    return numpy_array_with_data
+
 def mrc_reader(mrc_file):
     with mrcfile.open(mrc_file) as mrc:
         return mrc.data
+
 img_readers = {
     'mrc' : mrc_reader,
     'tiff': tiff_reader,
+    'cbf' : cbf_reader,
 }
 
 def get_frame_img(frame,key):

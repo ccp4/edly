@@ -197,36 +197,33 @@ angular.module('app').
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  // $scope.init_done=false
   $scope.init = function(){
     $http.get('init')
       .then(function(response){
         $scope.structure = response.data.mol;
+        $scope.crys      = response.data.crys;
+        $scope.cif_file  = $scope.crys.file!='?';
+        $log.log($scope.crys.file,$scope.cif_file)
+        // frames related stuffs
         $scope.dat       = response.data.dat;
         $scope.frame     = response.data.frame;
-        $scope.crys      = response.data.crys;
-        $scope.cif_file  = response.data.cif_file;
-        $scope.max_frame = response.data.max_frame;
+        $scope.max_frame = response.data.nb_frames;
+
         $scope.data      = {'exp':0,'sim':0};
         $scope.zmax      = response.data.zmax;
         $scope.nb_colors = response.data.nb_colors;
         $scope.heatmaps  = response.data.heatmaps;
         $scope.cmaps     = response.data.cmaps;
         $scope.caxis     = {'cmap':response.data.cmap};
-
         $scope.frames.offset = response.data.offset;
         $scope.frames.active_frame = response.data.frame;
-        // $scope.frames.reload = response.data.reload;
-        // if ($scope.frames.reload){
-        //   $scope.mode_style['reload']=sel_style;
-        // }
+
+        // mode : frames, bloch, felix
         $scope.mode = response.data.mode;
         $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
-        // $scope.init_panels();
+
         $scope.update();
-        // $scope.init_done=true
-        // $log.log($scope.crys.chemical_formula);
     });
   }
 

@@ -16,7 +16,7 @@ from EDutils import utilities as ut             #;imp.reload(ut)
 from in_out import*
 
 bloch = Blueprint('bloch', __name__)
-pets_data = {}
+# pets_data = {}
 
 
 ########################
@@ -614,16 +614,6 @@ def init_bloch_panel():
     rock_state=''
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
         rock_state='done'
-
-
-    if session['dat']['pets'] and not session['mol'] in pets_data.keys():
-        if os.path.exists(os.path.join(mol_path(session['mol']),'pets','reflections.txt')):
-            dat_type='dials'
-            pets_data[session['mol']]=pt.Dials(dials_path(session['mol']))
-        else:
-            dat_type='pets'
-            pets_data[session['mol']]=pt.Pets(pets_path(session['mol']),gen=False,dyn=0)
-        print(colors.red+'found processed data type : %s' %dat_type+colors.black)
 
     now = time.time()
     session['last_time']  = now

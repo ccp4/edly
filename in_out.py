@@ -5,24 +5,42 @@ from crystals import Crystal as Crys
 from utils import glob_colors as colors
 from EDutils import felix as fe        #;imp.reload(fe)
 from EDutils import pets               #;imp.reload(pets)
+from EDutils import dials_utils as dials#;imp.reload(dials)
+from EDutils import xds                 #;imp.reload(xds)
 
 chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol
 # get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,'%s.tiff' %frame_str)
-get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,frame_str)
-png_path=lambda path,frame_str:os.path.join(path,'%s.png' %frame_str)
-pets_path=lambda mol:glob.glob(os.path.join(mol_path(mol),'pets','*.pts'))[0]
-dials_path=lambda mol:os.path.join(mol_path(mol),'pets')
-get_pkl   = lambda id:'static/data/tmp/%s/b.pkl' %id
-rock_path = lambda id:'static/data/tmp/%s/rock_.pkl' %id
+get_path   = lambda mol,key,frame_str:os.path.join(mol_path(mol),key,frame_str)
+# png_path   = lambda path,frame_str:os.path.join(path,'%s.png' %frame_str)
+pets_path  = lambda mol:glob.glob(os.path.join(mol_path(mol),'pets','*.pts'))[0]
+dials_path = lambda mol:os.path.join(mol_path(mol),'dials','reflections.txt')
+xds_path   = lambda mol:os.path.join(mol_path(mol),'xds','XDS_ASCII.txt')
+get_pkl    = lambda id:'static/data/tmp/%s/b.pkl' %id
+rock_path  = lambda id:'static/data/tmp/%s/rock_.pkl' %id
 felix_path = lambda mol:os.path.join(mol_path(mol),'felix')
 felix_pkl  = lambda session:os.path.join(felix_path(session['mol']),'felix.pkl')
+
+pets_data={}
+
+def update_exp_data(mol):
+    if os.path.exists(dials_path(mol)):
+        dat_type='dials'
+        pets_data[mol]=dials.Dials(dials_path(mol))
+    elif os.path.exists(pets_path(mol)):
+        dat_type='pets'
+        pets_data[mol]=pets.Pets(pets_path(mol),gen=False,dyn=0)
+    elif os.path.exists(xds_path(mol)):
+        dat_type='xds'
+        pets_data[mol]=xds.XDS(xds_path(mol),gen=False,dyn=0)
+    else:
+        dat_type='None'
+    print(colors.red+'processed data type for structure %s : %s' %(mol,dat_type)+colors.black)
 
 def load_pets(session):
     pts_file = pets_path(session['mol'])
     if os.path.exists(pts_file):
         return pets.Pets(pts_file)
-
 
 def load_felix(session):
     if not os.path.exists(felix_pkl(session)):
