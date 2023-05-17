@@ -120,6 +120,8 @@ def bloch_fig():
              cx,cy = (x_m/2,)*2
          rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
 
+    #### the rings
+    # print('qs : ',qs)
     for q0,r0 in zip(qs,qr):
         name='%.2f A' %(1/q0)
         fig.add_trace(go.Scatter(
@@ -133,7 +135,7 @@ def bloch_fig():
         ))
     offset=3+session['dat']['pets']
     rings=list(range(offset,offset+qs.size))
-    session['rings']=rings#json.dumps(rings)
+    session['rings']=rings              #;print('rings',rings)
     session['last_time'] = time.time()
 
     # print(session['bloch'])
@@ -599,13 +601,10 @@ def init_bloch_panel():
             'single'    : False,
             }
 
-        expand_bloch = {
-            'omega':False,'struct':False,'thick':False,
-            'refl':True,'sim':False,'u':True,}
+
 
         # session['mol2']  = mol
         session['omega']    = 157 #in-plane rotation angle
-        session['expand']   = expand_bloch
         session['modes'].update(modes)
         # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
         session['theta_phi']  = [0,0]
@@ -617,12 +616,17 @@ def init_bloch_panel():
         session['is_px']     = True # use pixels instead of recA
         session['pred_info'] = True # use dials predicted refl
 
+    expand_bloch = {
+        'omega':False,'struct':False,'thick':False,
+        'refl':True,'sim':False,'u':True,}
+
     vis = {'I':True,
         'Vga':'legendonly','Sw':'legendonly','I_pets':True,
         'rings':True}
 
     session['graph'] = 'thick'
     session['vis']   = vis
+    session['expand'] = expand_bloch
     session['refl']  = []
     # if not session['dat']['pets']:
     #     print(colors.red+'pets not found : setting vis["I_pets"] to false'+colors.black)
@@ -660,16 +664,12 @@ def init_bloch():
 
 
 def load_b0():
-    ### sometimes the file is not saved yet and does not exist so we may need to re-try
-    i,n_try=0,4
-    err=1;print(err)
-    while i<n_try and err :
-        err=0
-        try:
-            b0 = ut.load_pkl(session['b0_path'])
-        except Exception as err:
-            print(colors.red,err,colors.black)
-            # if type(e)=EOFError
-            time.sleep(0.25)
-            # b0 = ut.load_pkl(session['b0_path'])
+    try:
+        b0 = ut.load_pkl(session['b0_path'])
+    except Exception as err:
+        print(colors.red,err,colors.black)
+        # if type(e)=EOFError
+        time.sleep(1)
+
+    b0 = ut.load_pkl(session['b0_path'])
     return b0

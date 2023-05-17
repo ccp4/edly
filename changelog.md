@@ -1,6 +1,8 @@
 # Version log
 
 ## 0.0.6dev
+### Wed 17 May 17:18:48 BST 2023
+- might have fixed initialization error bug with setTimeOut
 ### Wed 17 May 16:16:34 BST 2023
 - issue#30 reflections :
   - clear button

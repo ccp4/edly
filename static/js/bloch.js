@@ -32,8 +32,8 @@ angular.module('app')
       if ( !(curve_nb<$scope.info.rings[0])){
         curve_nb=$scope.info.rings[0];
       }
-      // $log.log(event.data,curve_nb)
       let dat = event.data[curve_nb];
+      // $log.log('dat:',dat.visible)
       if (dat.visible==true){
         var visible='legendonly';
       }
@@ -244,8 +244,8 @@ angular.module('app')
               $http.post('solve_bloch',JSON.stringify())
               .then(function(response){
                 $scope.info.rings = response.data.rings;
+                $log.log('rings : ',$scope.info.rings);
                 $scope.refl = response.data.refl;
-                // $log.log($scope.refl);
                 $scope.add_refl();
                 // $scope.fig1 = response.data;//JSON.parse(response.data.fig);
                 $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
@@ -696,25 +696,26 @@ angular.module('app')
         $scope.info.dq_ring = response.data.dq_ring;
         $scope.info.rings   = response.data.rings;
         $scope.u_style[$scope.info.modes['u']]={"border-style":'solid'};
-
-        //refl
-        // $scope.add_refl();
-
         $scope.info.graph = $scope.info.graphs[response.data.graph]
         $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
-        // $log.log('bloch init done');
         $scope.bloch_solve_reset();
-        // var init=false;
-        // while(!init){
+        $log.log('bloch init done');
+      });
+
+      $scope.init_done=false;
+      let myVar = setInterval(function(){
         $http.get('init_done')
         .then(function(response) {
-          $scope.init=response.data;
-          $log.log('init done : ',$scope.init);
-        });
-        if ($scope.init){
+          $scope.init_done=response.data;
+          })
+        },200);
+      setTimeout(function(){
+        if ($scope.init_done){
+          $log.log('updating bloch at init')
           $scope.update_bloch();
-        }
-    });
+          }
+        clearInterval(myVar);
+      },1000)
   }
 
   $scope.info=bloch_shared;
@@ -747,13 +748,6 @@ angular.module('app')
   $scope.show={}
   $scope.auto_refresh=false;
   $scope.auto_refresh_style='';
-  // $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}
-  // $scope.expand_str={false:'expand',true:'minimize'};
-
-  // $rootScope.$on('init_bloch',function(event,data){
-  //   $log.log('init bloch')
-  //   $scope.init();
-  // })
   $scope.init();
 
 }]);
