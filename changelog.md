@@ -1,6 +1,13 @@
 # Version log
 
 ## 0.0.6dev
+### Wed 17 May 16:16:34 BST 2023
+- issue#30 reflections :
+  - clear button
+  - put the automatically selected reflections in the table
+  - automatic refresh option
+- try fixing bug key error data['bloch'] at refresh(due to `init` occasionally called after `init_bloch_panel` )
+
 ### Wed 17 May 13:15:26 BST 2023
 - issue#29 : Bloch experimental rocking curves
 - fixed switching u modes bug

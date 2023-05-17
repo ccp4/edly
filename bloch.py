@@ -193,10 +193,9 @@ def bloch_rotation():
 
 @bloch.route('/bloch_u', methods=['POST'])
 def bloch_u():
-    data=json.loads(request.data.decode())
+    data=json.loads(request.data.decode())#;print(data)
     b_args = data['bloch']
     ## handle
-    # print(session['bloch'])
     thicks = update_thicks(data['bloch']['thicks'])
     # u = pets_data[session['mol']].uvw[data['frame']-1]
     if data['manual_mode']:
@@ -243,7 +242,11 @@ def solve_bloch():
     b0.solve(opts='vts',felix=session['bloch']['felix'])#opts=session['bloch']['opts'])
     fig_data = bloch_fig()
     # print(colors.red,session['rings'],colors.black)
-    return json.dumps({'rings':session['rings'],'fig':fig_data})
+    idx = b0.get_beam(refl=session['refl'])
+    session['refl'] = b0.df_G.iloc[idx].index.tolist()
+
+    return json.dumps({'rings':session['rings'],'refl':session['refl'],
+        'fig':fig_data})
 
 @bloch.route('/show_u', methods=['POST'])
 def show_u():
@@ -461,13 +464,19 @@ def update_thicks(thicks):
 def update_refl():
     data=json.loads(request.data.decode())
     session['refl']=data['refl']
+    ###get valid reflections
+    # try:
+    #     b0 = load_b0()
+    #     idx = b0.get_beam(refl=session['refl'])
+    #     session['refl'] = b0.df_G.iloc[idx].index.tolist()
+    # except:
+    #     pass
     return json.dumps({'refl':session['refl']})
 
 @bloch.route('/beam_vs_thick', methods=['POST'])
 def beam_vs_thick():
     data=json.loads(request.data.decode())
     thicks = update_thicks(data['thicks'])
-    b0_path=session['b0_path']
     refl = data['refl']
 
     b0  = load_b0()
@@ -477,7 +486,6 @@ def beam_vs_thick():
     b0.save(get_pkl(session['id']))
 
     df = pd.DataFrame(columns=['z','I','hkl'])
-    # print(Iz.items())
     for hkl,I in Iz.items():
         df_hkl = pd.DataFrame(np.array([b0.z,I]).T,columns=['z','I'])
         df_hkl['hkl'] = hkl
@@ -593,7 +601,7 @@ def init_bloch_panel():
 
         expand_bloch = {
             'omega':False,'struct':False,'thick':False,
-            'refl':False,'sim':False,'u':True,}
+            'refl':True,'sim':False,'u':True,}
 
         # session['mol2']  = mol
         session['omega']    = 157 #in-plane rotation angle
@@ -637,10 +645,14 @@ def init_bloch_panel():
     session_data['rock']  = get_session_data('rock')
     session_data['rock_state'] = rock_state
     session_data['exp_rock']  = session['dat']['rock']
-    # print(session['bloch'])
-
     return json.dumps(session_data)
 
+
+
+@bloch.route('/init_done', methods=['GET'])
+def init_done():
+    print('init done :',session['init'])
+    return json.dumps(session['init'])
 
 @bloch.route('/init_bloch', methods=['GET'])
 def init_bloch():

@@ -270,7 +270,7 @@ Parameters Panel
         <img style="width: 80%;" src="/static/images/beam_vs_thick.png"/>
         <span class="popuptext" ng-show="popup['show_rock']"> Show rocking curve </span>
       </a>
-    </td>    
+    </td>
     <td class="" ng-show="dat['pets']">
       <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="showIt('omega_show')" ng-mouseleave="hideIt('omega_show')">
         <span class="glyphicon glyphicon-repeat" />
@@ -374,13 +374,26 @@ Parameters Panel
         </span>
       </span>
     </div>
-    <div id='table_miller' ng-show="expand['refl']">
-      <table  id="table_Miller_indices"  border="1" cellpadding="2">
-        <tr>
-            <th></th>
-            <th><b>miller_indices</b></th>
-        </tr>
-      </table>
-    </div>
-  </div>
-</div>
+    <div class="row" ng-show="expand['refl']">
+      <div class="col-sm-9" id='table_miller' >
+        <table  id="table_Miller_indices"  border="1" cellpadding="2">
+          <tr>
+              <th>
+                <a class="btn-sm btn-primary popup" ng-click="clear_table()" ng-mouseenter="showIt('clear_list')" ng-mouseleave="hideIt('clear_list')">
+                  <span class="glyphicon glyphicon-remove" />
+                  <span class="popuptext" style="" ng-show="pop['clear_list']"> clear reflection table  </span>
+                </a>
+              </th>
+              <th><b>miller_indices</b></th>
+          </tr>
+        </table>
+      </div>
+      <div class="col-sm-2" style="padding-left:5px">
+        <a class="btn-sm btn-primary popup" ng-style="auto_refresh_style" ng-click="set_auto()" ng-mouseenter="showIt('auto_refresh')" ng-mouseleave="hideIt('auto_refresh')">
+          <span class="glyphicon glyphicon-refresh" />
+          <span class="popuptext" style="" ng-show="pop['auto_refresh']">Auto refresh  </span>
+        </a>
+      </div>
+    </div><!-- row -->
+  </div><!-- theta_phi -->
+</div><!-- miller indices table -->

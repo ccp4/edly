@@ -40,7 +40,7 @@ angular.module('app').
   $scope.update = function(){
     switch ($scope.mode){
       case 'bloch':
-          $rootScope.$emit('update_bloch',$scope.frame);
+          $rootScope.$emit('update_bloch',$scope.frame,1);
         break;
       case 'frames':
         if ($scope.max_frame>0){
@@ -225,7 +225,12 @@ angular.module('app').
         $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
 
-        $scope.update();
+        if ($scope.max_frame>0 && $scope.mode=='frames'){
+          $scope.update_img();
+        }
+        if ($scope.mode=='bloch'){
+          $rootScope.$emit('update_bloch',$scope.frame,0);
+        }
     });
   }
 

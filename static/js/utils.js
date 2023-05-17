@@ -36,6 +36,15 @@ function deleteRow(obj) {
     var index = obj.parentNode.parentNode.rowIndex;
     TABLE_MILLER.deleteRow(index);
 }
+function clearTable(){
+  var TABLE_MILLER=document.getElementById('table_Miller_indices')
+  let listrows= TABLE_MILLER.children[0].children
+  // console.log('clear table',listrows.length);
+  for (let i=listrows.length-1;i>0;i--) {
+    // console.log(i,listrows[i].cells[1].children[0].innerHTML);
+    TABLE_MILLER.deleteRow(i);
+  }
+}
 
 ////// function hover row point table miller
 function highlight(miller_indices,val){

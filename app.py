@@ -177,6 +177,8 @@ def init():
     info=['mol','dat','frame','crys','cif_file','mode','zmax','nb_frames',
         'offset','reload','cmap','cmaps','heatmaps','nb_colors']
     session_data = {k:session[k] for k in info}
+    session['init'] = True
+    # print(colors.magenta+'init done : ',session['init'],colors.black)
 
     # print(session_data['max_frame'])
     # session_data['structures'] = [s for s in structures if s!=session['mol']]
@@ -267,6 +269,7 @@ def init_mol():
     session['nb_frames']  = nb_frames
     session['last_time']  = now
     session['time']       = now
+
 
 
 

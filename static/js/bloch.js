@@ -67,7 +67,7 @@ angular.module('app')
 
     $scope.update_graph=function(){
       if (!$scope.info.modes.single){
-        $log.log($scope.info.graph);
+        // $log.log($scope.info.graph);
         $rootScope.$emit('update_graph');
       }
     }
@@ -197,10 +197,12 @@ angular.module('app')
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Bloch
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  $rootScope.$on('update_bloch',function(event,frame){
+  $rootScope.$on('update_bloch',function(event,frame,solve){
       $scope.frame=frame;
       $scope.bloch_solve_reset()
-      $scope.update_bloch();
+      if (solve){
+        $scope.update_bloch();
+      }
   })
 
 
@@ -208,7 +210,7 @@ angular.module('app')
     // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
         $scope.bloch_solve_set('Preparing');
-        // $log.log('solving bloch for frame ',$scope.frame)
+        // $log.log('solving bloch for frame ',$scope.frame, ' with bloch' , $scope.bloch);
         $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.info.modes['manual']}))
         .then(function(response){
           $scope.load_bloch(response.data);
@@ -242,6 +244,9 @@ angular.module('app')
               $http.post('solve_bloch',JSON.stringify())
               .then(function(response){
                 $scope.info.rings = response.data.rings;
+                $scope.refl = response.data.refl;
+                // $log.log($scope.refl);
+                $scope.add_refl();
                 // $scope.fig1 = response.data;//JSON.parse(response.data.fig);
                 $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
                 $scope.update_graph();
@@ -567,7 +572,6 @@ angular.module('app')
 
   $scope.show_rock=function(){
     $scope.info.modes['single']=false;
-    $scope.update_refl();
     $scope.info.graph=$scope.info.graphs['rock']
     $http.post('show_rock',JSON.stringify({'refl':$scope.refl}))
       .then(function(response){
@@ -577,7 +581,6 @@ angular.module('app')
   }
 
   $scope.beam_vs_thickness = function () {
-    $scope.update_refl();
     $scope.info.graph=$scope.info.graphs['thick']
     $http.post('beam_vs_thick',JSON.stringify({'thicks':$scope.bloch['thicks'],'refl':$scope.refl}))
       .then(function(response){
@@ -628,12 +631,32 @@ angular.module('app')
   }
 
   ////////////////////////////////////////////////////////
+  $scope.set_auto = function(){
+    $scope.auto_refresh_style='';
+    $scope.auto_refresh=!$scope.auto_refresh;
+    if ($scope.auto_refresh){
+      $scope.auto_refresh_style={"border-style":'solid'};
+    }
+  }
+  $scope.add_refl=function(){
+    clearTable();
+    for (let i=0;i<$scope.refl.length;i++){
+      addRow_tagTable($scope.refl[i]);
+    }
+  }
+  $scope.clear_table=function(){
+    clearTable();
+    $scope.update_refl();
+  }
   $scope.update_refl = function(){
-    $scope.refl = extract_list_indices_from_table();
+    $scope.refl = extract_list_indices_from_table()
     $http.post('update_refl',JSON.stringify({'refl':$scope.refl}))
       .then(function(response){
         // $log.log(response.data);
     });
+    if ($scope.auto_refresh){
+      $scope.update_graph()
+    }
   }
 
   $rootScope.$on('addRow_tagTable',function(event,data){
@@ -648,6 +671,10 @@ angular.module('app')
     $scope.expand['refl']=true;
     // $log.log($scope.expand)
   }
+  // $scope.delete_row=function(obj){
+  //   deleteRow(obj);
+  //   $scope.update_refl();
+  // }
 
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -671,18 +698,22 @@ angular.module('app')
         $scope.u_style[$scope.info.modes['u']]={"border-style":'solid'};
 
         //refl
-        var refl=response.data.refl;
-        for (let h of refl){
-          addRow_tagTable(h);
-        }
+        // $scope.add_refl();
 
         $scope.info.graph = $scope.info.graphs[response.data.graph]
-        var show_rock=$scope.rock_state=='done' || $scope.exp_rock
-        $log.log($scope.exp_rock,show_rock)
-        $scope.set_available_graphs('rock',show_rock);
-        $scope.bloch_solve_reset();
+        $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
         // $log.log('bloch init done');
-        // $scope.update()
+        $scope.bloch_solve_reset();
+        // var init=false;
+        // while(!init){
+        $http.get('init_done')
+        .then(function(response) {
+          $scope.init=response.data;
+          $log.log('init done : ',$scope.init);
+        });
+        if ($scope.init){
+          $scope.update_bloch();
+        }
     });
   }
 
@@ -694,7 +725,7 @@ angular.module('app')
   $scope.show_buttons=false;
   $scope.dtheta_phi=0.1;
   $scope.dthick=5;
-  $scope.refl=[[0,0,0]];
+  $scope.refl=[];
   $scope.rock_style = '';
   $scope.solve_rock_btn='Solve rock';
   $scope.popup={}
@@ -714,6 +745,8 @@ angular.module('app')
     scat:{type:'scat',desc:'scattering factors'}}
   $scope.info.graphs = JSON.parse(JSON.stringify(all_graphs))
   $scope.show={}
+  $scope.auto_refresh=false;
+  $scope.auto_refresh_style='';
   // $scope.expand = {'omega':false,'thick':false,'refl':false,'sim':false,'u':true,}
   // $scope.expand_str={false:'expand',true:'minimize'};
 

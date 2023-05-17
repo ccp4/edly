@@ -69,6 +69,7 @@ set_viewer?mol=silicon&mode=felix
 # @login.route('/viewer/',methods=['GET'])
 @login.route('/viewer',methods=['GET'])
 def viewer():
+    session['init'] = False
     if not session.get('logged_in'):
         print('attempt to see bloch viewer while not logged in')
         return redirect(server_home+url_for('login.home'))

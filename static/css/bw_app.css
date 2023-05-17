@@ -245,7 +245,7 @@ img {
 #table_miller{
   overflow-y: scroll;
   height: 15vh;
-  margin-left: 10px
+  margin-left: 0px;
   /* background-color: blue; */
 }
 
