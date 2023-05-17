@@ -144,7 +144,7 @@ Parameters Panel
             <span class="popuptext" ng-show="popup['u_info']"> Beam orientation based on experimental frame </span>
           </span>
           <span> = </span>
-          <span  ng-show="!info.modes['manual']"                      ng-bind="bloch['u']" ></span>
+          <span  ng-show="!info.modes['manual']" ng-bind="bloch['u']" ></span>
           <input ng-show="info.modes['manual'] && info.modes['u']=='edit'" ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
       </div>
 
@@ -265,6 +265,12 @@ Parameters Panel
     <td class="td-in" style="width: 50%;">
       <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()" ng-style="bloch_solve_style" ng-bind="bloch_solve_btn"></div>
     </td>
+    <td class="td-in" style="font-size:13px">
+      <a ng-show="dat['pets']" class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="show_rock()" ng-mouseenter="popup['show_rock']=true" ng-mouseleave="popup['show_rock']=false">
+        <img style="width: 80%;" src="/static/images/beam_vs_thick.png"/>
+        <span class="popuptext" ng-show="popup['show_rock']"> Show rocking curve </span>
+      </a>
+    </td>    
     <td class="" ng-show="dat['pets']">
       <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="showIt('omega_show')" ng-mouseleave="hideIt('omega_show')">
         <span class="glyphicon glyphicon-repeat" />
@@ -277,7 +283,6 @@ Parameters Panel
       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['nbms']=true" ng-mouseleave="popup['nbms']=false" >
         <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
       </span>
-      <!-- <span> = </span> -->
     </td>
   </tr></table>
 </div>

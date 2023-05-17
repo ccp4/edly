@@ -151,7 +151,7 @@
 
       <!-- solver views  -->
       <div class="col-sm-10" >
-          <div ng-show="mode=='frames'">
+          <div ng-show="mode=='frames' && max_frame>0">
             <div ng-include="'static/views/frame_viewer.html'"></div>
           </div>
           <div ng-controller="FelixCtrl">

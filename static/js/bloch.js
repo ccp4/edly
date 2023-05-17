@@ -90,15 +90,6 @@ angular.module('app')
       $scope.set_fig1();
     }
 
-    $scope.toggle_mode=function(key){
-      $scope.info.modes[key]=!$scope.info.modes[key];
-      // $log.log(val,'$scope.info.modes')
-      $http.post('set_mode_val',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
-      .then(function(response){
-          // $scope.update()
-          // $log.log(respo nse.data)
-        });
-    }
 
 
     //////////////////////////////////////////////////////////////
@@ -155,28 +146,37 @@ angular.module('app')
       // if ($scope.graph==$scope.graphs['rock']){
       //   $scope.graph=$scope.graphs['thick'];
       // }
-      $scope.set_available_graphs('rock',false);
+      $scope.set_available_graphs('rock',false || $scope.exp_rock);
     }
   }
 
 
-  $scope.set_analysis_mode=function(val){
-    $scope.info.modes['analysis']=val;
-    $scope.set_mode('analysis',val);
-    $scope.mode_style = {'bloch':'','frames':''};
-    $scope.mode_style[val]=mode_style;
-    if (changed){
-      // $log.log('updating')
-      $scope.update();
-      changed=false;
-    }
-  }
+  // $scope.set_analysis_mode=function(val){
+  //   $scope.info.modes['analysis']=val;
+  //   // $scope.set_mode('analysis',val);
+  //   // $scope.mode_style = {'bloch':'','frames':''};
+  //   // $scope.mode_style[val]=mode_style;
+  //   if (changed){
+  //     // $log.log('updating')
+  //     $scope.update();
+  //     changed=false;
+  //   }
+  // }
 
   $scope.toggle_manual_mode=function(){
     $scope.toggle_mode('manual');
     if (!$scope.info.modes['manual']){
       $scope.update();
     }
+  }
+  $scope.toggle_mode=function(key){
+    $scope.info.modes[key]=!$scope.info.modes[key];
+    // $log.log(val,'$scope.info.modes')
+    $http.post('set_mode_val',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
+    .then(function(response){
+        // $scope.update()
+        // $log.log(respo nse.data)
+      });
   }
 
   $scope.set_input=function(key,v){
@@ -285,7 +285,7 @@ angular.module('app')
 
   $scope.set_u_mode=function(val){
     $scope.info.modes['u']=val;
-    $scope.set_mode('u');
+    // $scope.set_mode('u');
     $scope.u_style = {'edit':'','move':'','rock':''};
     $scope.u_style[val]={"border-style":'solid'};
     switch (val){
@@ -659,6 +659,7 @@ angular.module('app')
         $scope.theta_phi = response.data.theta_phi.split(',');
         $scope.bloch     = response.data.bloch;
         $scope.rock      = response.data.rock;
+        $scope.exp_rock  = response.data.exp_rock;
         $scope.rock_state= response.data.rock_state;
         $scope.expand    = response.data.expand;
         $scope.refl      = response.data.refl;
@@ -676,9 +677,11 @@ angular.module('app')
         }
 
         $scope.info.graph = $scope.info.graphs[response.data.graph]
-        $scope.set_available_graphs('rock',$scope.rock_state=='done');
+        var show_rock=$scope.rock_state=='done' || $scope.exp_rock
+        $log.log($scope.exp_rock,show_rock)
+        $scope.set_available_graphs('rock',show_rock);
         $scope.bloch_solve_reset();
-        $log.log('bloch init done');
+        // $log.log('bloch init done');
         // $scope.update()
     });
   }
@@ -706,7 +709,8 @@ angular.module('app')
   var bloch_colors={'Solve':'#337ab7','Solving':'red','Completed':'green'}
   var all_graphs={
     thick:{type:'thick',desc:'thickness'},
-    u3d:{type:'3d',desc:'3d view'},rock:{type:'rock',desc:'rocking curve'},
+    u3d:{type:'3d',desc:'3d view'},
+    rock:{type:'rock',desc:'rocking curve'},
     scat:{type:'scat',desc:'scattering factors'}}
   $scope.info.graphs = JSON.parse(JSON.stringify(all_graphs))
   $scope.show={}

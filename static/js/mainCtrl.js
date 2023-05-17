@@ -43,7 +43,9 @@ angular.module('app').
           $rootScope.$emit('update_bloch',$scope.frame);
         break;
       case 'frames':
-        $scope.update_img();break;
+        if ($scope.max_frame>0){
+          $scope.update_img();break;
+        }
       case 'ms':
         $log.log('ms');break;
     }
@@ -203,7 +205,7 @@ angular.module('app').
         $scope.structure = response.data.mol;
         $scope.crys      = response.data.crys;
         $scope.cif_file  = $scope.crys.file!='?';
-        $log.log($scope.crys.file,$scope.cif_file)
+        // $log.log($scope.crys.file,$scope.cif_file)
         // frames related stuffs
         $scope.dat       = response.data.dat;
         $scope.frame     = response.data.frame;

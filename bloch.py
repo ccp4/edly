@@ -402,23 +402,33 @@ def get_rock_sim():
 def show_rock():
     data = json.loads(request.data.decode())
     refl = data['refl']
-    rock = ut.load_pkl(file=rock_path(session['id']))
-    update_rock_thickness()
+    x_axis = {'Sw':'Excitation Error Sw(A^-1)','F':'frame'}
+    tle = "Rocking curves "
+    if os.path.exists(rock_path(session['id'])):
+        x = 'Sw'
+        rock = ut.load_pkl(file=rock_path(session['id']))
+        update_rock_thickness()
 
-    df=pd.concat([
-        b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']]
-            for b0 in map(lambda i:rock.load(i), range(rock.n_simus))
-        ])
-    df['hkl']=df.index
+        df=pd.concat([
+            b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']]
+                for b0 in map(lambda i:rock.load(i), range(rock.n_simus))
+            ])
+        df['hkl']=df.index
+        fig = px.line(df,x='Sw',y='I',color='hkl',markers=True)
+        tle+="(simu at z=%d A)" %session['bloch']['thick']
 
-    ### the figure
-    fig = px.line(df,x='Sw',y='I',color='hkl',markers=True)
+    if session['dat']['rock']:
+        x = 'F'
+        df = pets_data[session['mol']].rpl[['hkl','F','I']]
+        df = df.loc[df.hkl.isin(refl)]
+        fig = px.line(df,x='F',y='I',color='hkl',markers=True)
+
     fig.update_layout(
-        title="Rocking curve at z=%d A" %session['bloch']['thick'],
-        hovermode='closest',
-        paper_bgcolor="LightSteelBlue",
-        xaxis_title='Excitation Error Sw(A^-1)',yaxis_title='Intensity',
-        width=fig_wh, height=fig_wh,
+    title=tle,
+    hovermode='closest',
+    paper_bgcolor="LightSteelBlue",
+    xaxis_title=x_axis[x],yaxis_title='Intensity',
+    width=fig_wh, height=fig_wh,
     )
     session['graph']='rock'
     return fig.to_json()
@@ -537,8 +547,7 @@ def set_mode_u():
     # print(data)
     key  = data['key']
     session['modes'][key] = data['val']
-    session['mol']  = session['mol']
-    session['mol']  = data['mod']
+    # session['mol']  = session['mol']
     return json.dumps({key:session['modes'][key]})
 
 @bloch.route('/set_visible', methods=['POST'])
@@ -627,6 +636,7 @@ def init_bloch_panel():
     session_data['bloch'] = get_session_data('bloch')
     session_data['rock']  = get_session_data('rock')
     session_data['rock_state'] = rock_state
+    session_data['exp_rock']  = session['dat']['rock']
     # print(session['bloch'])
 
     return json.dumps(session_data)

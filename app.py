@@ -215,6 +215,7 @@ def init_mol():
         'sim':type(sim)==dict,
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets')),
         'felix':os.path.exists(os.path.join(mol_path(mol),'felix')),
+        'rock':False,
         }
 
     # get the max number of frames for frontend from frames simulated/experimental frames
@@ -226,8 +227,9 @@ def init_mol():
         nb_frames = session['sim']['nb_frames']
     if session['exp']:
         nb_frames = max(session['exp']['nb_frames'],nb_frames)
-    if dat['pets'] and not mol in pets_data.keys():
-        update_exp_data(mol)
+    if dat['pets']:
+        dat_type=update_exp_data(mol)
+        dat['rock'] = dat_type=='pets'
         pets = pets_data[mol]
         pets_frames = pets.uvw.shape[0]
         nb_frames = min(pets_frames,nb_frames)

@@ -24,18 +24,23 @@ felix_pkl  = lambda session:os.path.join(felix_path(session['mol']),'felix.pkl')
 pets_data={}
 
 def update_exp_data(mol):
+    dat_type='None'
     if os.path.exists(dials_path(mol)):
         dat_type='dials'
-        pets_data[mol]=dials.Dials(dials_path(mol))
     elif os.path.exists(pets_path(mol)):
         dat_type='pets'
-        pets_data[mol]=pets.Pets(pets_path(mol),gen=False,dyn=0)
     elif os.path.exists(xds_path(mol)):
         dat_type='xds'
-        pets_data[mol]=xds.XDS(xds_path(mol),gen=False,dyn=0)
-    else:
-        dat_type='None'
+
+    if not mol in pets_data.keys():
+        if os.path.exists(dials_path(mol)):
+            pets_data[mol]=dials.Dials(dials_path(mol))
+        elif os.path.exists(pets_path(mol)):
+            pets_data[mol]=pets.Pets(pets_path(mol),gen=False,dyn=0)
+        elif os.path.exists(xds_path(mol)):
+            pets_data[mol]=xds.XDS(xds_path(mol))
     print(colors.red+'processed data type for structure %s : %s' %(mol,dat_type)+colors.black)
+    return dat_type
 
 def load_pets(session):
     pts_file = pets_path(session['mol'])

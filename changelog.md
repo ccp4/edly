@@ -1,9 +1,13 @@
 # Version log
 
 ## 0.0.6dev
+### Wed 17 May 13:15:26 BST 2023
+- issue#29 : Bloch experimental rocking curves
+- fixed switching u modes bug
+
 ### Tue 16 May 19:12:01 BST 2023
 - issue#35 refactor import dataset :
-  - datasets loaded in `in_out.py`
+  - datasets loaded in `in_out.py`ff
 - issue#31 :
   - enable reading exp frames without `cif_file`
   - disable solvers if `cif_file` not provided
