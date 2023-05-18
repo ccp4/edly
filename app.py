@@ -162,10 +162,10 @@ def init():
     else:
         init_session()
         session['new'] = True
-    init_mol()
-
 
     #### Done at every refresh
+    init_mol()
+
     # print('init with session mode : '+colors.red+session['mode']+colors.black)
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
@@ -195,7 +195,10 @@ def init_session():
     session['path'] = session_path
     session['id']   = id
     session['mol']  = 'glycine'
-    session['mode']    = 'bloch'
+    session['mode'] = 'bloch'
+    session['viewer_molecule'] = False;
+
+
     # session['reload']  = False
     session['b0_path'] = get_pkl(session['id'])
     print(colors.red+'init_session'+colors.black)
@@ -243,7 +246,7 @@ def init_mol():
         # b0=ut.load_pkl(session['b0_path'])
 
         crys,cif_file=b0.crys,b0.cif_file
-        crys_dat = {'file':os.path.basename(cif_file)}
+        crys_dat = {'file':os.path.basename(cif_file),'cif_file':cif_file}
         crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
         crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
             b_str(crys.lattice_parameters,2).split(',') )))
@@ -255,8 +258,11 @@ def init_mol():
         ['?']*11))
     # print(formula)
 
-    if not session.get('modes'):session['modes']={'analysis':'bloch'}
-    session['modes']['manual'] = not dat['pets']
+    #related to /set_viewer
+    if session.get('bloch_modes'):
+        # print('mol init :',session['bloch_modes'])
+        if not session['bloch_modes']['manual'] and not dat['pets']:
+            session['bloch_modes']['manual'] = True
     if not session.get('frame'):session['frame'] = 1
     if not session.get('offset'):session['offset'] = 0
 
@@ -360,7 +366,7 @@ img_readers = {
 }
 
 def get_frame_img(frame,key):
-    session['modes']['analysis']='frames'
+    # session['modes']['analysis']='frames'
     offset = ''
     if key=='sim':
         frame=min(max(0,frame-session['offset']),session['sim']['nb_frames']-1)

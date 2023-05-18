@@ -1,6 +1,13 @@
 # Version log
 
 ## 0.0.6dev
+### Thu 18 May 15:19:40 BST 2023
+- issue#29 : rocking curve
+  - automatically solve for rocking curve
+  - fixed bugs solve rock
+  - fixed wrong sign pinned orientation value
+- fixed bug manual and single modes  
+- changed init bug setTimeOut with interval cancelled only after `$scope.init=true`
 ### Thu 18 May 11:50:13 BST 2023
 - issue#28 : tweak orientation
 ###Thu 18 May 11:15:52 BST 2023
