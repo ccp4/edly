@@ -28,12 +28,16 @@ angular.module('app')
 
     $scope.leg_click=function(event){
       var curve_nb=event.curveNumber;
-      // $log.log($scope.info.rings)
-      if ( !(curve_nb<$scope.info.rings[0])){
-        curve_nb=$scope.info.rings[0];
+
+      //special case for the resolution rings
+      if ($scope.info.rings.length){
+        if ( curve_nb>=$scope.info.rings[0]){
+          curve_nb=$scope.info.rings[0];
+        }
       }
+
+      //change visibility
       let dat = event.data[curve_nb];
-      // $log.log('dat:',dat.visible)
       if (dat.visible==true){
         var visible='legendonly';
       }
@@ -49,19 +53,20 @@ angular.module('app')
     })
 
     $scope.set_visible=function(name,curve_nb,visible){
-      if ( curve_nb<$scope.info.rings[0]){
-        Plotly.restyle('fig1', {'visible':visible},[curve_nb]);
-        $http.post('set_visible',JSON.stringify({'key':name,'v':visible}))
-        .then(function(response){
-          // $log.log(response.data);
-        });
-      }
-      else{
-        Plotly.restyle('fig1', {'visible':visible},$scope.info.rings);
-        $http.post('set_visible',JSON.stringify({'key':'rings','v':visible}))
-        .then(function(response){
-          // $log.log(response.data);
-        });
+      Plotly.restyle('fig1', {'visible':visible},[curve_nb]);
+      $http.post('set_visible',JSON.stringify({'key':name,'v':visible}))
+      .then(function(response){
+        // $log.log(response.data);
+      });
+
+      if ($scope.info.rings.length>0){
+        if ( curve_nb>=$scope.info.rings[0]){
+          Plotly.restyle('fig1', {'visible':visible},$scope.info.rings);
+          $http.post('set_visible',JSON.stringify({'key':'rings','v':visible}))
+          .then(function(response){
+            // $log.log(response.data);
+          });
+        }
       }
     }
 
@@ -76,15 +81,12 @@ angular.module('app')
       // $log.log({'max_res':$scope.info.max_res,'dq_ring':$scope.info.dq_ring})
       $http.post('set_fig1',JSON.stringify({'max_res':$scope.info.max_res,'dq_ring':$scope.info.dq_ring}))
         .then(function(response){
-          $scope.fig1 = response.data;
-          // $log.log(response.data)
+          $scope.fig1 = JSON.parse(response.data.fig);
+          $scope.info.rings = response.data.rings;
         });
     }
     $scope.set_max_res=function(){
       $scope.set_fig1();
-      // if ($scope.info.graph.type=='scat' && !$scope.single_mode){
-      //   $scope.show_scat();
-      // }
     }
     $scope.set_ring_spacing=function(){
       $scope.set_fig1();
@@ -247,6 +249,7 @@ angular.module('app')
                 $log.log('rings : ',$scope.info.rings);
                 $scope.refl = response.data.refl;
                 $scope.add_refl();
+
                 // $scope.fig1 = response.data;//JSON.parse(response.data.fig);
                 $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
                 $scope.update_graph();

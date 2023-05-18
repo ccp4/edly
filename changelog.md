@@ -1,6 +1,12 @@
 # Version log
 
 ## 0.0.6dev
+###Thu 18 May 11:15:52 BST 2023
+- issue#21 : resolution rings bugs
+  - bug with hiding data when no rings present
+  - bug hiding rings does not always work for all rings
+  - setting rings spacing to 0 result in no rings at all now
+
 ### Wed 17 May 17:18:48 BST 2023
 - might have fixed initialization error bug with setTimeOut
 ### Wed 17 May 16:16:34 BST 2023

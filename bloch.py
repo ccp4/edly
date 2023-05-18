@@ -110,32 +110,34 @@ def bloch_fig():
         xr,yr=[0,x_m],[0,x_m]
 
     dq_ring = session['dq_ring']
-    t,qs = np.linspace(0,2*np.pi,100),np.arange(dq_ring,xm,dq_ring)
-    qr=qs
-    ct,st = np.cos(t),np.sin(t)
-    rx = lambda r:r*ct; ry=lambda r:r*st
-    if is_px :
-         qr = qs/(pets.aper*np.sqrt(2))
-         if pred_info:
-             cx,cy = (x_m/2,)*2
-         rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
+    rings=[]
+    if dq_ring:
+        t,qs = np.linspace(0,2*np.pi,100),np.arange(dq_ring,xm,dq_ring)
+        qr=qs
+        ct,st = np.cos(t),np.sin(t)
+        rx = lambda r:r*ct; ry=lambda r:r*st
+        if is_px :
+             qr = qs/(pets.aper*np.sqrt(2))
+             if pred_info:
+                 cx,cy = (x_m/2,)*2
+             rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
 
-    #### the rings
-    # print('qs : ',qs)
-    for q0,r0 in zip(qs,qr):
-        name='%.2f A' %(1/q0)
-        fig.add_trace(go.Scatter(
-            x=rx(r0),y=ry(r0),
-            legendgroup="resolution rings",
-            legendgrouptitle_text="res rings",
-            name=name,hovertext=['q=%.3f recA' %q0]*t.size,
-            hovertemplate='<b>ring</b><br>%{hovertext}<br>res='+name+'<extra></extra>',
-            visible=session['vis']['rings'],
-            mode='lines',marker_color='purple',
-        ))
-    offset=3+session['dat']['pets']
-    rings=list(range(offset,offset+qs.size))
-    session['rings']=rings              #;print('rings',rings)
+        #### the rings
+        # print('qs : ',qs)
+        for q0,r0 in zip(qs,qr):
+            name='%.2f A' %(1/q0)
+            fig.add_trace(go.Scatter(
+                x=rx(r0),y=ry(r0),
+                legendgroup="resolution rings",
+                legendgrouptitle_text="res rings",
+                name=name,hovertext=['q=%.3f recA' %q0]*t.size,
+                hovertemplate='<b>ring</b><br>%{hovertext}<br>res='+name+'<extra></extra>',
+                visible=session['vis']['rings'],
+                mode='lines',marker_color='purple',
+            ))
+        offset=3+session['dat']['pets']
+        rings=list(range(offset,offset+qs.size))
+    session['rings']=rings              ;print('rings',rings)
     session['last_time'] = time.time()
 
     # print(session['bloch'])
@@ -160,7 +162,9 @@ def set_max_res():
     session['max_res'] = data['max_res']
     session['dq_ring'] = data['dq_ring']
     # print(session['max_res'])
-    return bloch_fig()
+    fig_data = bloch_fig()
+    return json.dumps({'rings':session['rings'],'fig':fig_data})
+
 
 
 
