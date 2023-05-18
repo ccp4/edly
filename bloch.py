@@ -59,7 +59,7 @@ def bloch_fig():
 
     plts = {
         'I'  :['Ix','blue' ,'circle'     ],
-        'Vga':['Vx','yellow','triangle-up'],
+        'Vga':['Vx','green','triangle-up'],
         'Sw' :['Sx','red'  ,'diamond'    ],
     }
     toplot['Ix']=normalize( np.log10(np.maximum(abs(toplot['I'])  ,1e-5)))
@@ -137,7 +137,7 @@ def bloch_fig():
             ))
         offset=3+session['dat']['pets']
         rings=list(range(offset,offset+qs.size))
-    session['rings']=rings              ;print('rings',rings)
+    session['rings']=rings              #;print('rings',rings)
     session['last_time'] = time.time()
 
     # print(session['bloch'])
@@ -236,7 +236,7 @@ def update_bloch():
     if session['bloch']['felix']:
         fig_data=go.Figure().to_json()
     else:
-        fig_data = {}#bloch_fig()
+        fig_data = bloch_fig()
     info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
         'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
     return info

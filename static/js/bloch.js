@@ -246,7 +246,7 @@ angular.module('app')
               $http.post('solve_bloch',JSON.stringify())
               .then(function(response){
                 $scope.info.rings = response.data.rings;
-                $log.log('rings : ',$scope.info.rings);
+                // $log.log('rings : ',$scope.info.rings);
                 $scope.refl = response.data.refl;
                 $scope.add_refl();
 
@@ -458,6 +458,8 @@ angular.module('app')
     $http.post('bloch_rotation',JSON.stringify({'theta_phi':$scope.theta_phi}))
       .then(function(response){
         $scope.load_bloch(response.data);
+        $log.log(response.data.fig)
+        $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
       });
   }
 

@@ -1,6 +1,8 @@
 # Version log
 
 ## 0.0.6dev
+### Thu 18 May 11:50:13 BST 2023
+- issue#28 : tweak orientation
 ###Thu 18 May 11:15:52 BST 2023
 - issue#21 : resolution rings bugs
   - bug with hiding data when no rings present
