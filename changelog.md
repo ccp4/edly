@@ -1,6 +1,11 @@
 # Version log
 
 ## 0.0.6dev
+### Fri 19 May 16:30:12 BST 2023
+- issue#34 : bloch frames
+  - put the u_frame in the frames panel
+- cosmetic :(color,padding,etc...)
+- fixed some bugs when session cookies are deleted 
 ###Fri 19 May 10:54:33 BST 2023
 - issue#33 : pass from resolution to index
 - issue#30 : updating graph even when deleting reflections

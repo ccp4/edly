@@ -156,7 +156,7 @@ def init():
     days = 7
     if session.get('id') and os.path.exists(session.get('path')):
         session['new'] = False
-        if (now-session['last_time'])>days*24*3600:
+        if (now-session.get('last_time'))>days*24*3600:
             clear_session()
             session['new'] = True
     else:
@@ -174,8 +174,8 @@ def init():
             session['frame']=1
 
     ####### package info to frontend
-    info=['mol','dat','frame','crys','cif_file','mode','zmax','nb_frames',
-        'offset','reload','cmap','cmaps','heatmaps','nb_colors']
+    info=['mol','dat','frame','crys','mode','zmax','nb_frames',
+        'offset','cmap','cmaps','heatmaps','nb_colors']
     session_data = {k:session[k] for k in info}
     session['init'] = True
     # print(colors.magenta+'init done : ',session['init'],colors.black)
@@ -228,10 +228,10 @@ def init_mol():
     # Note : sometimes processed datasets may have discarded experimental frames
     # so only keep those ones then
     nb_frames = 0
-    if session['sim']:
-        nb_frames = session['sim']['nb_frames']
-    if session['exp']:
-        nb_frames = max(session['exp']['nb_frames'],nb_frames)
+    if dat['sim']:
+        nb_frames = sim['nb_frames']
+    if dat['exp']:
+        nb_frames = max(exp['nb_frames'],nb_frames)
     if dat['pets']:
         dat_type=update_exp_data(mol)
         dat['rock'] = dat_type=='pets'
@@ -244,6 +244,7 @@ def init_mol():
     if struct_file:
         b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
         # b0=ut.load_pkl(session['b0_path'])
+        # b0.save()
 
         crys,cif_file=b0.crys,b0.cif_file
         crys_dat = {'file':os.path.basename(cif_file),'cif_file':cif_file}

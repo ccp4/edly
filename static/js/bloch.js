@@ -745,7 +745,7 @@ angular.module('app')
     scat:{type:'scat',desc:'scattering factors'}}
   $scope.info.graphs = JSON.parse(JSON.stringify(all_graphs))
   $scope.show={}
-  $scope.auto_refresh=false;
+  $scope.auto_refresh=true;
   $scope.auto_refresh_style='';
   $scope.init();
 

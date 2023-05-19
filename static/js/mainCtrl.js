@@ -37,10 +37,17 @@ angular.module('app').
   };
 
 
-  $scope.update = function(){
+  $scope.update = function(solve=1){
     switch ($scope.mode){
       case 'bloch':
-          $rootScope.$emit('update_bloch',$scope.frame,1);
+          $rootScope.$emit('update_bloch',$scope.frame,solve);
+          if ($scope.dat['pets']){
+            $http.post('get_u',$scope.frame)
+            .then(function(response){
+              $scope.frames.u=response.data;
+              // $log.log($scope.frames.u);
+            });
+          }
         break;
       case 'frames':
         if ($scope.max_frame>0){
@@ -219,18 +226,14 @@ angular.module('app').
         $scope.caxis     = {'cmap':response.data.cmap};
         $scope.frames.offset = response.data.offset;
         $scope.frames.active_frame = response.data.frame;
+        $scope.frames.u = '';
 
         // mode : frames, bloch, felix
         $scope.mode = response.data.mode;
         $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
 
-        if ($scope.max_frame>0 && $scope.mode=='frames'){
-          $scope.update_img();
-        }
-        if ($scope.mode=='bloch'){
-          $rootScope.$emit('update_bloch',$scope.frame,0);
-        }
+        $scope.update(0);
     });
   }
 

@@ -188,6 +188,12 @@ def bloch_rotation():
     # session['bloch_modes']['manual'] = True
     return update_bloch()
 
+@bloch.route('/get_u', methods=['POST'])
+def get_u_exp():
+    frame = json.loads(request.data.decode())
+    u = -pets_data[session['mol']].uvw0[frame-1]
+    return b_str(u,4)
+
 @bloch.route('/bloch_u', methods=['POST'])
 def bloch_u():
     data=json.loads(request.data.decode())#;print(data)
@@ -584,7 +590,7 @@ def init_bloch_panel():
     b0=load_b0()
     b1,b2,b3 = np.array(b0.crys.reciprocal_vectors)/(2*np.pi)
     cell_diag = 1/np.linalg.norm(b1+b2+b3) #Angstrom
-    print('cell_diag %1f Angstrom' %cell_diag)    
+    # print('cell_diag %1f Angstrom' %cell_diag)
     if session['new'] :
         rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
         bloch_args={
@@ -594,7 +600,7 @@ def init_bloch_panel():
             }
         bloch_args['dmin']=cell_diag/bloch_args['Nmax']
         bloch_modes = {
-            'manual'    : True,
+            'manual'    : False,
             'u'         : 'edit',
             'single'    : False,
             }
