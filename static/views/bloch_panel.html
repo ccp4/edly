@@ -38,11 +38,11 @@ Parameters Panel
         <td class="td-in">
           <span href="" ng-dblclick="bloch['gemmi']=true">Nmax</span>
           <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['Nmax']=true" ng-mouseleave="popup['Nmax']=false" >
-            <span class="popuptext" ng-show="popup['Nmax']"> Largest reflection would be (Nmax,Nmax,Nmax). <br>Double click to specify resolution instead.</span>
+            <span class="popuptext" ng-show="popup['Nmax']"> Largest reflection would be (Nmax,Nmax,Nmax).</span>
           </span>
         </td>
         <td class="td-in">
-          <input type="number" min="0" max="30" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
+          <input type="number" min="1" max="30" ng-model="bloch['Nmax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="update_Nmax()">
         </td>
       </tr>
       <!-- dmin -->
@@ -50,11 +50,11 @@ Parameters Panel
         <td class="td-in">
           <span href="" ng-dblclick="bloch['gemmi']=false">dmin</span>
           <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['dmin']=true" ng-mouseleave="popup['dmin']=false" >
-            <span class="popuptext" ng-show="popup['dmin']"> Maximum resolution specification(result might be quite different).<br>Double click to specify Nmax </span>
+            <span class="popuptext" ng-show="popup['dmin']"> Maximum resolution specification (in Angstrom) for the largest possible reflection to be included in the simulation.<br> Resolution is not guaranteed as it depends on excitation error.
           </span>
         </td>
         <td class="td-in">
-          <input type="number" min="0.25" max="3" ng-model="bloch['dmin']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
+          <input type="number" min="0.1" max="3" ng-model="bloch['dmin']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="update_Nmax()">
         </td>
       </tr>
       <!-- Smax -->
@@ -379,7 +379,7 @@ Parameters Panel
         <table  id="table_Miller_indices"  border="1" cellpadding="2">
           <tr>
               <th>
-                <a class="btn-sm btn-primary popup" ng-click="clear_table()" ng-mouseenter="showIt('clear_list')" ng-mouseleave="hideIt('clear_list')">
+                <a id="clear_btn" class="btn-sm btn-primary popup" ng-click="clear_table()" ng-mouseenter="showIt('clear_list')" ng-mouseleave="hideIt('clear_list')">
                   <span class="glyphicon glyphicon-remove" />
                   <span class="popuptext" style="" ng-show="pop['clear_list']"> clear reflection table  </span>
                 </a>

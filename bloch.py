@@ -581,13 +581,18 @@ def get_session_data(key):
 
 @bloch.route('/init_bloch_panel', methods=['GET'])
 def init_bloch_panel():
+    b0=load_b0()
+    b1,b2,b3 = np.array(b0.crys.reciprocal_vectors)/(2*np.pi)
+    cell_diag = 1/np.linalg.norm(b1+b2+b3) #Angstrom
+    print('cell_diag %1f Angstrom' %cell_diag)    
     if session['new'] :
         rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
         bloch_args={
             'keV':200,'u':[0,0,1],
-            'Nmax':6,'dmin':1,'gemmi':False,'Smax':0.02,
+            'Nmax':6,'gemmi':False,'Smax':0.02,
             'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200
             }
+        bloch_args['dmin']=cell_diag/bloch_args['Nmax']
         bloch_modes = {
             'manual'    : True,
             'u'         : 'edit',
@@ -619,6 +624,7 @@ def init_bloch_panel():
     session['vis']    = vis
     session['expand'] = expand_bloch
     session['refl']   = []
+
     # if not session['dat']['pets']:
     #     print(colors.red+'pets not found : setting vis["I_pets"] to false'+colors.black)
     #     session['vis']['I_pets']=False
@@ -639,6 +645,7 @@ def init_bloch_panel():
     session_data['rock']  = get_session_data('rock')
     session_data['rock_state'] = rock_state
     session_data['exp_rock']  = session['dat']['rock']
+    session_data['cell_diag'] = cell_diag
     # print('init bloch:',session['bloch_modes'])
     return json.dumps(session_data)
 

@@ -517,6 +517,16 @@ angular.module('app')
     $scope.bloch_solve_reset()
   }
 
+  $scope.update_Nmax=function(){
+    if ($scope.bloch['gemmi']){
+      $scope.bloch['Nmax']=Math.max(1,Math.min(30,Math.ceil($scope.info.cell_diag/$scope.bloch['dmin'])));
+      // $log.log($scope.bloch['Nmax']);
+    }
+    else{
+      $scope.bloch['dmin']=Math.max(0.1,Math.min(3,$scope.info.cell_diag/$scope.bloch['Nmax']));
+    }
+    $scope.bloch_solve_reset();
+  }
   $scope.update_omega=function (e) {
     if (event.key=='Enter') {
       $http.post('update_omega',JSON.stringify({'omega':$scope.info.omega}))
@@ -529,6 +539,7 @@ angular.module('app')
 
 
   //////////////////////////////////////////////////////////////
+  //// Graph stuffs
   //////////////////////////////////////////////////////////////
   $scope.show_u=function(){
     $scope.info.graph=$scope.info.graphs['u3d']
@@ -613,6 +624,8 @@ angular.module('app')
   }
 
   ////////////////////////////////////////////////////////
+  //// reflections stuffs
+  ////////////////////////////////////////////////////////
   $scope.set_auto = function(){
     $scope.auto_refresh_style='';
     $scope.auto_refresh=!$scope.auto_refresh;
@@ -653,10 +666,6 @@ angular.module('app')
     $scope.expand['refl']=true;
     // $log.log($scope.expand)
   }
-  // $scope.delete_row=function(obj){
-  //   deleteRow(obj);
-  //   $scope.update_refl();
-  // }
 
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -697,6 +706,7 @@ angular.module('app')
         $scope.info.max_res = response.data.max_res;
         $scope.info.dq_ring = response.data.dq_ring;
         $scope.info.rings   = response.data.rings;
+        $scope.info.cell_diag = response.data.cell_diag;
         $scope.u_style[$scope.info.modes['u']]={"border-style":'solid'};
         $scope.info.graph = $scope.info.graphs[response.data.graph]
 

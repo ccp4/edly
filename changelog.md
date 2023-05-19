@@ -1,6 +1,9 @@
 # Version log
 
 ## 0.0.6dev
+###Fri 19 May 10:54:33 BST 2023
+- issue#33 : pass from resolution to index
+- issue#30 : updating graph even when deleting reflections
 ### Thu 18 May 15:19:40 BST 2023
 - issue#29 : rocking curve
   - automatically solve for rocking curve

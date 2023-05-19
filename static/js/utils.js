@@ -35,6 +35,9 @@ function deleteRow(obj) {
   var TABLE_MILLER=document.getElementById('table_Miller_indices')
     var index = obj.parentNode.parentNode.rowIndex;
     TABLE_MILLER.deleteRow(index);
+    
+    var element = angular.element(document.getElementById('clear_btn'));
+    element.scope().update_refl();
 }
 function clearTable(){
   var TABLE_MILLER=document.getElementById('table_Miller_indices')
