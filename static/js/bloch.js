@@ -211,13 +211,13 @@ angular.module('app')
       $scope.frame=frame;
       $scope.bloch_solve_reset()
       if (!init){
-        $log.log('manual mode : ',$scope.info.modes['manual'])
+        // $log.log('manual mode : ',$scope.info.modes['manual'])
         if ($scope.info.modes['manual']){
-          $log.log('manual mode.update only exp data')
+          // $log.log('manual mode.update only exp data')
           $scope.update_frame();
         }
         else{
-          $log.log('auto mode. resolve for new frame')
+          // $log.log('auto mode. resolve for new frame')
           $scope.update_bloch();
         }
       }
@@ -545,15 +545,7 @@ angular.module('app')
     }
     $scope.bloch_solve_reset();
   }
-  $scope.update_omega=function (e) {
-    if (event.key=='Enter') {
-      $http.post('update_omega',JSON.stringify({'omega':$scope.info.omega}))
-      .then(function(response){
-        $rootScope.$emit('load_fig1',response.data)
-        // $scope.fig1 = response.data;
-      })
-    }
-  }
+
 
 
   //////////////////////////////////////////////////////////////
@@ -720,7 +712,7 @@ angular.module('app')
         $scope.expand       = response.data.expand;
         $scope.refl         = response.data.refl;
         $scope.info.modes   = response.data.bloch_modes;
-        $scope.info.omega   = response.data.omega;
+        // $scope.info.omega   = response.data.omega;
         $scope.info.max_res = response.data.max_res;
         $scope.info.dq_ring = response.data.dq_ring;
         $scope.info.rings   = response.data.rings;

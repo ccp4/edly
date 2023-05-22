@@ -1,10 +1,14 @@
 # Version log
 
 ## 0.0.6dev
+### Mon 22 May 18:15:19 BST 2023
+- moved omega parameter into frames panel
+- bundled omega and offset into a settings expand menu.
+
 ###Mon 22 May 17:11:53 BST 2023
 - issue#29 : rocking curve
   - put the u_sim orientation permanently on top of solve panel   
-  - fixed bugs in updating u for sim and frames 
+  - fixed bugs in updating u for sim and frames
 
 ### Fri 19 May 16:30:12 BST 2023
 - issue#34 : bloch frames

@@ -227,10 +227,7 @@ Parameters Panel
           </tr>
           <tr><td class="td-in"> nbs  </td><td class="td-in"> = </td><td> <span ng-bind="nrock_beams" ></span></td></tr>
         </table>
-        <!-- rock solve button-->
-        <div class="btn-sm btn-primary rock_solve_param" ng-click="solve_rock()" ng-style="rock_style">
-          {a solve_rock_btn a}
-        </div>
+        <!-- Simulated rocking curve frames -->
         <div ng-show="rock_state=='done'">
           <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('i');">
             <span class="glyphicon glyphicon-fast-backward"></span >
@@ -264,26 +261,25 @@ Parameters Panel
   </div><!-- theta_phi -->
 </div><!-- u -->
 
+
 <!-- solve button -->
 <div class="row " ng-hide="info.modes['manual'] && info.modes['u']=='rock'">
   <table style="margin-left: 5px;"><tr>
     <td class="td-in" style="width: 50%;">
       <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()" ng-style="bloch_solve_style" ng-bind="bloch_solve_btn"></div>
     </td>
-    <td class="td-in" style="font-size:13px">
+    <!-- <div class="btn-sm btn-primary rock_solve_param" ng-click="solve()" ng-style="solve_button_style">
+      {a solve_btn a}
+      Solve
+    </div> -->
+    <!-- <td class="td-in" style="font-size:13px">
       <a ng-show="dat['pets']" class="btn btn-primary myBtn-sm popup" style="border-width:2px;margin-left:5px;"  ng-click="show_rock()" ng-mouseenter="popup['show_rock']=true" ng-mouseleave="popup['show_rock']=false">
         <img style="width: 80%;" src="/static/images/beam_vs_thick.png"/>
         <span class="popuptext" ng-show="popup['show_rock']"> Show rocking curve </span>
       </a>
-    </td>
-    <td class="" ng-show="dat['pets']">
-      <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="showIt('omega_show')" ng-mouseleave="hideIt('omega_show')">
-        <span class="glyphicon glyphicon-repeat" />
-        <span class="popuptext" style="" ng-show="popup['omega_show']"> set in-plane rotation angle omega  </span>
-      </a>
-    </td>
+    </td> -->
     <td class="td-in" style="font-size:13px">
-      <span>nbs = </span>
+      <span>n_beams = </span>
       <span ng-bind="nbeams"></span>
       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['nbms']=true" ng-mouseleave="popup['nbms']=false" >
         <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
@@ -292,17 +288,6 @@ Parameters Panel
   </tr></table>
 </div>
 
-<!-- omega -->
-<div class="row" ng-show="expand['omega']">
-  <div class="bloch_param" >
-    <span> omega </span>
-    <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['omega']=true" ng-mouseleave="popup['omega']=false">
-      <span class="popuptext" ng-show="popup['omega']"> In-plane rotation angle for experimental data (change to align it with expected reflections)</span>
-    </span>
-    <span> = </span>
-    <input type="number" min="0" max="360" ng-model="info.omega" class="bloch_input"  ng-keypress="update_omega($event)">
-  </div>
-</div>
 
 <!-- thickness dependence-->
 <div class="row" >

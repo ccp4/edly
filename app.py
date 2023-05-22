@@ -221,6 +221,7 @@ def init_mol():
         'pets':os.path.exists(os.path.join(mol_path(mol),'pets')),
         'felix':os.path.exists(os.path.join(mol_path(mol),'felix')),
         'rock':False,
+        'omega':0,
         }
 
     # get the max number of frames for frontend from frames simulated/experimental frames
@@ -238,6 +239,11 @@ def init_mol():
         pets = pets_data[mol]
         pets_frames = pets.uvw.shape[0]
         nb_frames = min(pets_frames,nb_frames)
+        if 'omega' in pets.__dict__:
+            ###will have to fix this later
+            if mol=='glycine':pets.omega=157
+            dat['omega']=pets.omega
+            # print("omega=%.1fdeg information found in exp data " %dat['omega'])
 
     ## initialize structure
     struct_file = get_structure_file()

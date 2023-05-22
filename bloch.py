@@ -36,7 +36,7 @@ def bloch_fig():
     else:
         is_px = False
 
-    omega=session['omega']
+    omega=session['dat']['omega']
     # session['vis']
     if omega and session['dat']['pets']:
         ct,st = np.cos(np.deg2rad(omega)),np.sin(np.deg2rad(omega))
@@ -189,8 +189,8 @@ def update_bloch_frame():
 @bloch.route('/update_omega', methods=['POST'])
 def update_omega():
     data=json.loads(request.data.decode())
-    session['omega']=data['omega']
-    # print(data['omega'])
+    session['dat']['omega']=float(data['omega'])
+    print('omega updated to %.1f' %session['dat']['omega'])
     return bloch_fig()
 
 @bloch.route('/bloch_rotation', methods=['POST'])
@@ -627,7 +627,6 @@ def init_bloch_panel():
             }
 
         # session['mol2']  = mol
-        session['omega']    = 157 #in-plane rotation angle
         session['bloch_modes'] = bloch_modes
         # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
         session['theta_phi']  = [0,0]
@@ -641,7 +640,7 @@ def init_bloch_panel():
 
 
     expand_bloch = {
-        'omega':False,'struct':False,'thick':False,
+        'struct':False,'thick':False,
         'refl':True,'sim':False,'u':True,}
     vis = {'I':True,
         'Vga':'legendonly','Sw':'legendonly','I_pets':True,
@@ -664,7 +663,7 @@ def init_bloch_panel():
     session['last_time']  = now
     session['time'] = now
     session_data = {k:session[k] for k in[
-        'omega','expand','bloch_modes','refl','graph',
+        'expand','bloch_modes','refl','graph',
         'rings','max_res','dq_ring',
         ]}
     session_data['theta_phi'] = b_str(session['theta_phi'],2)

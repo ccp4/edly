@@ -173,6 +173,15 @@ angular.module('app').
   $scope.update_offset = function(){
     $scope.update_keyval('offset',$scope.frames.offset,1);
   }
+  $scope.update_omega=function (e) {
+    if (event.key=='Enter') {
+      $http.post('update_omega',JSON.stringify({'omega':$scope.dat['omega']}))
+      .then(function(response){
+        $rootScope.$emit('load_fig1',response.data)
+        // $scope.fig1 = response.data;
+      })
+    }
+  }
 
   // $scope.toggle_reload=function(){
   //   $scope.frames.reload=!$scope.frames.reload
@@ -238,7 +247,7 @@ angular.module('app').
   }
 
   $scope.changed=true;
-  $scope.frame_offset_on=false;
+  // $scope.frame_offset_on=false;
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={};
