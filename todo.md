@@ -1,6 +1,11 @@
 # TODO
 
 move TODO to github issues
+- common interface :
+  - df.rpl = qx,qy,px,py,I,hkl,F
+  - uvw
+  - nxy
+- fix minor initialization stuffs
 
 ### issue#13 CBED
 - CBED panel

@@ -81,7 +81,9 @@ def bloch_fig():
             mode='markers',
         ))
 
-    #### pets
+    ########################
+    #### add exp data
+    ########################
     if session['dat']['pets']:
         pets = pets_data[session['mol']]
         df_pets = pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
@@ -93,15 +95,19 @@ def bloch_fig():
 
         fig.add_trace(go.Scatter(
             x=pt_plot[px],y=pt_plot[py],marker_size=pt_plot['Ix'],
-            name='I_pets',
+            name='I_exp',
             visible=session['vis']['I_pets'],
-            hovertext=['I_pets']*len(pt_plot),
+            hovertext=['I_exp']*len(pt_plot),
             marker_symbol='square',marker_color='purple',
             customdata=np.array([pt_plot['I'].values, pt_plot['hkl'].to_numpy()]).T,
             hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>',
             mode='markers',
         ))
 
+
+    ########################
+    #### xmax
+    ########################
     xm = session['max_res']
     if not xm:xm = b0.df_G.q.max()
     xr,yr=[-xm,xm],[xm,-xm]
@@ -109,6 +115,9 @@ def bloch_fig():
         x_m = pets.nxy #pt_plot['px'].max() #*np.sqrt(2)
         xr,yr=[0,x_m],[0,x_m]
 
+    ########################
+    #### resolution rings
+    ########################
     dq_ring = session['dq_ring']
     rings=[]
     if dq_ring:
@@ -122,7 +131,6 @@ def bloch_fig():
                  cx,cy = (x_m/2,)*2
              rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
 
-        #### the rings
         # print('qs : ',qs)
         for q0,r0 in zip(qs,qr):
             name='%.2f A' %(1/q0)
@@ -140,6 +148,10 @@ def bloch_fig():
     session['rings']=rings              #;print('rings',rings)
     session['last_time'] = time.time()
 
+
+    ########################
+    #### layout
+    ########################
     # print(session['bloch'])
     fig.update_layout(
         title="diffraction pattern z=%d A" %session['bloch']['thick'],
@@ -153,8 +165,8 @@ def bloch_fig():
     return fig.to_json()
 
 
-@bloch.route('/set_fig1', methods=['POST'])
-def set_max_res():
+@bloch.route('/set_max_res_rings', methods=['POST'])
+def set_max_res_rings():
     data =json.loads(request.data.decode())
     session['max_res'] = data['max_res']
     session['dq_ring'] = data['dq_ring']
@@ -162,7 +174,12 @@ def set_max_res():
     fig_data = bloch_fig()
     return json.dumps({'rings':session['rings'],'fig':fig_data})
 
-
+@bloch.route('/update_bloch_frame', methods=['POST'])
+def update_bloch_frame():
+    data =json.loads(request.data.decode())
+    # print(data)
+    session['frame'] = data['frame']
+    return bloch_fig()
 
 ########################################################################
 ########################################################################
@@ -288,7 +305,8 @@ def show_u():
 @bloch.route('/get_bloch_sim', methods=['POST'])
 def get_bloch_sim():
     session['b0_path'] = get_pkl(session['id'])
-    return bloch_fig()
+    b0 = load_b0()
+    return json.dumps({'fig':bloch_fig(),'u':b_str(b0.u,4)})
 ##############################
 #### Rocking curve stuffs
 ##############################
@@ -402,9 +420,12 @@ def get_rock_sim():
     i    = max(min(rock_sim,sims.size),1)-1
     sim  = sims[i] #;print(i,sim)
     session['b0_path'] = sim
-    session['frame'] = data['frame']
+    session['frame']   = data['frame']
+    b0 = load_b0()
+    u = b0.u
+
     fig = bloch_fig()
-    return json.dumps({'fig':fig, 'sim':i+1})
+    return json.dumps({'fig':fig, 'u':b_str(u,4),'sim':i+1})
 
 @bloch.route('/show_rock', methods=['POST'])
 def show_rock():

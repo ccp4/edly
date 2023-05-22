@@ -107,6 +107,16 @@ Parameters Panel
     <div style="font-size:14px;margin-bottom:5px;">Beam orientation :</div>
     <div ng-show="expand['u']">
 
+      <!-- orientation  -->
+      <div style="padding-bottom:5px;" >
+          <span> $\mathbf u_{sim}$ </span>
+          <span> = </span>
+          <span ng-bind="bloch['u']" ></span>
+          <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['u_info']=true" ng-mouseleave="popup['u_info']=false">
+            <span class="popuptext" ng-show="popup['u_info']"> Beam orientation of the simulation, i.e. miller indices of the incident beam.</span>
+          </span>
+      </div>
+
       <!-- buttons -->
       <div class="row" style="margin-bottom: 10px">
         <span ng-show="dat['pets']">
@@ -137,15 +147,11 @@ Parameters Panel
         </a>
       </div>
 
-      <!-- frame mode or edit mode -->
-      <div class="bloch_param" ng-hide="info.modes['manual'] && info.modes['u']!='edit'">
-          <span> u </span>
-          <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['u_info']=true" ng-mouseleave="popup['u_info']=false">
-            <span class="popuptext" ng-show="popup['u_info']"> Beam orientation based on experimental frame </span>
-          </span>
-          <span> = </span>
-          <span  ng-show="!info.modes['manual']" ng-bind="bloch['u']" ></span>
-          <input ng-show="info.modes['manual'] && info.modes['u']=='edit'" ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
+
+      <!-- edit mode -->
+      <div class="bloch_param" ng-show="info.modes['manual'] && info.modes['u']=='edit'" >
+        <span> u = </span>
+        <input ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
       </div>
 
       <!-- move mode-->
@@ -173,7 +179,6 @@ Parameters Panel
           </a>
         </div>
         <table style="margin-left: 20px;" >
-          <tr><td class="td-in"> u     </td><td> = </td><td class="td-in"> <span ng-bind="bloch['u']"></span></td></tr>
           <tr><td class="td-in"> theta </td><td> = </td><td class="td-in"> <span ng-hide="input['theta']" ng-bind="theta_phi[0]" ng-dblclick="input['theta']=true">deg</span> <input class="long_input" ng-show="input['theta']" ng-model="theta_phi[0]" ng-key-enter="set_input('theta','move')"></td></tr>
           <tr><td class="td-in"> phi   </td><td> = </td><td class="td-in"> <span ng-hide="input['phi']"   ng-bind="theta_phi[1]" ng-dblclick="input['phi']=true"  >deg</span> <input class="long_input" ng-show="input['phi']"   ng-model="theta_phi[1]" ng-key-enter="set_input('phi'  ,'move')"  ></td></tr>
           <tr><td class="td-in"> dt    </td><td> = </td><td class="td-in"> <span ng-hide="input['dtp']"   ng-bind="dtheta_phi"   ng-dblclick="input['dtp']=true"  >deg</span> <input class="long_input" ng-show="input['dtp']"   ng-model="dtheta_phi"   ng-key-enter="set_input('dtp'  ,'move')"  ></td></tr>

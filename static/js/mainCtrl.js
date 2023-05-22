@@ -37,10 +37,10 @@ angular.module('app').
   };
 
 
-  $scope.update = function(solve=1){
+  $scope.update = function(init=0){
     switch ($scope.mode){
       case 'bloch':
-          $rootScope.$emit('update_bloch',$scope.frame,solve);
+          $rootScope.$emit('update_frame',$scope.frame,init);
           if ($scope.dat['pets']){
             $http.post('get_u',$scope.frame)
             .then(function(response){
@@ -233,7 +233,7 @@ angular.module('app').
         $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
 
-        $scope.update(0);
+        $scope.update(1);
     });
   }
 

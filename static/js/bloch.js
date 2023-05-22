@@ -80,19 +80,19 @@ angular.module('app')
       $rootScope.$emit('toggle_mode','single')
     }
 
-    $scope.set_fig1 = function(){
+    $scope.set_max_res_rings = function(){
       // $log.log({'max_res':$scope.info.max_res,'dq_ring':$scope.info.dq_ring})
-      $http.post('set_fig1',JSON.stringify({'max_res':$scope.info.max_res,'dq_ring':$scope.info.dq_ring}))
+      $http.post('set_max_res_rings',JSON.stringify({'max_res':$scope.info.max_res,'dq_ring':$scope.info.dq_ring}))
         .then(function(response){
           $scope.fig1 = JSON.parse(response.data.fig);
           $scope.info.rings = response.data.rings;
         });
     }
     $scope.set_max_res=function(){
-      $scope.set_fig1();
+      $scope.set_max_res_rings();
     }
     $scope.set_ring_spacing=function(){
-      $scope.set_fig1();
+      $scope.set_max_res_rings();
     }
 
 
@@ -170,7 +170,8 @@ angular.module('app')
   $scope.get_bloch_sim=function(){
     $http.post('get_bloch_sim')
     .then(function(response){
-      $rootScope.$emit('load_fig1',response.data)
+      $scope.bloch.u=response.data.u;
+      $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
     });
   }
 
@@ -205,14 +206,29 @@ angular.module('app')
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Bloch
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  $rootScope.$on('update_bloch',function(event,frame,solve){
+  $rootScope.$on('update_frame',function(event,frame,init){
+      //
       $scope.frame=frame;
       $scope.bloch_solve_reset()
-      if (solve){
-        $scope.update_bloch();
+      if (!init){
+        $log.log('manual mode : ',$scope.info.modes['manual'])
+        if ($scope.info.modes['manual']){
+          $log.log('manual mode.update only exp data')
+          $scope.update_frame();
+        }
+        else{
+          $log.log('auto mode. resolve for new frame')
+          $scope.update_bloch();
+        }
       }
   })
 
+  $scope.update_frame=function(){
+    $http.post('update_bloch_frame',JSON.stringify({'frame':$scope.frame}))
+    .then(function(response){
+      $rootScope.$emit('load_fig1',response.data)
+    });
+  }
 
   $scope.update_bloch=function(){
     // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
@@ -386,8 +402,10 @@ angular.module('app')
       .then(function(response){
         $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
         // $scope.fig1 = JSON.parse(response.data.fig);
-        $scope.rock_sim = response.data.sim;
-        $scope.sim_rock = $scope.rock_sim;
+        $scope.bloch['u'] = response.data.u;
+        $scope.rock_sim  = response.data.sim;
+        $scope.sim_rock  = $scope.rock_sim;
+
         $scope.update_graph();
     });
   }
