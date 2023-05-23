@@ -259,10 +259,33 @@ def init_mol():
             b_str(crys.lattice_parameters,2).split(',') )))
         formula = re.sub("([0-9]+)", r"_{\1}", crys.chemical_formula).replace(' ','')
         crys_dat['chemical_formula'] = formula
+        crys_dat['lattice_system']=crys.lattice_system.name
+        crys_dat['nb_atoms']=len(crys.atoms)
+        crys_dat['spg_ref']=False
+        ### space group stuff
+        dataset = read_space_group(struct_file)  #;print(dataset)
+        if not dataset:
+            try :
+                dataset = crys.symmetry()
+            except:
+                dataset={}
+                print(colors.red+'Crystal.symmetry() failed'+colors.black)
+        crys_dat['spg']=all([k in dataset.keys() for k in
+            ['international_number','international_symbol']])
+        if crys_dat['spg']:
+            crys_dat.update({k:dataset[k] for k in['international_number','international_symbol']})
+            crys_dat['spg_ref'] = 'http://img.chem.ucl.ac.uk/sgp/large/%s%s.htm' %(
+                str(crys_dat['international_number']).zfill(3),
+                ['az1','ay1'][crys.lattice_system.name=='monoclinic']
+            )
+            if 'lattice_system' in dataset.keys():crys_dat['lattice_system'] = dataset['lattice_system']
     else:
         crys_dat=dict(zip(
-        ['file','a','b','c','alpha','beta','gamma','a1', 'a2', 'a3','chemical_formula'],
-        ['?']*11))
+        ['file','a','b','c','alpha','beta','gamma','a1', 'a2', 'a3','chemical_formula',
+            'nb_atoms','lattice_system'],
+        ['?']*13))
+        crys_dat['spg_ref']=False
+    # print(crys_dat)
     # print(formula)
 
     #related to /set_viewer
@@ -313,6 +336,7 @@ def get_structure_file():
             if len(pdb_files):
                 struct_file = pdb_files[0]
     return struct_file
+
 
 def get_frames(mol,frame_type):
     frames_dict=None
@@ -393,3 +417,48 @@ def get_frame_img(frame,key):
         im = im[::step,::step]
     # print(im.shape)
     return im.flatten()
+
+
+def read_space_group(struct_file):
+    dataset={}
+    if struct_file.split('.')[-1]=='cif':
+        with open(struct_file,'r') as f:
+            lines=f.readlines()
+        spg_info = {
+            'lattice_system'      :['_space_group_crystal_system','_symmetry_cell_setting'],
+            'international_number':['_space_group_IT_number'     ,],
+            'international_symbol':['_space_group_name_H-M_alt'  ,'_symmetry_space_group_name_H-M'],
+        }
+
+        # (key,vals),l=next(spg_info),next(lines)
+        for l in lines:
+            if l.strip() in ['_space_group_symop_operation_xyz','_symmetry_equiv_pos_as_xyz']:
+                break
+            for key,vals in spg_info.items():
+                for v in vals:
+                    if v==l.split(' ')[0]:
+                        val = l.replace(v,'').strip(" '\n")
+                        # print('match found:',l.split(' ')[0],v,val)
+                        dataset[key]=val
+                        break
+
+    elif struct_file.split('.')[-1]=='pdb':
+        with open(struct_file,'r') as f:
+            lines=f.readlines()
+        for l in lines:
+            if 'SYMMETRY OPERATORS FOR SPACE GROUP' in l:
+                dataset['international_symbol'] = l.split(':')[1].strip()
+                break
+
+    if dataset:
+        print(colors.green+'Reading space group info manually in cif file'+colors.black)
+        if 'international_symbol' in dataset.keys() and 'international_number' not in dataset.keys():
+            with open('static/spg/spg_groups_hm.json','r') as f:
+                spg_hm=json.load(f)
+            hm = dataset['international_symbol']
+            if hm in spg_hm.keys():
+                dataset['international_number'] = spg_hm[hm]
+                print('retrieved space group number from dictionary')
+
+    return dataset
+read_space_group('static/data/crambin/1ejg.pdb')

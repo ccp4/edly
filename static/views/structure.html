@@ -24,6 +24,19 @@
       <div style="margin-left:30px;margin-top:-5px;">
         <span id="formula" >$H_2O$</span>
       </div>
+      <div style="font-size:16px;margin:5px;" ng-if="crys['spg']">
+        Space group :
+          <!-- <div style="margin-left:30px;margin:5px;" > -->
+            <a ng-href="{acrys['spg_ref']a}" >{a crys['international_number'] a}</a>
+            :
+            <span ng-bind="crys['international_symbol']"></span>
+          <!-- </div> -->
+      </div>
+      <div style="font-size:16px;margin:5px;">Number of atoms : {a crys['nb_atoms'] a}</div>
+      <div style="font-size:16px;margin:5px;">Lattice system : {a crys['lattice_system'] a}</div>
+      <!-- <div style="margin-left:10px;">
+        <span ng-bind="crys['lattice_system']"/>
+      </div> -->
       <div style="font-size:16px;margin:5px;">Lattice parameters : </div>
       <div style="margin-left:10px;">
         <span>  a=<span ng-bind="crys['a']"/> </span>
@@ -36,7 +49,7 @@
         <span>, $\beta$ =<span ng-bind="crys['beta']" /></span>
         <span>, $\gamma$=<span ng-bind="crys['gamma']"/></span>
       </div>
-      <div style="font-size:16px;margin:5px;">Lattice vectors : </div>
+      <div style="font-size:16px;margin:5px;margin-bottom: 0px;">Lattice vectors : </div>
       <div style="margin-left:10px;">
         <div> $a_1$=<span ng-bind="crys['a1']"/></div>
         <div> $a_2$=<span ng-bind="crys['a2']"/></div>

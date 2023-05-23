@@ -1,6 +1,11 @@
 # Version log
 
 ## 0.0.6dev
+### Tue 23 May 17:21:28 BST 2023
+- issue#37 : space group info
+  - display space group, lattice system and number of atoms.
+  - provide link to ucl chem space group info page
+  - obtained a dictionary to pass from space group it number to hm symbol and vice versa
 ### Tue 23 May 01:25:24 BST 2023
 - issue#29 : rocking curve
   - active simulation updated properly when passing from rock to other mode
