@@ -316,7 +316,7 @@ def rock_state():
         n_simus=len(glob.glob(os.path.join(session['path'],'u_*.pkl')))
         npts=session['rock']['nframes']
         if not n_simus==npts:
-            session['rock_state'] = '%d/%d' %(n_simus,npts)
+            session['rock_state'] = '%d/%d' %(n_simus+1,npts)
         else:
             if not os.path.exists(rock_path(session['id'])):
                 session['rock_state'] = 'postprocess'

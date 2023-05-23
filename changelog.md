@@ -1,10 +1,17 @@
 # Version log
 
 ## 0.0.6dev
+### Tue 23 May 01:25:24 BST 2023
+- issue#29 : rocking curve
+  - active simulation updated properly when passing from rock to other mode
+  - u_sim orientation permanently above the mode options
+  - rock solve button with the normal bloch solve button
+  - solve rock available again when changing simulation parameters
+  - rock solve Should always complete properly now
+
 ### Mon 22 May 18:15:19 BST 2023
 - moved omega parameter into frames panel
 - bundled omega and offset into a settings expand menu.
-
 ###Mon 22 May 17:11:53 BST 2023
 - issue#29 : rocking curve
   - put the u_sim orientation permanently on top of solve panel   
@@ -18,6 +25,7 @@
 ###Fri 19 May 10:54:33 BST 2023
 - issue#33 : pass from resolution to index
 - issue#30 : updating graph even when deleting reflections
+
 ### Thu 18 May 15:19:40 BST 2023
 - issue#29 : rocking curve
   - automatically solve for rocking curve
