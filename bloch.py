@@ -33,17 +33,10 @@ def bloch_fig():
     ########################
     #### plot simulation data
     ########################
-    # omega=session['dat']['omega']
-    # if omega and session['dat']['pets']:
-    #     ct,st = np.cos(np.deg2rad(omega)),np.sin(np.deg2rad(omega))
-    #     qx_b,qy_b = toplot[['px','py']].values.T
-    #     qx,qy = ct*qx_b-st*qy_b,st*qx_b+ct*qy_b
-    #     toplot['px'],toplot['py'] = qx,qy
     if is_px:
         df_pxy = pets.hkl_to_pixels(toplot.index.tolist(),session['frame'])
         toplot['px']=df_pxy['px']
         toplot['py']=df_pxy['py']
-
 
     plts = {
         'I'  :['Ix','blue' ,'circle'     ],
@@ -205,17 +198,21 @@ def bloch_u():
     session['b0_path'] = get_pkl(session['id'])
     ## handle
     thicks = update_thicks(data['bloch']['thicks'])
+    keV = session['bloch']['keV']
     if data['manual_mode']:
         # print(data['bloch']['u'])
         u = b_arr(data['bloch']['u'],session['bloch']['u'])
     else:
+        keV = np.round(pets_data[session['mol']].keV)
+        # print('recover wavelength %.1f' %keV)
         u = pets_data[session['mol']].uvw0[data['frame']-1]
     # print(data['frame'],u)
 
-    b_args.update({'u':list(u),'thicks':list(thicks)})
+    b_args.update({'u':list(u),'thicks':list(thicks),'keV':keV})
     session['frame'] = data['frame']
     session['bloch_modes']['manual'] = data['manual_mode']
     session['bloch'] = b_args
+    print(session['bloch'])
     # session['last_req'] = 'solve_bloch:%s' %(time.time())
     # print({k:type(v) for k,v in session['bloch'].items()})
     return update_bloch()

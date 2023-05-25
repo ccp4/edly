@@ -156,7 +156,8 @@ angular.module('app')
     }
     //auto mode
     else{
-
+      $scope.show_keV=False;
+      $scope.update_bloch();
     }
   }
 

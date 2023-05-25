@@ -250,19 +250,16 @@ function open_link(link){
 
 
 function update_formula(formula){
-  window.MathJax = {
-    startup: {
-      ready: () => {
-        console.log('MathJax is loaded, but not yet initialized');
-        MathJax.startup.defaultReady();
-        console.log('MathJax is initialized, and the initial typeset is queued');
-      }
-    }
-  };
+  // window.MathJax = {
+  //   startup: {
+  //     ready: () => {
+  //       console.log('MathJax is loaded, but not yet initialized');
+  //       MathJax.startup.defaultReady();
+  //       console.log('MathJax is initialized, and the initial typeset is queued');
+  //     }
+  //   }
+  // };
   var math = MathJax.Hub.getAllJax("formula")[0];
-  console.log(math)
-
-
-
+  // console.log(math)
   MathJax.Hub.Queue(["Text",math,formula]);
 }

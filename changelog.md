@@ -1,8 +1,17 @@
 # Version log
 
 ## 0.0.6dev
+### Thu 25 May 20:45:34 BST 2023
+- issue#23 : import exp data auto orientation
+  - works for dials(spot location wrong though)
+  - wavelength retrieval
+  - fix xds file should be a .HKL extension
+- issue#35 refactor import dataset
+  - dials and xds have a base class
+  - pets has a common interface but does not inherit base class yet
+
 ### Thu 25 May 04:23:52 BST 2023
-- issue#29 : auto orientation
+- issue#23 : auto orientation
   - works for pets
   - works for xds
 - issue#35 refactor import dataset
