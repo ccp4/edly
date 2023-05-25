@@ -1,6 +1,9 @@
 # Version log
 
 ## 0.0.6dev
+### Thu 25 May 21:19:49 BST 2023
+- issue#33 : show Nmax and dmin
+
 ### Thu 25 May 20:45:34 BST 2023
 - issue#23 : import exp data auto orientation
   - works for dials(spot location wrong though)
@@ -9,7 +12,6 @@
 - issue#35 refactor import dataset
   - dials and xds have a base class
   - pets has a common interface but does not inherit base class yet
-
 ### Thu 25 May 04:23:52 BST 2023
 - issue#23 : auto orientation
   - works for pets

@@ -562,6 +562,9 @@ angular.module('app')
     }
     else{
       $scope.bloch['dmin']=Math.max(0.1,Math.min(3,$scope.info.cell_diag/$scope.bloch['Nmax']));
+      $scope.dmin_str=String($scope.bloch['dmin']).slice(0,4)
+      // $log.log($scope.bloch['dmin']);
+
     }
     $scope.bloch_solve_reset();
   }
@@ -744,6 +747,7 @@ angular.module('app')
         $scope.bloch_solve_reset();
         $log.log('bloch init done');
         $scope.update_bloch();
+        $scope.dmin_str=String($scope.bloch['dmin']).slice(0,4)
         $scope.init_bloch_done=true;
       });
   }

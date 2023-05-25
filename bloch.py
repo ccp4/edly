@@ -212,7 +212,7 @@ def bloch_u():
     session['frame'] = data['frame']
     session['bloch_modes']['manual'] = data['manual_mode']
     session['bloch'] = b_args
-    print(session['bloch'])
+    # print(session['bloch'])
     # session['last_req'] = 'solve_bloch:%s' %(time.time())
     # print({k:type(v) for k,v in session['bloch'].items()})
     return update_bloch()
