@@ -1,6 +1,20 @@
 # Version log
 
 ## 0.0.6dev
+### Thu 25 May 04:23:52 BST 2023
+- issue#29 : auto orientation
+  - works for pets
+  - works for xds
+- issue#35 refactor import dataset
+  - unifying the data process interface with info : npx,rpl,cen
+  - function hkl_to_pixels(hkl,frame) to obtain pixel locations from miller indices
+  - partially removed the omega feature
+  - modified pets so that its uvw is already correctly oriented and should not need a negative sign in edly
+- fix bug frames panel not available when only the processed data exist
+- fix error pets_file when no .pts present
+- implemented a,w,s,d hotkeys for moving in rotation tweaking mode
+- added some basic Mathjax ready startup stuffs
+
 ### Tue 23 May 17:21:28 BST 2023
 - issue#37 : space group info
   - display space group, lattice system and number of atoms.
@@ -40,7 +54,7 @@
 - changed init bug setTimeOut with interval cancelled only after `$scope.init=true`
 ### Thu 18 May 11:50:13 BST 2023
 - issue#28 : tweak orientation
-###Thu 18 May 11:15:52 BST 2023
+### Thu 18 May 11:15:52 BST 2023
 - issue#21 : resolution rings bugs
   - bug with hiding data when no rings present
   - bug hiding rings does not always work for all rings

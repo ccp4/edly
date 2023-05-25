@@ -1,39 +1,27 @@
 <!-- Frames panel -->
 <div class="panel" ng-show="!modes['molecule'] && max_frame>0">
   <div class="row">
-    <!-- <div class="col-sm-8"> -->
-      <!-- <h4>
-        <span style="padding-left: 5px" > Frames : </span>
-      </h4> -->
       <span style="padding-left: 5px;font-size:18px" > Frames : </span>
       <span class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!expand['frame_settings'],'glyphicon-minus-sign':expand['frame_settings']}" ng-click="expand['frame_settings']=!expand['frame_settings']" ng-mouseenter="popup['frame_settings']=true" ng-mouseleave="popup['frame_settings']=false" >
         <span class="popuptext" ng-show="popup['frame_settings']"> settings  </span>
       </span>
-      <!-- omega button-->
-      <!-- <span class="">
-        <a class="btn-sm btn-primary popup" ng-click="expand['omega']=!expand['omega']" ng-mouseenter="showIt('omega_show')" ng-mouseleave="hideIt('omega_show')">
-          <span class="glyphicon glyphicon-repeat" />
-          <span class="popuptext" style="" ng-show="popup['omega_show']"> set in-plane rotation angle omega  </span>
-        </a>
-      </span> -->
-    <!-- </div> -->
   </div>
 
 
   <table>
+    <!-- settings -->
     <tr ng-show="expand['frame_settings']"><td>
       Simulation frames offset:
       <input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" />
     </td></tr>
-    <!-- omega -->
-    <tr ng-show="expand['frame_settings'] && dat['pets']"><td>
+    <!-- <tr ng-show="expand['frame_settings'] && dat['pets']"><td>
       <span> omega </span>
       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['omega']=true" ng-mouseleave="popup['omega']=false">
         <span class="popuptext" ng-show="popup['omega']"> In-plane rotation angle for experimental data (change to align it with expected reflections)</span>
       </span>
       <span> = </span>
       <input type="number" min="0" max="360" ng-model="dat['omega']" class="bloch_input"  ng-keypress="update_omega($event)">
-    </td></tr>
+    </td></tr> -->
     <!-- Frames selection input -->
     <tr><td>
       <span >
@@ -50,9 +38,6 @@
       <a class="btn-sm btn-primary"  ng-click="inc_frame()">
         <span class="glyphicon glyphicon-step-forward"></span >
       </a>
-      <!-- <a class="btn-sm btn-primary"  ng-click="toggle_reload()" ng-style="mode_style['reload']">
-        <span class="glyphicon glyphicon-refresh"></span >
-      </a> -->
     </td></tr>
     <!-- colormap -->
     <tr ng-show="mode=='frames'"><td style="padding-top:10px" >

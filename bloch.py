@@ -26,35 +26,23 @@ def bloch_fig():
     b0 = load_b0()
     toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
 
-    is_px = session['is_px']
-    pred_info = session['pred_info']
-    if session['dat']['pets'] :
+    is_px = session['is_px'] and session['dat']['pets']
+    if session['dat']['pets']:
         pets = pets_data[session['mol']]
-        if is_px:
-            is_px = 'aper' in pets.__dict__
-        pred_info = pred_info and 'df_pred' in pets.__dict__
-    else:
-        is_px = False
 
-    omega=session['dat']['omega']
-    # session['vis']
-    if omega and session['dat']['pets']:
-        ct,st = np.cos(np.deg2rad(omega)),np.sin(np.deg2rad(omega))
-        qx_b,qy_b = toplot[['px','py']].values.T
-        # print(qy_b[0])
-        qx,qy = ct*qx_b-st*qy_b,st*qx_b+ct*qy_b
-        toplot['px'],toplot['py'] = qx,qy
+    ########################
+    #### plot simulation data
+    ########################
+    # omega=session['dat']['omega']
+    # if omega and session['dat']['pets']:
+    #     ct,st = np.cos(np.deg2rad(omega)),np.sin(np.deg2rad(omega))
+    #     qx_b,qy_b = toplot[['px','py']].values.T
+    #     qx,qy = ct*qx_b-st*qy_b,st*qx_b+ct*qy_b
+    #     toplot['px'],toplot['py'] = qx,qy
     if is_px:
-        if pred_info:
-            hkl = [h for h in b0.df_G.index if h in pets.df_pred.index]
-
-            pxy = pets.df_pred.loc[hkl]
-            toplot['px'] = pxy['px']
-            toplot['py'] = pxy['py']
-        else:
-            cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
-            toplot['px'] = qx/pets.aper + cx
-            toplot['py'] = qy/pets.aper + cy
+        df_pxy = pets.hkl_to_pixels(toplot.index.tolist(),session['frame'])
+        toplot['px']=df_pxy['px']
+        toplot['py']=df_pxy['py']
 
 
     plts = {
@@ -126,10 +114,9 @@ def bloch_fig():
         ct,st = np.cos(t),np.sin(t)
         rx = lambda r:r*ct; ry=lambda r:r*st
         if is_px :
-             qr = qs/(pets.aper*np.sqrt(2))
-             if pred_info:
-                 cx,cy = (x_m/2,)*2
-             rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
+            cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
+            qr = qs/(pets.aper*np.sqrt(2))
+            rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
 
         # print('qs : ',qs)
         for q0,r0 in zip(qs,qr):
@@ -208,7 +195,7 @@ def bloch_rotation():
 @bloch.route('/get_u', methods=['POST'])
 def get_u_exp():
     frame = json.loads(request.data.decode())
-    u = -pets_data[session['mol']].uvw0[frame-1]
+    u = pets_data[session['mol']].uvw0[frame-1]
     return b_str(u,4)
 
 @bloch.route('/bloch_u', methods=['POST'])
@@ -218,14 +205,12 @@ def bloch_u():
     session['b0_path'] = get_pkl(session['id'])
     ## handle
     thicks = update_thicks(data['bloch']['thicks'])
-    # u = pets_data[session['mol']].uvw[data['frame']-1]
     if data['manual_mode']:
         # print(data['bloch']['u'])
         u = b_arr(data['bloch']['u'],session['bloch']['u'])
     else:
-        u = -pets_data[session['mol']].uvw0[data['frame']-1]
+        u = pets_data[session['mol']].uvw0[data['frame']-1]
     # print(data['frame'],u)
-    # print(pets_data[session['mol']].uvw[data['frame']-1])
 
     b_args.update({'u':list(u),'thicks':list(thicks)})
     session['frame'] = data['frame']
@@ -351,11 +336,11 @@ def set_rock_frame():
     opt = data['opt']
     uvw = pets_data[session['mol']].uvw0
     if opt==0:
-        e0 = -uvw[max(0,frame-1)]
+        e0 = uvw[max(0,frame-1)]
         e1 = np.array(session['rock']['u1'])
     elif opt==1:
         e0 = np.array(session['rock']['u0'])
-        e1 = -uvw[max(0,frame-1)]
+        e1 = uvw[max(0,frame-1)]
     else:
         u0 = uvw[max(0,frame-2)]
         u1 = uvw[frame-1]

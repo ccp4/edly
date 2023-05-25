@@ -215,10 +215,12 @@ def init_mol():
     mol = session['mol']
     sim = get_frames(mol,'sim')
     exp = get_frames(mol,'exp')
+    dat_type=update_exp_data(mol)
     dat = {
         'exp':type(exp)==dict,
         'sim':type(sim)==dict,
-        'pets':os.path.exists(os.path.join(mol_path(mol),'pets')),
+        'pets':type(dat_type)==str,
+        'dat_type':dat_type,
         'felix':os.path.exists(os.path.join(mol_path(mol),'felix')),
         'rock':False,
         'omega':0,
@@ -234,11 +236,13 @@ def init_mol():
     if dat['exp']:
         nb_frames = max(exp['nb_frames'],nb_frames)
     if dat['pets']:
-        dat_type=update_exp_data(mol)
         dat['rock'] = dat_type=='pets'
         pets = pets_data[mol]
-        pets_frames = pets.uvw.shape[0]
-        nb_frames = min(pets_frames,nb_frames)
+        pets_frames = pets.uvw0.shape[0]
+        if nb_frames:
+            nb_frames = min(pets_frames,nb_frames)
+        else:
+            nb_frames = pets_frames
         if 'omega' in pets.__dict__:
             ###will have to fix this later
             if mol=='glycine':pets.omega=157

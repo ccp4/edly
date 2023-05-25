@@ -226,7 +226,7 @@ angular.module('app')
   $scope.update_bloch=function(){
     // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
-        $scope.bloch_solve_set('Preparing');
+        $scope.bloch_solve_set('Preparing','red');
         // $log.log('solving bloch for frame ',$scope.frame, ' with bloch' , $scope.bloch);
         $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.info.modes['manual']}))
         .then(function(response){
@@ -445,32 +445,38 @@ angular.module('app')
     var updated = false;
     var theta_phi=[Number($scope.theta_phi[0]),Number($scope.theta_phi[1])];
     $scope.dtheta_phi=Number($scope.dtheta_phi);
+    // $log.log(e.keyCode)//,parseInt(e.keyCode),parseInt(e.keyCode) in [65,87,68,83, 37,38,39,40])
+    if ([65,87,68,83, 37,38,39,40].indexOf(e.keyCode)>=0){
+      updated=true;
+      $log.log('update')
+    }
     switch (e.keyCode) {
         case 37:
-          theta_phi[1]-=$scope.dtheta_phi;
-          updated=true;
-          break;
+          theta_phi[1]-=$scope.dtheta_phi;break;
+        case 65:
+          theta_phi[1]-=$scope.dtheta_phi;break;
         case 38:
-          theta_phi[0]+=$scope.dtheta_phi;
-          updated=true;
-          break;
+          theta_phi[0]+=$scope.dtheta_phi;break;
+        case 87:
+          theta_phi[0]+=$scope.dtheta_phi;break;
         case 39:
-          theta_phi[1]+=$scope.dtheta_phi;
-          updated=true;
-          break;
+          theta_phi[1]+=$scope.dtheta_phi;break;
+        case 68:
+          theta_phi[1]+=$scope.dtheta_phi;break;
         case 40:
-          theta_phi[0]-=$scope.dtheta_phi;
-          updated=true;
-          break;
+          theta_phi[0]-=$scope.dtheta_phi;break;
+        case 83:
+          theta_phi[0]-=$scope.dtheta_phi;break;
         case 34:
-          $scope.dtheta_phi*=2;
-          break;
+          $scope.dtheta_phi*=2;break;
+        case 69:
+          $scope.dtheta_phi*=2;break;
         case 33:
-          $scope.dtheta_phi/=2;
-          break;
+          $scope.dtheta_phi/=2;break;
+        case 81:
+          $scope.dtheta_phi/=2;break;
         case 8:
-          $scope.dtheta_phi=0.1;
-          break;
+          $scope.dtheta_phi=0.1;break;
         case 13:
           $scope.update_bloch();
           break;
