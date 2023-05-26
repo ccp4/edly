@@ -1,6 +1,11 @@
 # Version log
 
 ## 0.0.6dev
+### Fri 26 May 14:11:29 BST 2023
+- issue#36 : diff pattern axis
+  - Enable passing from pixels to rec angstrom
+  - change yaxis orientation up/down
+
 ### Thu 25 May 21:19:49 BST 2023
 - issue#33 : show Nmax and dmin
 

@@ -26,7 +26,7 @@ def bloch_fig():
     b0 = load_b0()
     toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
 
-    is_px = session['is_px'] and session['dat']['pets']
+    is_px = session['bloch_modes']['is_px'] and session['dat']['pets']
     if session['dat']['pets']:
         pets = pets_data[session['mol']]
 
@@ -65,7 +65,7 @@ def bloch_fig():
     ########################
     #### add exp data
     ########################
-    if session['dat']['pets']:
+    if session['dat']['pets'] and is_px:
         pets = pets_data[session['mol']]
         df_pets = pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
         df_pets = df_pets.loc[~(df_pets.hkl == str((0,0,0)))]
@@ -95,6 +95,7 @@ def bloch_fig():
     if is_px:
         x_m = pets.nxy #pt_plot['px'].max() #*np.sqrt(2)
         xr,yr=[0,x_m],[0,x_m]
+        if session['bloch_modes']['reversed']:yr=[x_m,0]
 
     ########################
     #### resolution rings
@@ -140,8 +141,8 @@ def bloch_fig():
         width=fig_wh, height=fig_wh,
     )
     # fig.update_traces(mode='markers')
-    fig.update_xaxes(range=xr)
-    fig.update_yaxes(range=yr)
+    fig.update_xaxes(range=xr,scaleratio=1)
+    fig.update_yaxes(range=yr,scaleratio=1,autorange=False) #[False,"reversed"][session['bloch_modes']['reversed']])
     return fig.to_json()
 
 
@@ -606,6 +607,8 @@ def init_bloch_panel():
             'manual'    : False,
             'u'         : 'edit',
             'single'    : False,
+            'is_px'     : True,
+            'reversed'  : False,
             }
 
         # session['mol2']  = mol
@@ -617,7 +620,7 @@ def init_bloch_panel():
         session['dq_ring']  = 0.25
         session['rings']    = []
         session['max_res']  = 0
-        session['is_px']     = True # use pixels instead of recA
+        # session['is_px']     = True # use pixels instead of recA
         session['pred_info'] = True # use dials predicted refl
 
 

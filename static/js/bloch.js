@@ -94,6 +94,14 @@ angular.module('app')
   $scope.set_ring_spacing=function(){
     $scope.set_max_res_rings();
   }
+  $scope.toggle_mode=function(key){
+    // $scope.info.modes['is_px']=!$scope.info.modes['is_px'];
+    // $log.log($scope.info.modes['is_px'])
+    $http.post('set_mode_val',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
+    .then(function(response){
+      $scope.set_max_res_rings();
+    })
+  }
 
 
   //////////////////////////////////////////////////////////////
@@ -172,6 +180,7 @@ angular.module('app')
   $rootScope.$on('toggle_mode',function(event,key){
       $scope.toggle_mode(key);
   })
+
 
   $scope.toggle_mode=function(key){
     $scope.info.modes[key]=!$scope.info.modes[key];

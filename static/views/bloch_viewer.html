@@ -5,8 +5,16 @@
         <span ng-class="{'glyphicon glyphicon-duplicate':info.modes.single,'glyphicon glyphicon-file':!info.modes.single}" />
         <span class="popuptext" style="" ng-show="popup['single_mode']"> toggle single/dual mode </span>
       </a>
-      <span>max res (recA)              : <input class="sm_input" type="number" ng-model="info.max_res" min="0"  ng-key-enter="set_max_res()"></span>
-      <span>&nbsp; rings spacing (recA) : <input class="sm_input" type="number" ng-model="info.dq_ring" min="0"  ng-key-enter="set_ring_spacing()"></span>
+      <span>max res (recA)                    : <input class="sm_input" type="number"   ng-model="info.max_res" min="0"  ng-key-enter="set_max_res()"></span>
+      <span>&nbsp; rings spacing (recA)       : <input class="sm_input" type="number"   ng-model="info.dq_ring" min="0"  ng-key-enter="set_ring_spacing()"></span>
+      <span ng-if="dat['pets']" style="margin-left:5px">
+          <span style="margin-right:-15px" > pixels : </span>
+          <input class="sm_input" type="checkbox" ng-model="info.modes['is_px']" ng-click="toggle_mode('is_px')">
+      </span>
+      <span ng-if="dat['pets']" style="margin-left:-10px">
+          <span style="margin-right:-15px" > reversed : </span>
+          <input class="sm_input" type="checkbox" ng-model="info.modes['reversed']" ng-click="toggle_mode('reversed')">
+      </span>
     </td>
     <td ng-hide="info.modes.single">
       <select ng-model="info.graph" ng-options="x.desc for x in info.graphs" ng-change="update_graph()"></select>
