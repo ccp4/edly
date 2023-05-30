@@ -1,6 +1,9 @@
 # Version log
 
 ## 0.0.6dev
+### Tue 30 May 10:43:38 BST 2023
+- added fast forward and fast backward to exp data frame
+- fix minor bug when new session
 ### Fri 26 May 14:11:29 BST 2023
 - issue#36 : diff pattern axis
   - Enable passing from pixels to rec angstrom

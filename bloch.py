@@ -604,6 +604,8 @@ def init_bloch_panel():
             }
         bloch_args['dmin']=cell_diag/bloch_args['Nmax']
         bloch_modes = {
+            # 'u0'        : 'auto'    ,#auto,edit,rotate
+            # 'u'         : 'single'  ,#single,rock,lacbed
             'manual'    : False,
             'u'         : 'edit',
             'single'    : False,

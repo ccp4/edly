@@ -281,11 +281,12 @@ Parameters Panel
       </a>
     </td> -->
     <td class="td-in" style="font-size:13px">
-      <span>n_beams = </span>
-      <span ng-bind="nbeams"></span>
+      <span>n_beams </span>
       <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['nbms']=true" ng-mouseleave="popup['nbms']=false" >
         <span class="popuptext" ng-show="popup['nbms']"> Number of beams (size of the bloch matrix) </span>
       </span>
+      <span>=</span>
+      <span ng-bind="nbeams"></span>
     </td>
   </tr></table>
 </div>

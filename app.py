@@ -253,8 +253,8 @@ def init_mol():
     struct_file = get_structure_file()
     if struct_file:
         b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
+        b0.save()
         # b0=ut.load_pkl(session['b0_path'])
-        # b0.save()
 
         crys,cif_file=b0.crys,b0.cif_file
         crys_dat = {'file':os.path.basename(cif_file),'cif_file':cif_file}

@@ -62,6 +62,15 @@ angular.module('app').
   ///////////////////////////////////////////////////////////////////
   // Frames
   ///////////////////////////////////////////////////////////////////
+  $scope.set_frame=function(s){
+      switch (s){
+        case 'i':$scope.frames.active_frame  = 1               ;break;
+        case '-':$scope.frames.active_frame -= 1               ;break;
+        case '+':$scope.frames.active_frame += 1               ;break;
+        case 'f':$scope.frames.active_frame  = $scope.max_frame;break;
+      }
+      $scope.update_frame();
+  }
   $scope.inc_frame=function(){
     $scope.frames.active_frame+=1;//=Math.min($scope.max_frame,$scope.frame+1);
     $scope.update_frame();

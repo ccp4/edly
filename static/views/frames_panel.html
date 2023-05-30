@@ -32,11 +32,17 @@
         <input ng-show="frames.manual" ng-model="frames.active_frame" min="1" max="max_frame" ng-key-enter="update_frame()" style="width:30px;">
       </span>
       <span> / <span ng-bind="max_frame"/></span>
-      <a class="btn-sm btn-primary"  ng-click="dec_frame()">
+      <a class="btn-sm btn-primary btn-rock" ng-click="set_frame('i');">
+        <span class="glyphicon glyphicon-fast-backward"></span >
+      </a>
+      <a class="btn-sm btn-primary"  ng-click="set_frame('-')">
         <span class="glyphicon glyphicon-step-backward"></span >
       </a>
-      <a class="btn-sm btn-primary"  ng-click="inc_frame()">
+      <a class="btn-sm btn-primary"  ng-click="set_frame('+')">
         <span class="glyphicon glyphicon-step-forward"></span >
+      </a>
+      <a class="btn-sm btn-primary btn-rock" ng-click="set_frame('f')">
+        <span class="glyphicon glyphicon-fast-forward"></span >
       </a>
     </td></tr>
     <!-- colormap -->
