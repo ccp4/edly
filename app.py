@@ -295,8 +295,8 @@ def init_mol():
     #related to /set_viewer
     if session.get('bloch_modes'):
         # print('mol init :',session['bloch_modes'])
-        if not session['bloch_modes']['manual'] and not dat['pets']:
-            session['bloch_modes']['manual'] = True
+        if session['bloch_modes']['u0']=='auto' and not dat['pets']:
+            session['bloch_modes']['u0'] = 'edit'
     if not session.get('frame'):session['frame'] = 1
     if not session.get('offset'):session['offset'] = 0
 

@@ -68,7 +68,7 @@ Parameters Panel
           </span>
         </td>
         <td class="td-in">
-          <input type="number" min="0.000001" max="1" ng-model="bloch['Smax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
+          <input type="number" min="0.0001" max="1" ng-model="bloch['Smax']" class="bloch_input" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()">
         </td>
       </tr>
       <!-- nbeams -->
@@ -120,75 +120,89 @@ Parameters Panel
       </div>
 
       <!-- buttons -->
-      <div class="row" style="margin-bottom: 10px">
-        <span ng-show="dat['pets']">
-          <a class="btn-sm btn-primary popup" ng-click="toggle_manual_mode()" ng-mouseenter="showIt('manual')" ng-mouseleave="hideIt('manual')" style="margin-left: 7px;">
-            <span ng-class="{'glyphicon glyphicon-wrench':!info.modes['manual'],'glyphicon glyphicon-lock':info.modes['manual']}" />
-            <span class="popuptext" style="" ng-show="popup['manual']">
-              <div ng-show="info.modes['manual']"> Lock u to experimental frames  </div>
-              <div ng-hide="info.modes['manual']"> Set u manually   </div></span>
-          </a>
-        </span>
-        <span ng-show="info.modes['manual']" style="margin-left:5px;">
-          <a class="btn-sm btn-primary popup" ng-style="u_style['edit']" ng-click="set_u_mode('edit')" ng-mouseenter="showIt('u_edit')" ng-mouseleave="hideIt('u_edit')">
-            <span class="glyphicon glyphicon-pencil" />
-            <span class="popuptext" style="" ng-show="popup['u_edit']"> Edit u manually  </span>
-          </a>
-          <a class="btn-sm btn-primary popup" ng-style="u_style['move']" ng-click="set_u_mode('move')" ng-mouseenter="showIt('u_move')" ng-mouseleave="hideIt('u_move')">
-            <span class="glyphicon glyphicon-move" />
-            <span class="popuptext" style="" ng-show="popup['u_move']"> Change Euler angles of u using arrows  </span>
-          </a>
-          <a class="btn-sm btn-primary popup" ng-style="u_style['rock']" ng-click="set_u_mode('rock')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
-            <span class="gg-icon gg-spectrum" ></span>
-            <span class="popuptext" style="" ng-show="popup['u_rock']"> Set rocking curve for u </span>
-          </a>
-        </span>
-        <a class="btn-sm btn-primary popup" ng-click="show_u()" ng-mouseenter="showIt('u_show')" ng-mouseleave="hideIt('u_show')" style="float:right;right:15px;" >
+      <div class="row" style="margin-bottom:10px;margin-left:-5px;margin-top:5px">
+        <a class="btn-sm btn-primary btn_u" ng-style="u_style['single']" ng-click="set_mode('u','single')" ng-mouseenter="showIt('u_single')" ng-mouseleave="hideIt('u_single')" >
+          <span class="gg-icon gg-arrow-down" />
+          <!-- <span class="popuptext" style="" ng-show="popup['u_single']"> Set single mode for u </span> -->
+        </a>
+        <a class="btn-sm btn-primary btn_u" ng-style="u_style['rock']" ng-click="set_mode('u','rock')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
+          <span class="gg-icon gg-spectrum" ></span>
+          <!-- <span class="popuptext" style="" ng-show="popup['u_rock']"> Set rocking curve for u </span> -->
+        </a>
+        <a class="btn-sm btn-primary btn_u" ng-style="u_style['lacbed']" ng-click="set_mode('u','lacbed')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
+          <span class="gg-icon gg-shape-circle" style="border:solid 8px;"></span>
+          <!-- <span class="popuptext" style="" ng-show="popup['lacbed']"> Set lacbed pattern for u </span> -->
+        </a>
+        <!-- <a class="btn-sm btn-primary popup" ng-click="show_u()" ng-mouseenter="showIt('u_show')" ng-mouseleave="hideIt('u_show')" style="float:right;right:15px;" >
           <span class="glyphicon glyphicon-eye-open" />
           <span class="popuptext" style="" ng-show="popup['u_show']"> Show u orientation  </span>
-        </a>
-      </div>
+        </a> -->
+      </div> <!-- buttons -->
 
 
-      <!-- edit mode -->
-      <div class="bloch_param" ng-show="info.modes['manual'] && info.modes['u']=='edit'" >
-        <span> u = </span>
-        <input ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
-      </div>
-
-      <!-- move mode-->
-      <div ng-show="info.modes['manual'] && info.modes['u']=='move'" >
-        <span style="float:right;"class="popup glyphicon glyphicon-question-sign " ng-mouseenter="popup['rot_help']=true" ng-mouseleave="popup['rot_help']=false">
-          <div class="popuptext" style=";width:200px;text-align:left" ng-show="popup['rot_help']">
-            <div> click on the hand and press hotkeys :
-              <br> &nbsp left  : decrement phi
-              <br> &nbsp right : increment phi
-              <br> &nbsp down  : decrement theta
-              <br> &nbsp up    : increment theta
-              <br> &nbsp pagedown  : increase dt
-              <br> &nbsp pageup    : decrease dt
-              <br> &nbsp backspace : reset rate
-              <br> &nbsp Enter : solve intensities
-              <br> For theta,phi and dt :
-              <br> &nbsp double-click : set the input value manually
-              <br> &nbsp press Enter to validate
-            </div>
-          </div>
-        </span>
-        <div style="font-size:14px;margin-bottom:5px;">Orientation tweaking :
-          <a tabindex="1" ng-keydown="theta_phi_cb($event)" class="btn-sm btn-primary" style="margin-right:0px;margin-left:0px" ng-click="popup['move_thick']=false" >
-            <span class='glyphicon glyphicon-hand-down' />
-          </a>
+      <!-- Single mode  -->
+      <div ng-show="info.modes['u']=='single'" style="margin-bottom: 10px;">
+        <!-- buttons -->
+        <div class="row" style="margin-left:5px">
+          <span style="margin-left: 0px;"ng-show="dat['pets']">
+            <a class="btn-sm btn-primary popup" ng-style="u0_style['auto']" ng-click="set_mode('u0','auto')" ng-mouseenter="showIt('u_auto')" ng-mouseleave="hideIt('u_auto')" >
+              <span class="glyphicon glyphicon-lock" />
+              <span class="popuptext" style="" ng-show="popup['u_auto']"> Lock u to experimental frames  </span>
+            </a>
+          </span>
+          <span style="margin-left:0px;">
+            <a class="btn-sm btn-primary popup" ng-style="u0_style['edit']" ng-click="set_mode('u0','edit')" ng-mouseenter="showIt('u_edit')" ng-mouseleave="hideIt('u_edit')">
+              <span class="glyphicon glyphicon-pencil" />
+              <span class="popuptext" style="" ng-show="popup['u_edit']"> Edit u manually  </span>
+            </a>
+          </span>
+          <span style="margin-left:0px;">
+            <a class="btn-sm btn-primary popup" ng-style="u0_style['move']" ng-click="set_mode('u0','move')" ng-mouseenter="showIt('u_move')" ng-mouseleave="hideIt('u_move')">
+              <span class="glyphicon glyphicon-move" />
+              <span class="popuptext" style="" ng-show="popup['u_move']"> Change Euler angles of u using arrows  </span>
+            </a>
+          </span>
         </div>
-        <table style="margin-left: 20px;" >
-          <tr><td class="td-in"> theta </td><td> = </td><td class="td-in"> <span ng-hide="input['theta']" ng-bind="theta_phi[0]" ng-dblclick="input['theta']=true">deg</span> <input class="long_input" ng-show="input['theta']" ng-model="theta_phi[0]" ng-key-enter="set_input('theta','move')"></td></tr>
-          <tr><td class="td-in"> phi   </td><td> = </td><td class="td-in"> <span ng-hide="input['phi']"   ng-bind="theta_phi[1]" ng-dblclick="input['phi']=true"  >deg</span> <input class="long_input" ng-show="input['phi']"   ng-model="theta_phi[1]" ng-key-enter="set_input('phi'  ,'move')"  ></td></tr>
-          <tr><td class="td-in"> dt    </td><td> = </td><td class="td-in"> <span ng-hide="input['dtp']"   ng-bind="dtheta_phi"   ng-dblclick="input['dtp']=true"  >deg</span> <input class="long_input" ng-show="input['dtp']"   ng-model="dtheta_phi"   ng-key-enter="set_input('dtp'  ,'move')"  ></td></tr>
-        </table>
-      </div>
+
+        <!-- edit mode -->
+        <div class="bloch_param" ng-show="info.modes['u0']=='edit'" >
+          <span> u = </span>
+          <input ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
+        </div>
+        <!-- move mode-->
+        <div ng-show="info.modes['u0']=='move'" >
+          <span style="float:right;"class="popup glyphicon glyphicon-question-sign " ng-mouseenter="popup['rot_help']=true" ng-mouseleave="popup['rot_help']=false">
+            <div class="popuptext" style=";width:200px;text-align:left" ng-show="popup['rot_help']">
+              <div> click on the hand and press hotkeys :
+                <br> &nbsp left  : decrement phi
+                <br> &nbsp right : increment phi
+                <br> &nbsp down  : decrement theta
+                <br> &nbsp up    : increment theta
+                <br> &nbsp pagedown  : increase dt
+                <br> &nbsp pageup    : decrease dt
+                <br> &nbsp backspace : reset rate
+                <br> &nbsp Enter : solve intensities
+                <br> For theta,phi and dt :
+                <br> &nbsp double-click : set the input value manually
+                <br> &nbsp press Enter to validate
+              </div>
+            </div>
+          </span>
+          <div style="font-size:14px;margin-bottom:5px;">Orientation tweaking :
+            <a tabindex="1" ng-keydown="theta_phi_cb($event)" class="btn-sm btn-primary" style="margin-right:0px;margin-left:0px" ng-click="popup['move_thick']=false" >
+              <span class='glyphicon glyphicon-hand-down' />
+            </a>
+          </div>
+          <table style="margin-left: 20px;" >
+            <tr><td class="td-in"> theta </td><td> = </td><td class="td-in"> <span ng-hide="input['theta']" ng-bind="theta_phi[0]" ng-dblclick="input['theta']=true">deg</span> <input class="long_input" ng-show="input['theta']" ng-model="theta_phi[0]" ng-key-enter="set_input('theta','move')"></td></tr>
+            <tr><td class="td-in"> phi   </td><td> = </td><td class="td-in"> <span ng-hide="input['phi']"   ng-bind="theta_phi[1]" ng-dblclick="input['phi']=true"  >deg</span> <input class="long_input" ng-show="input['phi']"   ng-model="theta_phi[1]" ng-key-enter="set_input('phi'  ,'move')"  ></td></tr>
+            <tr><td class="td-in"> dt    </td><td> = </td><td class="td-in"> <span ng-hide="input['dtp']"   ng-bind="dtheta_phi"   ng-dblclick="input['dtp']=true"  >deg</span> <input class="long_input" ng-show="input['dtp']"   ng-model="dtheta_phi"   ng-key-enter="set_input('dtp'  ,'move')"  ></td></tr>
+          </table>
+        </div><!-- move mode -->
+      </div><!-- Single mode -->
 
       <!-- rock mode -->
-      <div ng-show="info.modes['manual'] && info.modes['u']=='rock'" class="">
+      <div ng-show="info.modes['u']=='rock'" class="">
         <span style="float:right;" class="popup glyphicon glyphicon-question-sign " ng-mouseenter="popup['rock_help']=true" ng-mouseleave="popup['rock_help']=false">
           <div class="popuptext" style=";width:200px;text-align:left" ng-show="popup['rock_help']">
             <div> Rocking curve settings  :
@@ -223,7 +237,7 @@ Parameters Panel
             <td class="td-in" ng-show="dat['pets']">
               <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="showIt('rock_set')" ng-mouseleave="hideIt('rock_set')">
                 <span class="gg-icon gg-path-back" />
-                <span class="popuptext" style="" ng-show="popup['rock_set']"> Assign u0,u1 from current experimental frame </span>
+                <span class="popuptext" style="" ng-show="popup['rock_set']"> Assign u0,u1 as first and last frame. </span>
               </a>
             </td>
           </tr>

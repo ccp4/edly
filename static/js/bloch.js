@@ -136,47 +136,8 @@ angular.module('app')
   .controller('BlochPanelCtrl', ['$scope','$rootScope','$log','$http', '$interval','$timeout','bloch_shared', function ($scope,$rootScope,$log,$http,$interval,$timeout,bloch_shared) {
 
   ///////////////////////////////////////////////////////////////////
-  // Toggles
+  // Callbacks
   ///////////////////////////////////////////////////////////////////
-  $scope.set_mode_u=function(key){
-    $http.post('set_mode_val',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
-    .then(function(response){
-      });
-    if (!$scope.info.modes['manual'] && key=='rock' ){
-    }
-    else{
-      $scope.set_available_graphs('rock',false || $scope.exp_rock);
-    }
-  }
-
-  $scope.toggle_manual_mode=function(){
-    $scope.toggle_mode('manual');
-    $scope.bloch_solve_reset();
-    if ($scope.info.modes['manual']){
-      if($scope.info.modes['u']=='rock'){
-        $log.log("get rock sim")
-        $scope.get_rock_sim();
-      }
-      else{
-        $log.log("get bloch sim")
-        $scope.get_bloch_sim();
-      }
-    }
-    //auto mode
-    else{
-      $scope.show_keV=false;
-      $scope.update_bloch();
-    }
-  }
-
-  $scope.get_bloch_sim=function(){
-    $http.post('get_bloch_sim')
-    .then(function(response){
-      $scope.bloch.u=response.data.u;
-      $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
-    });
-  }
-
   $rootScope.$on('toggle_mode',function(event,key){
       $scope.toggle_mode(key);
   })
@@ -204,24 +165,18 @@ angular.module('app')
   }
 
 
-
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////
-  // Bloch
-  ////////////////////////////////////////////////////////////////////////////////////////////////
   $rootScope.$on('update_frame',function(event,frame,init){
       //
       $scope.frame=frame;
       $scope.bloch_solve_reset()
       if (!init){
-        // $log.log('manual mode : ',$scope.info.modes['manual'])
-        if ($scope.info.modes['manual']){
-          // $log.log('manual mode.update only exp data')
-          $scope.update_frame();
+        if ($scope.info.modes['u']=='single' && $scope.info.modes['u0']=='auto'){
+          $log.log('auto mode. resolve for new frame')
+          $scope.update_bloch();
         }
         else{
-          // $log.log('auto mode. resolve for new frame')
-          $scope.update_bloch();
+          $log.log('Update exp data only')
+          $scope.update_frame();
         }
       }
   })
@@ -233,12 +188,15 @@ angular.module('app')
     });
   }
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////
+  // Bloch single
+  ////////////////////////////////////////////////////////////////////////////////////////////////
   $scope.update_bloch=function(){
     // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
     if ($scope.bloch_solve_btn=='Solve'){
         $scope.bloch_solve_set('Preparing','red');
         // $log.log('solving bloch for frame ',$scope.frame, ' with bloch' , $scope.bloch);
-        $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch,'manual_mode':$scope.info.modes['manual']}))
+        $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch}))
         .then(function(response){
           $scope.load_bloch(response.data);
           // FELIX
@@ -301,12 +259,21 @@ angular.module('app')
     }
   }
   $scope.bloch_solve_reset=function(){
-    if ($scope.info.modes['u']=='rock'){
-      $scope.bloch_solve_set('Solve rock','reset');
-    }
-    else{
+    if ($scope.info.modes['u']=='single'){
       $scope.bloch_solve_set('Solve','reset');
     }
+    else{
+      $scope.bloch_solve_set('Solve '+$scope.info.modes['u'],'reset');
+    }
+  }
+
+
+  $scope.get_bloch_sim=function(){
+    $http.post('get_bloch_sim')
+    .then(function(response){
+      $scope.bloch.u=response.data.u;
+      $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
+    });
   }
 
   $scope.load_bloch=function (data){
@@ -316,28 +283,68 @@ angular.module('app')
     // $log.log($scope.rings)
   }
 
+  $scope.set_mode=function(key,val){
+    $scope.info.modes[key]=val;
+    $http.post('set_mode_val',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
+    .then(function(response){
+      // $log.log(response.data)
+      switch (key){
+        case 'u':
+          $scope.set_u_mode(val);
+          break;
+        case 'u0':
+          $scope.set_u0_mode(val);
+          break;
+      }
+      });
+  }
 
   $scope.set_u_mode=function(val){
-    $scope.info.modes['u']=val;
-    $scope.set_mode_u('u');
-    $scope.u_style = {'edit':'','move':'','rock':''};
+    $scope.u_style = {'single':'','rock':'','lacbed':''};
     $scope.u_style[val]={"border-style":'solid'};
+    $scope.bloch_solve_reset();
     switch (val){
-      case 'edit':
-        $scope.bloch_solve_reset();
-        break;
-      case 'move':
-        $scope.bloch_solve_reset();
-        $rootScope.$emit('set_visible',{name:'Sw',curve_nb:2,vis:true})
+      case 'single':
+        // $log.log("get bloch sim")
+        if ($scope.info.modes['u0']=='auto'){
+          $scope.bloch_u();
+        }
+        $scope.get_bloch_sim();
         break;
       case 'rock':
-        $scope.bloch_solve_set($scope.rock_state);
+        // $log.log("get rock sim")
+        $scope.get_rock_sim();
+        // $scope.bloch_solve_set($scope.rock_state);
         // $log.log($scope.rock_state=='done');
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
+        break;
+      case 'lacbed':
         break;
     }
   }
 
+  $scope.set_u0_mode=function(val){
+    $scope.u0_style = {'edit':'','move':'','auto':''};
+    $scope.u0_style[val]={"border-style":'solid'};
+    $scope.bloch_solve_reset();
+    switch (val){
+      case 'edit':
+        break;
+      case 'move':
+        $rootScope.$emit('set_visible',{name:'Sw',curve_nb:2,vis:true})
+        break;
+      case 'auto':
+        $scope.show_keV=false;
+        $scope.bloch_u();
+        break;
+    }
+  }
+  $scope.bloch_u=function(){
+    $http.post('bloch_u',JSON.stringify({'frame':$scope.frame,'bloch':$scope.bloch}))
+    .then(function(response){
+      $scope.load_bloch(response.data);
+    });
+  }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Rock mode
@@ -749,7 +756,8 @@ angular.module('app')
         $scope.info.dq_ring = response.data.dq_ring;
         $scope.info.rings   = response.data.rings;
         $scope.info.cell_diag = response.data.cell_diag;
-        $scope.u_style[$scope.info.modes['u']]={"border-style":'solid'};
+        $scope.u_style[$scope.info.modes['u']] ={"border-style":'solid'};
+        $scope.u0_style[$scope.info.modes['u0']]={"border-style":'solid'};
         $scope.info.graph = $scope.info.graphs[response.data.graph]
 
         $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
@@ -771,7 +779,8 @@ angular.module('app')
   $scope.popup={}
   $scope.sim_rock = 1;
   $scope.rock_sim = 1;
-  $scope.u_style = {'edit':'','move':'','rock':''};
+  $scope.u_style  = {'single':'','rock':'','lacbed':''};
+  $scope.u0_style = {'auto':'','edit':'','move':''};
   $scope.input={'theta':false,'phi':false,'dtp':false ,'rock_sim':true};
   var bloch_colors={'reset':'#337ab7','blue':'#337ab7','red':'#ff0000','green':'#107014'}
   var all_graphs={

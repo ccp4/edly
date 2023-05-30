@@ -1,6 +1,13 @@
 # Version log
 
 ## 0.0.6dev
+### Tue 30 May 13:23:20 BST 2023
+- issue#29 :bloch rock
+  - modified `modes['u']` modes into single,rock,lacbed with corresponding buttons
+  - created `modes['u0']` modes as auto,move,edit with corresponding buttons when `modes['u']=='single'`
+  - removed `modes['manual']`
+  - changed `set_u_mode` into `set_mode(key,val)` which dispatches to `set_u_mode(val)` and `set_u0_mode(val)`
+  - first and last frame automatic retrieval
 ### Tue 30 May 10:43:38 BST 2023
 - added fast forward and fast backward to exp data frame
 - fix minor bug when new session

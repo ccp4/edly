@@ -200,18 +200,18 @@ def bloch_u():
     ## handle
     thicks = update_thicks(data['bloch']['thicks'])
     keV = session['bloch']['keV']
-    if data['manual_mode']:
+    # print(session['bloch_modes'])
+    if session['bloch_modes']['u0']=='auto':
+        keV = np.round(pets_data[session['mol']].keV) #;print('recover wavelength %.1f' %keV)
+        u = pets_data[session['mol']].uvw0[data['frame']-1]
+    else:
         # print(data['bloch']['u'])
         u = b_arr(data['bloch']['u'],session['bloch']['u'])
-    else:
-        keV = np.round(pets_data[session['mol']].keV)
-        # print('recover wavelength %.1f' %keV)
-        u = pets_data[session['mol']].uvw0[data['frame']-1]
     # print(data['frame'],u)
 
     b_args.update({'u':list(u),'thicks':list(thicks),'keV':keV})
     session['frame'] = data['frame']
-    session['bloch_modes']['manual'] = data['manual_mode']
+    # session['bloch_modes']['manual'] = data['manual_mode']
     session['bloch'] = b_args
     # print(session['bloch'])
     # session['last_req'] = 'solve_bloch:%s' %(time.time())
@@ -252,14 +252,14 @@ def solve_bloch():
 @bloch.route('/show_u', methods=['POST'])
 def show_u():
     data = json.loads(request.data.decode())
-    if session['bloch_modes']['manual']:
-        if session['bloch_modes']['u']=='rock':
-            r_args = get_rock(data)
-            uvw = ut.get_uvw_cont(**r_args)
+    if session['bloch_modes']['u']=='rock':
+        r_args = get_rock(data)
+        uvw = ut.get_uvw_cont(**r_args)
+    else:
+        if session['bloch_modes']['u0']=='auto':
+            uvw = pets_data[session['mol']].uvw0
         else:
             uvw = np.array(b_arr(data['u'],session['bloch']['u']))[None,:]
-    else:
-        uvw = pets_data[session['mol']].uvw0
 
     ui = np.arange(uvw.shape[0])[:,None]
     uvw = np.vstack([np.hstack([uvw,ui]),np.hstack([0*uvw,ui])])
@@ -340,13 +340,15 @@ def set_rock_frame():
         e0 = np.array(session['rock']['u0'])
         e1 = uvw[max(0,frame-1)]
     else:
-        u0 = uvw[max(0,frame-2)]
-        u1 = uvw[frame-1]
-        u2 = uvw[min(frame,frame-1)]
-        e0 = (u0 + u1)/2
-        e1 = (u1 + u2)/2
-        e0/=np.linalg.norm(e0)
-        e1/=np.linalg.norm(e1)
+        e0 = uvw[0] #max(0,frame-2)]
+        e1 = uvw[-1]#frame-1]
+        # u0 = uvw[max(0,frame-2)]
+        # u1 = uvw[frame-1]
+        # u2 = uvw[min(frame,frame-1)]
+        # e0 = (u0 + u1)/2
+        # e1 = (u1 + u2)/2
+        # e0/=np.linalg.norm(e0)
+        # e1/=np.linalg.norm(e1)
 
     session['rock'].update({'u0':e0.tolist(),'u1':e1.tolist()})
     session['frame'] = frame
@@ -556,14 +558,15 @@ def set_mode_val():
     data = json.loads(request.data.decode())
     # print(data)
     key  = data['key']
-    bloch_modes = session['bloch_modes']
+    bloch_modes = session['bloch_modes'].copy()
     bloch_modes[key] = data['val']
     session['bloch_modes'] = bloch_modes
+    # print(data,data['val'],session['bloch_modes'])
     session['last_time']=time.time()
-    if not session['bloch_modes']['manual']:
+    if not session['bloch_modes']['u']=='single':
         session['b0_path'] = get_pkl(session['id'])
         # print(session['b0_path'])
-    return json.dumps({key:session['bloch_modes'][key]})
+    return json.dumps(session['bloch_modes'])
 
 @bloch.route('/set_visible', methods=['POST'])
 def set_visible():
@@ -596,24 +599,22 @@ def init_bloch_panel():
     cell_diag = 1/np.linalg.norm(b1+b2+b3) #Angstrom
     # print('cell_diag %1f Angstrom' %cell_diag)
     if session['new'] :
+        print(colors.green+'new session'+colors.black)
         rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
         bloch_args={
             'keV':200,'u':[0,0,1],
-            'Nmax':6,'gemmi':False,'Smax':0.02,
+            'Nmax':6,'gemmi':False,'Smax':0.015,
             'thick':250,'thicks':[0,300,100],'felix':False,'nbeams':200
             }
         bloch_args['dmin']=cell_diag/bloch_args['Nmax']
         bloch_modes = {
-            # 'u0'        : 'auto'    ,#auto,edit,rotate
-            # 'u'         : 'single'  ,#single,rock,lacbed
-            'manual'    : False,
-            'u'         : 'edit',
+            'u0'        : 'auto'    ,#auto,edit,rotate
+            'u'         : 'single'  ,#single,rock,lacbed
             'single'    : False,
             'is_px'     : True,
             'reversed'  : False,
             }
 
-        # session['mol2']  = mol
         session['bloch_modes'] = bloch_modes
         # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
         session['theta_phi']  = [0,0]
@@ -622,7 +623,6 @@ def init_bloch_panel():
         session['dq_ring']  = 0.25
         session['rings']    = []
         session['max_res']  = 0
-        # session['is_px']     = True # use pixels instead of recA
         session['pred_info'] = True # use dials predicted refl
 
 
@@ -638,13 +638,13 @@ def init_bloch_panel():
     session['expand'] = expand_bloch
     session['refl']   = []
 
-    # if not session['dat']['pets']:
-    #     print(colors.red+'pets not found : setting vis["I_pets"] to false'+colors.black)
-    #     session['vis']['I_pets']=False
 
+    #check if  rockingcurve was already simulated
     rock_state=''
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
         rock_state='done'
+
+    # print(session['bloch_modes'])
 
     now = time.time()
     session['last_time']  = now
@@ -676,6 +676,7 @@ def init_done():
 
 def load_b0():
     try:
+        print(session['b0_path'])
         b0 = ut.load_pkl(session['b0_path'])
     except Exception as err:
         print(colors.red,err,colors.black)
