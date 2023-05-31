@@ -453,6 +453,33 @@ def update_rock_thickness():
     rock = ut.load_pkl(file=rock_path(session['id']))
     rock.do('set_thickness',thick=session['bloch']['thick'])
 
+@bloch.route('/show_integrated', methods=['POST'])
+def show_integrated():
+    data = json.loads(request.data.decode())
+    refl = data['refl']
+    rock = ut.load_pkl(file=rock_path(session['id']))
+    df = rock.df_int.loc[refl].transpose()
+    df.index=rock.z
+    fig = px.line(df,markers=True)
+
+    fig.update_layout(
+        title="Integrated intensities",
+        hovermode='closest',
+        paper_bgcolor="LightSteelBlue",
+        xaxis_title='z(Angstrom)',yaxis_title='Integrated Intensity',
+        width=fig_wh, height=fig_wh,
+    )
+    session['graph']='int'
+    return fig.to_json()
+
+@bloch.route('/integrate_rock', methods=['POST'])
+def integrate_rock():
+    rock = ut.load_pkl(file=rock_path(session['id']))
+    thicks=session['bloch']['thicks']
+    rock.set_beams_vs_thickness(thicks)
+    rock.integrate()
+    return 'done'
+
 ########################
 #### Thickness stuffs
 ########################
@@ -684,5 +711,5 @@ def load_b0():
         # if type(e)=EOFError
         time.sleep(1)
         b0 = ut.load_pkl(session['b0_path'])
-        
+
     return b0

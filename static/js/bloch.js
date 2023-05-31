@@ -248,6 +248,11 @@ angular.module('app')
         // $log.log('rock mode. Solve button : ',$scope.bloch_solve_btn,' rock state',$scope.rock_state)
         $scope.solve_rock();
       }
+      else{
+        if ($scope.rock_state=='done'){
+          $scope.get_rock_sim();
+        }
+      }
     }
   };
 
@@ -391,17 +396,19 @@ angular.module('app')
           $scope.set_available_graphs('rock',true);
           $scope.set_rock_sim(1);
           $scope.get_rock_state();
-
-          // $scope.get_rock_state();
-          // $scope.rock_state = 'done';
-          // $scope.bloch_solve_set($scope.rock_state,'green');
-          // $log.log('solve rock completed. rock state = ',$scope.rock_state);
-          // $scope.rock_state = 'done';
-          // $scope.solve_rock_btn = 'done';
         })
       })
   }
 
+
+  $scope.integrate_rock=function(){
+  $http.post('integrate_rock')
+    .then(function(response){
+      $log.log(response.data);
+      $scope.set_available_graphs('int',true);
+      $scope.show_integrated()
+    });
+  }
 
   $scope.update_rock_sim=function(e){
     s=''
@@ -621,6 +628,13 @@ angular.module('app')
         // $scope.fig2 = response.data;
     });
   }
+  $scope.show_integrated=function(){
+    $scope.info.graph=$scope.info.graphs['int']
+    $http.post('show_integrated',JSON.stringify({'refl':$scope.refl}))
+      .then(function(response){
+          $rootScope.$emit('load_fig2',response.data)
+    });
+  }
 
   $scope.beam_vs_thickness=function () {
     $scope.info.graph=$scope.info.graphs['thick']
@@ -641,6 +655,9 @@ angular.module('app')
           break;
         case 'rock':
           $scope.show_rock();
+          break;
+        case 'int':
+          $scope.show_integrated();
           break;
         case '3d':
           $scope.show_u();
@@ -785,8 +802,9 @@ angular.module('app')
   var bloch_colors={'reset':'#337ab7','blue':'#337ab7','red':'#ff0000','green':'#107014'}
   var all_graphs={
     thick:{type:'thick',desc:'thickness'},
-    u3d:{type:'3d',desc:'3d view'},
     rock:{type:'rock',desc:'rocking curve'},
+    int:{type:'int',desc:'integrated curve'},
+    u3d:{type:'3d',desc:'3d view'},
     scat:{type:'scat',desc:'scattering factors'}}
   $scope.info.graphs = JSON.parse(JSON.stringify(all_graphs))
   $scope.show={}

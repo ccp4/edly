@@ -2,6 +2,10 @@
 
 ## 0.0.6dev
 
+###Wed 31 May 11:16:35 BST 2023
+- issue#24: simulated integration
+  - button to integrate at all thicknesses
+  - show integrated reflections across thickness
 ### Wed 31 May 09:38:41 BST 2023
 - minor fix in pixel range
 
