@@ -1,11 +1,9 @@
 # Version log
 
 ## 0.0.6dev
-### d
-- automatic selected reflections
-- graph state retrieval
-- overlay exp data in both rock and integrated
-- output HKL
+###Wed 31 May 22:10:13 BST 2023
+- issue#29 : bloch rock
+  - change axis from Sw to Frame  
 ###Wed 31 May 12:34:51 BST 2023
 - created file `static/views/main.html` for main layout
 - template dependent variables present in header and footer still in `templates/main.html`  

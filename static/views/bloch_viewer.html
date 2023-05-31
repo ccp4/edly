@@ -17,7 +17,14 @@
       </span>
     </td>
     <td ng-hide="info.modes.single">
-      <select ng-model="info.graph" ng-options="x.desc for x in info.graphs" ng-change="update_graph()"></select>
+      <span>
+        <span>graph : </span>
+        <select ng-model="info.graph" ng-options="x.desc for x in info.graphs" ng-change="update_graph()"></select>
+      </span>
+      <span ng-show="info.graph.type=='rock'" style="margin-left:10px">
+        <span> x axis : </span>
+        <select ng-model="info.modes.rock_x" ng-options="x for x in rock_axis" ng-change="change_rock_x()"></select>
+      </span>
     </td>
   </tr>
   <!-- figs -->

@@ -195,7 +195,7 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol']  = 'glycine'
+    session['mol']  = 'GaAs'
     session['mode'] = 'bloch'
     session['viewer_molecule'] = False;
 

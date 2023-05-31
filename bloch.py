@@ -416,36 +416,44 @@ def get_rock_sim():
 @bloch.route('/show_rock', methods=['POST'])
 def show_rock():
     data = json.loads(request.data.decode())
-    refl = data['refl']
-    x_axis = {'Sw':'Excitation Error Sw(A^-1)','F':'frame'}
+    refl   = data['refl']
+    rock_x = data['rock_x']
     tle = "Rocking curves "
-    if os.path.exists(rock_path(session['id'])):
-        x = 'Sw'
+    if os.path.exists(rock_path(session['id'])) :
         rock = ut.load_pkl(file=rock_path(session['id']))
         update_rock_thickness()
 
-        df=pd.concat([
-            b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']]
-                for b0 in map(lambda i:rock.load(i), range(rock.n_simus))
-            ])
+        # df=pd.concat([
+        #     b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']]
+        #         for b0 in map(lambda i:rock.load(i), range(rock.n_simus))
+        #     ])
+        df = pd.DataFrame()
+        for i in range(rock.n_simus):
+            b0       = rock.load(i)
+            df0      = b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']].copy()
+            df0['F'] = i
+            df=pd.concat([df,df0])
         df['hkl']=df.index
-        fig = px.line(df,x='Sw',y='I',color='hkl',markers=True)
+        fig = px.line(df,x=rock_x,y='I',color='hkl',markers=True)
         tle+="(simu at z=%d A)" %session['bloch']['thick']
 
-    if session['dat']['rock']:
-        x = 'F'
+    if session['dat']['rock'] and 0:
         df = pets_data[session['mol']].rpl[['hkl','F','I']]
         df = df.loc[df.hkl.isin(refl)]
         fig = px.line(df,x='F',y='I',color='hkl',markers=True)
 
+
+    x_axis = {'Sw':'Excitation Error Sw(A^-1)','F':'Frame'}
     fig.update_layout(
     title=tle,
     hovermode='closest',
     paper_bgcolor="LightSteelBlue",
-    xaxis_title=x_axis[x],yaxis_title='Intensity',
+    xaxis_title=x_axis[rock_x],yaxis_title='Intensity',
     width=fig_wh, height=fig_wh,
     )
+
     session['graph']='rock'
+    session['bloch_modes']['x_rock'] = rock_x
     return fig.to_json()
 
 @bloch.route('/update_rock_thickness', methods=['POST'])
@@ -638,9 +646,10 @@ def init_bloch_panel():
         bloch_modes = {
             'u0'        : 'auto'    ,#auto,edit,rotate
             'u'         : 'single'  ,#single,rock,lacbed
-            'single'    : False,
-            'is_px'     : True,
-            'reversed'  : False,
+            'single'    : False     ,
+            'is_px'     : True      ,
+            'reversed'  : False     ,
+            'rock_x'    : 'Sw'      ,#Sw,exp,sim
             }
 
         session['bloch_modes'] = bloch_modes

@@ -192,34 +192,11 @@ angular.module('app').
     }
   }
 
-  // $scope.toggle_reload=function(){
-  //   $scope.frames.reload=!$scope.frames.reload
-  //   $scope.update_keyval('reload',$scope.frames.reload)
-  //   if ($scope.frames.reload){
-  //     $scope.mode_style['reload']=sel_style
-  //   }
-  //   else{
-  //     $scope.mode_style['reload']=''
-  //   }
-  // }
-
   $scope.show_structure = function(){
     $scope.expand['struct']=!$scope.expand['struct']
     // $log.log($scope.crys.chemical_formula)
     update_formula($scope.crys.chemical_formula);
   }
-
-  // $scope.init_panels=function(){
-  //   if ($scope.mode in {'felix':'',bloch:''}){
-  //     // $rootScope.$emit('init_'+$scope.mode)
-  //     switch($scope.mode){
-  //       case 'felix':
-  //         $rootScope.$emit('init_felix');break
-  //       case 'bloch':
-  //         $rootScope.$emit('init_bloch');break
-  //       }
-  //   }
-  // }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs

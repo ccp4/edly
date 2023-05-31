@@ -1,5 +1,9 @@
 # TODO
 
+- graph state retrieval
+- overlay exp data in both rock and integrated
+- output HKL
+
 ## changes summary 0.0.6
 - import dataset from xds,pets,dials
 - automatic exp wavelength retrieval  

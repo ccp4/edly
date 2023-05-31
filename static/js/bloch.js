@@ -103,6 +103,13 @@ angular.module('app')
     })
   }
 
+  ////fig2
+  $scope.change_rock_x=function(){
+    if ($scope.info.modes['u']=='rock'){
+      // $scope.info.modes.rock_x = $scope.rock_x[];
+      $scope.update_graph();
+    }
+  }
 
   //////////////////////////////////////////////////////////////
   //// INIT
@@ -110,7 +117,8 @@ angular.module('app')
   $scope.fig1={};
   $scope.fig2={};
   $scope.info=bloch_shared;
-
+  $scope.rock_axis=['Sw','F'];//{'excitation error':'Sw','frames':'F'};
+  // $scope.rock_x='Sw';
 }]);
 
 
@@ -388,7 +396,7 @@ angular.module('app')
         // $scope.solve_rock_btn=$scope.rock_state;
         // $scope.rock_style={'background-color':'red'};
         var interval;
-        interval = $interval($scope.get_rock_state,250);
+        interval = $interval($scope.get_rock_state,500);
         $http.post('solve_rock')
         .then(function(response){
           $interval.cancel(interval);
@@ -622,7 +630,7 @@ angular.module('app')
   $scope.show_rock=function(){
     $scope.info.modes['single']=false;
     $scope.info.graph=$scope.info.graphs['rock']
-    $http.post('show_rock',JSON.stringify({'refl':$scope.refl}))
+    $http.post('show_rock',JSON.stringify({'refl':$scope.refl,'rock_x':$scope.info.modes['rock_x']}))
       .then(function(response){
         $rootScope.$emit('load_fig2',response.data)
         // $scope.fig2 = response.data;
@@ -780,7 +788,7 @@ angular.module('app')
         $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
         $scope.bloch_solve_reset();
         $log.log('bloch init done');
-        $log.log(response.data.b0_path)
+        // $log.log(response.data.b0_path)
         $scope.update_bloch();
         $scope.dmin_str=String($scope.bloch['dmin']).slice(0,4)
         $scope.init_bloch_done=true;
