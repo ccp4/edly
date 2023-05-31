@@ -38,7 +38,7 @@ def update_exp_data(mol):
             pets_data[mol]=pets.Pets(pets_path(mol),gen=False,dyn=0)
         elif os.path.exists(xds_path(mol)):
             pets_data[mol]=xds.XDS(xds_path(mol))
-    print(colors.red+'processed data type for structure %s : %s' %(mol,dat_type)+colors.black)
+    print(colors.green+'processed data type for structure %s : %s' %(mol,dat_type)+colors.black)
     return dat_type
 
 def load_pets(session):

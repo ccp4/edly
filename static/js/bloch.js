@@ -780,6 +780,7 @@ angular.module('app')
         $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
         $scope.bloch_solve_reset();
         $log.log('bloch init done');
+        $log.log(response.data.b0_path)
         $scope.update_bloch();
         $scope.dmin_str=String($scope.bloch['dmin']).slice(0,4)
         $scope.init_bloch_done=true;

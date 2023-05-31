@@ -1,7 +1,15 @@
 # Version log
 
 ## 0.0.6dev
-
+### d
+- automatic selected reflections
+- graph state retrieval
+- overlay exp data in both rock and integrated
+- output HKL
+###Wed 31 May 12:34:51 BST 2023
+- created file `static/views/main.html` for main layout
+- template dependent variables present in header and footer still in `templates/main.html`  
+- minor bug fix
 ###Wed 31 May 11:16:35 BST 2023
 - issue#24: simulated integration
   - button to integrate at all thicknesses
@@ -60,7 +68,7 @@
   - u_sim orientation permanently above the mode options
   - rock solve button with the normal bloch solve button
   - solve rock available again when changing simulation parameters
-  - rock solve Should always complete properly now
+  - rock solve should always complete properly now
 
 ### Mon 22 May 18:15:19 BST 2023
 - moved omega parameter into frames panel

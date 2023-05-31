@@ -704,9 +704,9 @@ def init_done():
 
 def load_b0():
     try:
-        print(session['b0_path'])
         b0 = ut.load_pkl(session['b0_path'])
     except Exception as err:
+        print(session['b0_path'])
         print(colors.red,err,colors.black)
         # if type(e)=EOFError
         time.sleep(1)

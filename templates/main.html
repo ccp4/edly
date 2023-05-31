@@ -45,12 +45,12 @@
 
 
  <body>
-  <div class="container-fluid mt-3" style="margin:0px;padding-left:0px;background-color:#3c4a66;">
+  <div class="container-fluid mt-3" style="background-color:#3c4a66;">
 
     <!--================================================  -->
     <!--================================================  -->
     <!-- HEADER -->
-    <div class="header">
+    <div class="header" style="margin-left:-10px;margin-right:-10px;">
       <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
       <!-- Menu -->
       <div class="menu">
@@ -100,79 +100,12 @@
     <!--================================================  -->
     <!--================================================  -->
     <!-- PANEL =================================-->
-    <div class="row" style="color:#000000c7"; ng-controller="mainCtrl">
-      <div class="col-sm-2" style="padding-left:5px;padding-right:0px;">
-        <div class="panel" style="background-color:#b5ccda">
-
-            <div ng-include="'/static/views/structure.html'"></div>
-
-            <!-- solver tabs  -->
-            <div class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
-              <a class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
-                <span class="gg-stack"></span >
-                <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
-              </a>
-              <a ng-show="cif_file" class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
-                <span class="gg-edit-unmask"></span >
-                <span class="popuptext" ng-show="popup['bloch_solver']"> Bloch solver </span>
-              </a>
-              <a ng-show="cif_file" class="btn btn-primary popup tab_btn" ng-style="mode_style['ms']" ng-click="set_mode('ms')" ng-mouseenter="showIt('ms_solver')" ng-mouseleave="hideIt('ms_solver')">
-                <span class="gg-format-justify" style="margin-top:0"></span >
-                <span class="popuptext" ng-show="popup['ms_solver']"> Multislice solver </span>
-              </a>
-              <a ng-show="cif_file && dat['felix']" class="btn btn-primary popup tab_btn" ng-click="set_mode('felix')" ng-mouseenter="showIt('felix_tab')" ng-mouseleave="hideIt('felix_tab')" ng-style="mode_style['felix']">
-                <span class="gg-components" style="margin-top:0"></span >
-                <span class="popuptext" ng-show="popup['felix_tab']"> Felix dynamical refinement </span>
-              </a>
-            </div>
-
-            <!-- solver panel -->
-            <div class="row">
-              <div class="col-sm-11 bloch_solver" >
-                {a titles[mode] a}
-              </div>
-            </div>
-            <div ng-include="'static/views/frames_panel.html'"></div>
-            <div ng-show="mode=='frames'">
-              <div ng-include="'static/views/upload_panel.html'"></div>
-            </div>
-            <div ng-controller="BlochPanelCtrl" class="panel bloch_panel" >
-              <div ng-show="mode=='bloch'">
-                <div ng-include="'static/views/bloch_panel.html'"></div>
-              </div>
-            </div>
-            <div ng-controller="FelixPanelCtrl" class="panel bloch_panel" >
-              <div ng-show="mode=='felix'">
-                <div ng-include="'static/views/felix_panel.html'"></div>
-              </div>
-            </div>
-        </div><!-- Main Panel -->
-      </div><!-- col-sm-2 -->
-
-      <!-- solver views  -->
-      <div class="col-sm-10" >
-          <div ng-show="mode=='frames' && max_frame>0">
-            <div ng-include="'static/views/frame_viewer.html'"></div>
-          </div>
-          <div ng-controller="FelixCtrl">
-            <div ng-show="mode=='felix'">
-              <div  ng-include="'static/views/felix_viewer.html'"></div>
-            </div>
-          </div>
-          <div ng-controller="BlochCtrl">
-            <div style="margin-top: 5px;" ng-show="mode=='bloch'">
-              <div ng-include="'static/views/bloch_viewer.html'"></div>
-            </div>
-          </div>
-      </div><!-- solver views  -->
-
-    </div><!-- main Ctrl row -->
-
+    <div ng-include="'/static/views/main.html'"></div>
 
     <!--================================================  -->
     <!--================================================  -->
     <!-- footer  -->
-    <footer class="footer">
+    <footer class="footer"  style="margin-left:-10px;margin-right:-10px;">
        Copyright © {{year}}, CCP4
        <div>Author : Tarik Drevon</div>
        <div>version : {{version}}</div>

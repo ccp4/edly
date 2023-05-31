@@ -175,7 +175,8 @@ def init():
 
     ####### package info to frontend
     info=['mol','dat','frame','crys','mode','zmax','nb_frames',
-        'offset','cmap','cmaps','heatmaps','nb_colors']
+        'offset','cmap','cmaps','heatmaps','nb_colors',
+        'new','b0_path']
     session_data = {k:session[k] for k in info}
     session['init'] = True
     # print(colors.magenta+'init done : ',session['init'],colors.black)
@@ -194,14 +195,14 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol']  = 'biotin'
+    session['mol']  = 'glycine'
     session['mode'] = 'bloch'
     session['viewer_molecule'] = False;
 
 
     # session['reload']  = False
     session['b0_path'] = get_pkl(session['id'])
-    print(colors.red+'init_session'+colors.black)
+    # print(colors.red+'init_session'+colors.black)
     #colormaps
     session['zmax']      = dict(zip(['sim','exp'],[50]*2))
     session['nb_colors'] = 100
@@ -351,7 +352,7 @@ def get_frames(mol,frame_type):
     while fmt not in fmts:
         fmt = files[i].split('.')[-1]
         i+=1
-    print(colors.red+'format detected for %s frames : %s' %(frame_type,fmt) +colors.black)
+    print(colors.green+'format detected for %s frames :' %frame_type +colors.yellow+'%s' %fmt +colors.black)
     # print(colors.red,get_path(mol,dat,'*'),colors.black)
     if fmt:
         frames    = np.sort(glob.glob(get_path(mol,frame_type,'*.%s' %fmt))).tolist()
@@ -462,7 +463,6 @@ def read_space_group(struct_file):
             hm = dataset['international_symbol']
             if hm in spg_hm.keys():
                 dataset['international_number'] = spg_hm[hm]
-                print('retrieved space group number from dictionary')
+                print(colors.blue+'retrieved space group number from dictionary'+colors.black)
 
     return dataset
-read_space_group('static/data/crambin/1ejg.pdb')
