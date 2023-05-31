@@ -93,9 +93,9 @@ def bloch_fig():
     if not xm:xm = b0.df_G.q.max()
     xr,yr=[-xm,xm],[xm,-xm]
     if is_px:
-        x_m = pets.nxy #pt_plot['px'].max() #*np.sqrt(2)
-        xr,yr=[0,x_m],[0,x_m]
-        if session['bloch_modes']['reversed']:yr=[x_m,0]
+        x_m,y_m = pets.nxy #pt_plot['px'].max() #*np.sqrt(2)
+        xr,yr=[0,x_m],[0,y_m]
+        if session['bloch_modes']['reversed']:yr=[y_m,0]
 
     ########################
     #### resolution rings
@@ -108,7 +108,8 @@ def bloch_fig():
         ct,st = np.cos(t),np.sin(t)
         rx = lambda r:r*ct; ry=lambda r:r*st
         if is_px :
-            cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
+            # cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
+            cx,cy = toplot.loc[str((0,0,0)),['px','py']]
             qr = qs/(pets.aper*np.sqrt(2))
             rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
 
@@ -682,6 +683,6 @@ def load_b0():
         print(colors.red,err,colors.black)
         # if type(e)=EOFError
         time.sleep(1)
-
-    b0 = ut.load_pkl(session['b0_path'])
+        b0 = ut.load_pkl(session['b0_path'])
+        
     return b0

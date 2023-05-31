@@ -1,6 +1,10 @@
 # Version log
 
 ## 0.0.6dev
+
+### Wed 31 May 09:38:41 BST 2023
+- minor fix in pixel range
+
 ### Tue 30 May 13:23:20 BST 2023
 - issue#29 :bloch rock
   - modified `modes['u']` modes into single,rock,lacbed with corresponding buttons
