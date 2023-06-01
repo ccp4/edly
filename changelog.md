@@ -10,7 +10,7 @@
 - changed the `info.graphs` structure
 - get automatic reflection selection in rock mode when refreshing
 - `clear` flag in `update_refl` callback when clearing table
-## 0.0.6dev
+## 0.0.6
 ###Wed 31 May 22:10:13 BST 2023
 - issue#29 : bloch rock
   - change axis from Sw to Frame  

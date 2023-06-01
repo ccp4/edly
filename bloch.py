@@ -521,11 +521,8 @@ def update_refl():
     ###get valid reflections
     if not data['clear']:
         b0 = load_b0()
-        print(session['refl'])
-        print(session['b0_path'])
-        idx = b0.get_beam(refl=session['refl'])
-        refl = b0.df_G.iloc[idx].index.tolist()
-        print(refl)
+        idx = b0.get_beam(refl=session['refl'])#;print(session['refl'])
+        refl = b0.df_G.iloc[idx].index.tolist()#;print(refl)
         session['refl'] = refl
     return json.dumps({'refl':session['refl']})
 
