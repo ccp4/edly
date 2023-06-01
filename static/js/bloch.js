@@ -2,7 +2,7 @@
   'use strict';
 
 app.factory('bloch_shared', function(){
-  return {graphs:'',graph:'',modes:{}}
+  return {graphs:'',graph:'',modes:{},rock_axis:{}}
 });
 
 
@@ -76,9 +76,6 @@ angular.module('app')
       $rootScope.$emit('update_graph');
     }
   }
-  $scope.toggle_mode=function(key){
-    $rootScope.$emit('toggle_mode','single')
-  }
 
   $scope.set_max_res_rings=function(){
     // $log.log({'max_res':$scope.info.max_res,'dq_ring':$scope.info.dq_ring})
@@ -106,10 +103,18 @@ angular.module('app')
   ////fig2
   $scope.change_rock_x=function(){
     if ($scope.info.modes['u']=='rock'){
-      // $scope.info.modes.rock_x = $scope.rock_x[];
+      // $log.log($scope.info.modes.rock_x)
       $scope.update_graph();
     }
   }
+  $scope.toggle_exp_rock=function(){
+    const key='exp_rock';
+    $http.post('set_mode_val',JSON.stringify({'key':key,'val':$scope.info.modes[key]}))
+    .then(function(response){
+      $scope.update_graph();
+    });
+  }
+
 
   //////////////////////////////////////////////////////////////
   //// INIT
@@ -117,8 +122,6 @@ angular.module('app')
   $scope.fig1={};
   $scope.fig2={};
   $scope.info=bloch_shared;
-  $scope.rock_axis=['Sw','F'];//{'excitation error':'Sw','frames':'F'};
-  // $scope.rock_x='Sw';
 }]);
 
 
@@ -179,11 +182,11 @@ angular.module('app')
       $scope.bloch_solve_reset()
       if (!init){
         if ($scope.info.modes['u']=='single' && $scope.info.modes['u0']=='auto'){
-          $log.log('auto mode. resolve for new frame')
+          // $log.log('auto mode. resolve for new frame')
           $scope.update_bloch();
         }
         else{
-          $log.log('Update exp data only')
+          // $log.log('Update exp data only')
           $scope.update_frame();
         }
       }
@@ -258,6 +261,7 @@ angular.module('app')
       }
       else{
         if ($scope.rock_state=='done'){
+          $scope.update_refl();
           $scope.get_rock_sim();
         }
       }
@@ -326,7 +330,9 @@ angular.module('app')
         break;
       case 'rock':
         // $log.log("get rock sim")
-        $scope.get_rock_sim();
+        if ($scope.rock_state=='done'){
+          $scope.get_rock_sim();
+        }
         // $scope.bloch_solve_set($scope.rock_state);
         // $log.log($scope.rock_state=='done');
         $scope.set_available_graphs('rock',$scope.rock_state=='done');
@@ -362,12 +368,14 @@ angular.module('app')
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // Rock mode
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  $scope.set_rock=function(opt){
+  $scope.set_rock_frame=function(opt){
     // $log.log(opt);
     $http.post('set_rock_frame',JSON.stringify({'frame':$scope.frame,'opt':opt}))
     .then(function(response){
-      $scope.rock = response.data.rock;
-      $scope.rock_reset();
+      if (opt>=0){
+        $scope.rock = response.data.rock;
+      }
+      $scope.bloch_solve_set('Solve rock');
     })
   }
 
@@ -388,7 +396,7 @@ angular.module('app')
 
   $scope.solve_rock=function(){
     // if ($scope.solve_rock_btn[$scope.rock_state]=='Solve rock'){
-      $http.post('set_rock',JSON.stringify({'rock':$scope.rock,'bloch':$scope.bloch}))
+      $http.post('init_rock',JSON.stringify({'rock':$scope.rock,'bloch':$scope.bloch}))
       .then(function(response){
         $scope.rock = response.data.rock;
         $scope.rock_state='init';
@@ -402,6 +410,7 @@ angular.module('app')
           $interval.cancel(interval);
           $scope.nbeams = response.data.nbeams;
           $scope.set_available_graphs('rock',true);
+          $scope.set_available_graphs('int',false);
           $scope.set_rock_sim(1);
           $scope.get_rock_state();
         })
@@ -463,10 +472,9 @@ angular.module('app')
   }
 
   $scope.rock_reset=function(){
-    // $scope.solve_rock_btn='Solve rock';
     $scope.bloch_solve_set('Solve rock');
-    // $log.log($scope.rock_state);
-    // $scope.rock_style={'background-color':'#286090'};
+    // $log.log($scope.rock);
+    $scope.set_rock_frame(-1);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -606,30 +614,25 @@ angular.module('app')
   //// Graph stuffs
   //////////////////////////////////////////////////////////////
   $scope.show_u=function(){
-    $scope.info.graph=$scope.info.graphs['u3d']
-    $scope.info.modes['single']=false;
+    $scope.info.graph='u3d';
     $http.post('show_u',JSON.stringify({'rock':$scope.rock,'u':$scope.bloch['u']}))
       .then(function(response){
         $rootScope.$emit('load_fig2',response.data)
-        // $scope.fig2 = response.data;
-        // $log.log()
     });
   }
 
   $scope.show_scat=function(){
-    $scope.info.graph=$scope.info.graphs['scat']
-    $scope.info.modes['single']=false;
+    // $scope.info.modes['single']=false;
+    $scope.info.graph='scat';
     $http.post('show_sf')
       .then(function(response){
         $rootScope.$emit('load_fig2',response.data)
-        // $scope.fig2 = response.data;
-        // $log.log()
     });
   }
 
   $scope.show_rock=function(){
-    $scope.info.modes['single']=false;
-    $scope.info.graph=$scope.info.graphs['rock']
+    // $scope.info.modes['single']=false;
+    $scope.info.graph='rock';
     $http.post('show_rock',JSON.stringify({'refl':$scope.refl,'rock_x':$scope.info.modes['rock_x']}))
       .then(function(response){
         $rootScope.$emit('load_fig2',response.data)
@@ -637,7 +640,7 @@ angular.module('app')
     });
   }
   $scope.show_integrated=function(){
-    $scope.info.graph=$scope.info.graphs['int']
+    $scope.info.graph='int';
     $http.post('show_integrated',JSON.stringify({'refl':$scope.refl}))
       .then(function(response){
           $rootScope.$emit('load_fig2',response.data)
@@ -645,7 +648,7 @@ angular.module('app')
   }
 
   $scope.beam_vs_thickness=function () {
-    $scope.info.graph=$scope.info.graphs['thick']
+    $scope.info.graph='thick';
     $http.post('beam_vs_thick',JSON.stringify({'thicks':$scope.bloch['thicks'],'refl':$scope.refl}))
       .then(function(response){
         $scope.info.modes['single']=false;
@@ -655,9 +658,9 @@ angular.module('app')
   }
 
   $scope.update_graph=function(){
-    // $log.log('update_graph',$scope.info.modes.single);
+    $log.log('update_graph : ',$scope.info.graph);
     if (!$scope.info.modes.single){
-      switch ($scope.info.graph.type){
+      switch ($scope.info.graph){
         case 'thick':
           $scope.beam_vs_thickness();
           break;
@@ -667,15 +670,15 @@ angular.module('app')
         case 'int':
           $scope.show_integrated();
           break;
-        case '3d':
+        case 'u3d':
           $scope.show_u();
           break;
         case 'scat':
           $scope.show_scat();
           break;
         default :
-          $scope.info.graph = $scope.info.graphs['thick'];
-          $scope.beam_vs_thickness();
+          // $scope.info.graph = $scope.info.graphs['thick'];
+          // $scope.beam_vs_thickness();
           break;
       }
     }
@@ -688,13 +691,16 @@ angular.module('app')
   })
 
   $scope.set_available_graphs=function(key,val){
-    if(val){
-      $scope.info.graphs[key]=JSON.parse(JSON.stringify(all_graphs[key]));
+    // $log.log(key,val,$scope.info.graphs);
+    if(val && !(all_graphs[key] in $scope.info.graphs)  ){
+      // $scope.info.graphs[key]=JSON.parse(JSON.stringify(all_graphs[key]));
+      // $log.log('adding ',key,' to available graphs')
+      $scope.info.graphs[all_graphs[key]]=key;
     }
-    else{
-      delete $scope.info.graphs[key];
+    else if (!val){
+      delete $scope.info.graphs[all_graphs[key]];
     }
-    // $log.log($scope.all_graphs);
+    // $log.log($scope.info.graphs);
   }
 
   ////////////////////////////////////////////////////////
@@ -715,15 +721,18 @@ angular.module('app')
   }
   $scope.clear_table=function(){
     clearTable();
-    $scope.update_refl();
+    $scope.update_refl(true);
   }
-  $scope.update_refl=function(){
+  $scope.update_refl=function(clear=false){
     $scope.refl = extract_list_indices_from_table()
-    $http.post('update_refl',JSON.stringify({'refl':$scope.refl}))
+    $http.post('update_refl',JSON.stringify({'refl':$scope.refl,'clear':clear}))
       .then(function(response){
-        // $log.log(response.data);
+        $scope.refl=response.data.refl;
+        $log.log(response.data);
+        $scope.add_refl();
     });
     if ($scope.auto_refresh){
+      // $log.log('auto refreshing graph')
       $scope.update_graph()
     }
   }
@@ -783,9 +792,12 @@ angular.module('app')
         $scope.info.cell_diag = response.data.cell_diag;
         $scope.u_style[$scope.info.modes['u']] ={"border-style":'solid'};
         $scope.u0_style[$scope.info.modes['u0']]={"border-style":'solid'};
-        $scope.info.graph = $scope.info.graphs[response.data.graph]
-
         $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
+        $scope.set_available_graphs('int',false);
+        // $scope.info.graph = $scope.info.graphs[response.data.graph];
+        $scope.info.graph = response.data.graph;
+        $scope.info.rock_axis = response.data.rock_axis;
+
         $scope.bloch_solve_reset();
         $log.log('bloch init done');
         // $log.log(response.data.b0_path)
@@ -809,13 +821,10 @@ angular.module('app')
   $scope.u0_style = {'auto':'','edit':'','move':''};
   $scope.input={'theta':false,'phi':false,'dtp':false ,'rock_sim':true};
   var bloch_colors={'reset':'#337ab7','blue':'#337ab7','red':'#ff0000','green':'#107014'}
-  var all_graphs={
-    thick:{type:'thick',desc:'thickness'},
-    rock:{type:'rock',desc:'rocking curve'},
-    int:{type:'int',desc:'integrated curve'},
-    u3d:{type:'3d',desc:'3d view'},
-    scat:{type:'scat',desc:'scattering factors'}}
-  $scope.info.graphs = JSON.parse(JSON.stringify(all_graphs))
+  var all_graphs={'thick':'thickness','u3d':'3d view','scat':'scattering factors',
+    'rock':'rocking curve','int':'integrated curve',
+    }
+  $scope.info.graphs = {'thickness':'thick','3d view':'u3d','scattering factors':'scat',};
   $scope.show={}
   $scope.auto_refresh=true;
   $scope.auto_refresh_style='';

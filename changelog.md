@@ -1,5 +1,15 @@
 # Version log
-
+## 0.0.7dev
+###Thu 1 Jun 10:54:33 BST 2023
+- issue#29:bloch rock
+  - enable exp/sim rocking curves option
+  - axis option to frame/index/Sw when show rocking curve
+  - record `rock_frames` when simulated experimental frames
+- fix minor bug when switching to structure with no exp data while `bloch['u0']=auto`
+- fix `get_rock_sim` callback when switching to rock mode with no simulation data   
+- changed the `info.graphs` structure
+- get automatic reflection selection in rock mode when refreshing
+- `clear` flag in `update_refl` callback when clearing table
 ## 0.0.6dev
 ###Wed 31 May 22:10:13 BST 2023
 - issue#29 : bloch rock
@@ -156,7 +166,7 @@
 - retractable frame offset
 - biotin dataset imported with pets
 
-### dials import(Fri 15 Jul 20:19:58 BST 2022)
+### Fri 15 Jul 20:19:58 BST 2022
 - fixed bug reload image when changing frames
 - fixed bug reload frames when switching to frames
 - fixed init bug for structures with no available images  
@@ -218,8 +228,8 @@
 - interval rock not working on VM : get('/') fixed  
 - rocking curve error : `thick` taken from `session['bloch']`
 - rocking curve orientations error : needed calling `get_uvw_cont`
+- issue#15 : help menu links
 
-### issue#15 help menu links
 #### (Tue 26 Apr 09:51:41 BST 2022)
 - hide error after closing dialog
 - import cif

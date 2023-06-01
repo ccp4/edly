@@ -217,7 +217,7 @@ Parameters Panel
           <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
             <td> <input class="long_input" ng-change="rock_reset()" ng-model="rock['u0']"  ></td>
             <td class="td-in" ng-show="dat['pets']">
-              <a class="btn-sm btn-primary popup" ng-click="set_rock(0)" ng-mouseenter="showIt('rock_set_0')" ng-mouseleave="hideIt('rock_set_0')">
+              <a class="btn-sm btn-primary popup" ng-click="set_rock_frame(0)" ng-mouseenter="showIt('rock_set_0')" ng-mouseleave="hideIt('rock_set_0')">
                 <span class="glyphicon glyphicon-pushpin"/>
                 <span class="popuptext" style="" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
               </a>
@@ -226,7 +226,7 @@ Parameters Panel
           <tr><td class="td-in"> u1   </td><td class="td-in"> = </td>
             <td> <input class="long_input"  ng-change="rock_reset()" ng-model="rock['u1']"  ></td>
             <td class="td-in" ng-show="dat['pets']">
-              <a class="btn-sm btn-primary popup" ng-click="set_rock(1)" ng-mouseenter="showIt('rock_set_1')" ng-mouseleave="hideIt('rock_set_1')">
+              <a class="btn-sm btn-primary popup" ng-click="set_rock_frame(1)" ng-mouseenter="showIt('rock_set_1')" ng-mouseleave="hideIt('rock_set_1')">
                 <span class="glyphicon glyphicon-pushpin"/>
                 <span class="popuptext" style="" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
               </a>
@@ -235,7 +235,7 @@ Parameters Panel
           <tr><td class="td-in"> npts </td><td class="td-in"> = </td>
             <td> <input class="bloch_input"  ng-change="rock_reset()" ng-model="rock['nframes']" ng-key-enter="solve_rock()" type="number" min="2" max="100"></td>
             <td class="td-in" ng-show="dat['pets']">
-              <a class="btn-sm btn-primary popup" ng-click="set_rock(2)" ng-mouseenter="showIt('rock_set')" ng-mouseleave="hideIt('rock_set')">
+              <a class="btn-sm btn-primary popup" ng-click="set_rock_frame(2)" ng-mouseenter="showIt('rock_set')" ng-mouseleave="hideIt('rock_set')">
                 <span class="gg-icon gg-path-back" />
                 <span class="popuptext" style="" ng-show="popup['rock_set']"> Assign u0,u1 as first and last frame. </span>
               </a>

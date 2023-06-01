@@ -19,14 +19,19 @@
     <td ng-hide="info.modes.single">
       <span>
         <span>graph : </span>
-        <select ng-model="info.graph" ng-options="x.desc for x in info.graphs" ng-change="update_graph()"></select>
+        <select ng-model="info.graph" ng-options="x for (x,y) in info.graphs" ng-change="update_graph()"></select>
       </span>
-      <span ng-show="info.graph.type=='rock'" style="margin-left:10px">
+      <span ng-if="dat['rock']" ng-show="info.graph=='rock'" style="margin-left:10px">
+          <span > exp rock : </span>
+          <input style="margin-left:-10px" class="sm_input" type="checkbox" ng-model="info.modes['exp_rock']" ng-click="toggle_exp_rock()">
+      </span>
+      <span ng-show="info.graph=='rock' && !info.modes['exp_rock']" style="margin-left:10px">
         <span> x axis : </span>
-        <select ng-model="info.modes.rock_x" ng-options="x for x in rock_axis" ng-change="change_rock_x()"></select>
+        <select ng-model="info.modes.rock_x" ng-options="x for (x,y) in info.rock_axis" ng-change="change_rock_x()"></select>
       </span>
     </td>
   </tr>
+
   <!-- figs -->
   <tr>
     <td>

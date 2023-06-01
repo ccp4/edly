@@ -331,32 +331,40 @@ def bloch_state():
 @bloch.route('/set_rock_frame', methods=['POST'])
 def set_rock_frame():
     data = json.loads(request.data.decode())
-    frame = data['frame']
     opt = data['opt']
-    uvw = pets_data[session['mol']].uvw0
-    if opt==0:
-        e0 = uvw[max(0,frame-1)]
-        e1 = np.array(session['rock']['u1'])
-    elif opt==1:
-        e0 = np.array(session['rock']['u0'])
-        e1 = uvw[max(0,frame-1)]
+    if opt==-1:
+        session['rock_frames']=[-1]*2
+        return ''
     else:
-        e0 = uvw[0] #max(0,frame-2)]
-        e1 = uvw[-1]#frame-1]
-        # u0 = uvw[max(0,frame-2)]
-        # u1 = uvw[frame-1]
-        # u2 = uvw[min(frame,frame-1)]
-        # e0 = (u0 + u1)/2
-        # e1 = (u1 + u2)/2
-        # e0/=np.linalg.norm(e0)
-        # e1/=np.linalg.norm(e1)
+        frame = max(0,data['frame']-1)
+        uvw = pets_data[session['mol']].uvw0
+        if opt==0:
+            e0 = uvw[frame]
+            e1 = np.array(session['rock']['u1'])
+            session['rock_frames'][0]=frame
+        elif opt==1:
+            e0 = np.array(session['rock']['u0'])
+            e1 = uvw[frame]
+            session['rock_frames'][1]=frame
+        elif opt==2:
+            session['rock_frames']=[0,uvw.shape[0]]
+            e0 = uvw[0] #max(0,frame-2)]
+            e1 = uvw[-1]#frame-1]
+            # u0 = uvw[max(0,frame-2)]
+            # u1 = uvw[frame-1]
+            # u2 = uvw[min(frame,frame-1)]
+            # e0 = (u0 + u1)/2
+            # e1 = (u1 + u2)/2
+            # e0/=np.linalg.norm(e0)
+            # e1/=np.linalg.norm(e1)
 
-    session['rock'].update({'u0':e0.tolist(),'u1':e1.tolist()})
-    session['frame'] = frame
-    return json.dumps({'rock':get_session_data('rock')})
+        session['frame'] = frame
+        # print(session['rock_frames'])
+        session['rock'].update({'u0':e0.tolist(),'u1':e1.tolist()})
+        return json.dumps({'rock':get_session_data('rock')})
 
-@bloch.route('/set_rock', methods=['POST'])
-def set_rock():
+@bloch.route('/init_rock', methods=['POST'])
+def init_rock():
     data=json.loads(request.data.decode())
     r_args = get_rock(data)
 
@@ -416,34 +424,33 @@ def get_rock_sim():
 @bloch.route('/show_rock', methods=['POST'])
 def show_rock():
     data = json.loads(request.data.decode())
-    refl   = data['refl']
-    rock_x = data['rock_x']
+    refl = data['refl']
     tle = "Rocking curves "
     if os.path.exists(rock_path(session['id'])) :
+        rock_x = data['rock_x']
         rock = ut.load_pkl(file=rock_path(session['id']))
         update_rock_thickness()
-
-        # df=pd.concat([
-        #     b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']]
-        #         for b0 in map(lambda i:rock.load(i), range(rock.n_simus))
-        #     ])
         df = pd.DataFrame()
+        rock_frames=session['rock_frames']
+        # print(rock_frames)
         for i in range(rock.n_simus):
             b0       = rock.load(i)
             df0      = b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']].copy()
-            df0['F'] = i
+            df0['i'] = i
+            df0['F'] = rock_frames[0] + (rock_frames[1] -rock_frames[0])*i/(rock.n_simus-1)
             df=pd.concat([df,df0])
         df['hkl']=df.index
         fig = px.line(df,x=rock_x,y='I',color='hkl',markers=True)
         tle+="(simu at z=%d A)" %session['bloch']['thick']
 
-    if session['dat']['rock'] and 0:
+    if session['bloch_modes']['exp_rock'] :
+        rock_x='F'
         df = pets_data[session['mol']].rpl[['hkl','F','I']]
         df = df.loc[df.hkl.isin(refl)]
         fig = px.line(df,x='F',y='I',color='hkl',markers=True)
 
 
-    x_axis = {'Sw':'Excitation Error Sw(A^-1)','F':'Frame'}
+    x_axis = {'Sw':'Excitation Error Sw(A^-1)','F':'Frame','i':'rock simulation index'}
     fig.update_layout(
     title=tle,
     hovermode='closest',
@@ -453,7 +460,7 @@ def show_rock():
     )
 
     session['graph']='rock'
-    session['bloch_modes']['x_rock'] = rock_x
+    session['bloch_modes']['rock_x'] = rock_x
     return fig.to_json()
 
 @bloch.route('/update_rock_thickness', methods=['POST'])
@@ -512,12 +519,14 @@ def update_refl():
     data=json.loads(request.data.decode())
     session['refl']=data['refl']
     ###get valid reflections
-    # try:
-    #     b0 = load_b0()
-    #     idx = b0.get_beam(refl=session['refl'])
-    #     session['refl'] = b0.df_G.iloc[idx].index.tolist()
-    # except:
-    #     pass
+    if not data['clear']:
+        b0 = load_b0()
+        print(session['refl'])
+        print(session['b0_path'])
+        idx = b0.get_beam(refl=session['refl'])
+        refl = b0.df_G.iloc[idx].index.tolist()
+        print(refl)
+        session['refl'] = refl
     return json.dumps({'refl':session['refl']})
 
 @bloch.route('/beam_vs_thick', methods=['POST'])
@@ -599,7 +608,7 @@ def set_mode_val():
     session['bloch_modes'] = bloch_modes
     # print(data,data['val'],session['bloch_modes'])
     session['last_time']=time.time()
-    if not session['bloch_modes']['u']=='single':
+    if session['bloch_modes']['u']=='single':
         session['b0_path'] = get_pkl(session['id'])
         # print(session['b0_path'])
     return json.dumps(session['bloch_modes'])
@@ -649,42 +658,57 @@ def init_bloch_panel():
             'single'    : False     ,
             'is_px'     : True      ,
             'reversed'  : False     ,
-            'rock_x'    : 'Sw'      ,#Sw,exp,sim
+            'rock_x'    : 'i'       ,#Sw,F,i
+            'exp_rock'  : False     ,
             }
+        vis = {'I':True,
+            'Vga':'legendonly','Sw':'legendonly','I_pets':True,
+            'rings':True}
 
         session['bloch_modes'] = bloch_modes
         # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
-        session['theta_phi']  = [0,0]
-        session['bloch']      = bloch_args
-        session['rock']       = rock_args
-        session['dq_ring']  = 0.25
-        session['rings']    = []
-        session['max_res']  = 0
-        session['pred_info'] = True # use dials predicted refl
-
-
+        session['theta_phi']   = [0,0]
+        session['bloch']       = bloch_args
+        session['rock']        = rock_args
+        session['dq_ring']     = 0.5
+        session['rings']       = []
+        session['max_res']     = 0
+        session['pred_info']   = True # use dials predicted refl
+        session['graph']       = 'thick'
+        session['rock_frames'] = [-1,-1]
+        session['vis']         = vis
+    #reinit on refresh
     expand_bloch = {
         'struct':False,'thick':False,
         'refl':True,'sim':False,'u':True,}
-    vis = {'I':True,
-        'Vga':'legendonly','Sw':'legendonly','I_pets':True,
-        'rings':True}
-
-    session['graph']  = 'thick'
-    session['vis']    = vis
-    session['expand'] = expand_bloch
-    session['refl']   = []
+    # vis = {'I':True,
+    #     'Vga':'legendonly','Sw':'legendonly','I_pets':True,
+    #     'rings':True}
+    rock_axis={'excitation error':'Sw','rock index':'i'};
+    if session['dat']['pets']:
+        rock_axis['exp frames']='F'
 
 
-    #check if  rockingcurve was already simulated
+    #### sanity checks on refresh
     rock_state=''
     if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
         rock_state='done'
 
-    # print(session['bloch_modes'])
+    if session['graph']=='rock' and not session['bloch']['u']=='rock':
+        session['graph']=='thick'
+    if session['graph']=='int' and not session['bloch']['u']=='rock':
+        session['graph']=='thick'
+    if session['bloch_modes']['u0']=='auto' and not session['dat']['pets']:
+        session['bloch_modes']['u0'] = 'edit'
+    if session['bloch_modes']['exp_rock'] and not session['dat']['rock']:
+        session['bloch_modes']['exp_rock'] = False
+
 
     now = time.time()
-    session['last_time']  = now
+    # session['vis']       = vis
+    session['expand']    = expand_bloch
+    session['refl']      = []
+    session['last_time'] = now
     session['time'] = now
     session_data = {k:session[k] for k in[
         'expand','bloch_modes','refl','graph',
@@ -694,8 +718,9 @@ def init_bloch_panel():
     session_data['bloch'] = get_session_data('bloch')
     session_data['rock']  = get_session_data('rock')
     session_data['rock_state'] = rock_state
-    session_data['exp_rock']  = session['dat']['rock']
-    session_data['cell_diag'] = cell_diag
+    session_data['exp_rock']   = session['dat']['rock']
+    session_data['cell_diag']  = cell_diag
+    session_data['rock_axis']  = rock_axis
     # print('init bloch:',session['bloch_modes'])
     return json.dumps(session_data)
 
@@ -703,12 +728,9 @@ def init_bloch_panel():
 
 @bloch.route('/init_done', methods=['GET'])
 def init_done():
-    print('init done :',session['init'])
+    color=colors.__dict__[ {True:'green',False:'red'}[session['init']] ]
+    print(colors.blue,'main init done : ',color,session['init'],colors.black)
     return json.dumps(session['init'])
-
-# @bloch.route('/init_bloch', methods=['GET'])
-# def init_bloch():
-#     return json.dumps({k:session[k] for k in ['bloch_modes']})
 
 
 def load_b0():

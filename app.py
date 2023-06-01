@@ -195,7 +195,7 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol']  = 'GaAs'
+    session['mol']  = 'glycine'
     session['mode'] = 'bloch'
     session['viewer_molecule'] = False;
 
@@ -254,6 +254,7 @@ def init_mol():
     struct_file = get_structure_file()
     if struct_file:
         b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
+        print('saving bloch object')
         b0.save()
         # b0=ut.load_pkl(session['b0_path'])
 
@@ -303,10 +304,10 @@ def init_mol():
 
     now = time.time()
     # session['cif_file'] = struct_file
-    session['crys']     = crys_dat
-    session['dat']      = dat
-    session['sim']      = sim
-    session['exp']      = exp
+    session['crys']       = crys_dat
+    session['dat']        = dat
+    session['sim']        = sim
+    session['exp']        = exp
     session['nb_frames']  = nb_frames
     session['last_time']  = now
     session['time']       = now
