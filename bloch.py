@@ -16,7 +16,6 @@ from EDutils import utilities as ut             #;imp.reload(ut)
 from in_out import*
 
 bloch = Blueprint('bloch', __name__)
-# pets_data = {}
 
 
 ########################
@@ -373,6 +372,7 @@ def init_rock():
     print(p.communicate())
 
     session['rock_state'] = 'init'
+    session['bloch_modes']['integrated']=False
     session['rock'] = r_args
     session['bloch'].update({k:data['bloch'][k] for k in ['keV','Nmax','Smax','thick']})
     data = {s : get_session_data(s) for s in ['rock']}
@@ -493,6 +493,7 @@ def integrate_rock():
     thicks=session['bloch']['thicks']
     rock.set_beams_vs_thickness(thicks)
     rock.integrate()
+    session['bloch_modes']['integrated']=True
     return 'done'
 
 ########################
@@ -556,6 +557,22 @@ def beam_vs_thick():
     session['graph']='thick'
     return fig.to_json()
 
+@bloch.route('/to_shelx', methods=['POST'])
+def to_shelx():
+    thick = session['bloch']['thick']
+    output_file_shelx = f"shelx_thick_{thick}A.hkl"
+    file = os.path.join(session['path'], output_file_shelx)
+
+    rock = ut.load_pkl(file=rock_path(session['id']))
+    df = rock.integrate(thick)
+    hkl = pd.DataFrame(index=df.index,
+        columns=['h','k','l','I','sig'])
+    # hkl['I'] = rock.df_int['%.1fA' %thick].values
+    hkl[['h','k','l']]=[list(eval(h)) for h in hkl.index]
+    hkl['I'] = df['I']*1000
+    hkl['sig'] = 0.01
+    ut.to_shelx(hkl,file)
+    return json.dumps({'hkl_file':file})
 
 
 ########################
@@ -657,6 +674,7 @@ def init_bloch_panel():
             'reversed'  : False     ,
             'rock_x'    : 'i'       ,#Sw,F,i
             'exp_rock'  : False     ,
+            'integrated': False     ,
             }
         vis = {'I':True,
             'Vga':'legendonly','Sw':'legendonly','I_pets':True,

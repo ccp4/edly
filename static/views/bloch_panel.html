@@ -266,14 +266,25 @@ Parameters Panel
             <img style="width: 90%;" src="/static/images/beam_vs_thick.png"/>
             <span class="popuptext" ng-show="popup['show_rock']"> Show rocking curve </span>
           </a>
-          <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;"  ng-click="all_rock_sim()" ng-mouseenter="popup['show_rock_int']=true" ng-mouseleave="popup['show_rock_int']=false">
+          <!-- <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;"  ng-click="all_rock_sim()" ng-mouseenter="popup['show_rock_int']=true" ng-mouseleave="popup['show_rock_int']=false">
             all
             <span class="popuptext" ng-show="popup['show_rock_int']"> Overlay rocking curve patterns </span>
-          </a>
+          </a> -->
           <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;"  ng-click="integrate_rock()" ng-mouseenter="popup['rock_int']=true" ng-mouseleave="popup['rock_int']=false">
             <span class="gg-icon gg-stack"></span >
-            <span class="popuptext" ng-show="popup['rock_int']"> Integrate rocking curve </span>
+            <span class="popuptext" ng-show="popup['rock_int']">
+              Integrate rocking curve <br>
+              at all thicknesses
+            </span>
           </a>
+          <a class="btn btn-primary myBtn-sm popup" style="border-width:2px;"  ng-click="download_hkl()" ng-mouseenter="popup['show_download_hkl']=true" ng-mouseleave="popup['show_download_hkl']=false">
+            <span class="gg-icon gg-software-download"></span >
+              <span class="popuptext" ng-show="popup['show_download_hkl']">
+                Download hkl file (shelx format)<br>
+                for integrated reflections <br>
+                at current thickness
+              </span>
+            </a>
         </div><!-- done buttons -->
       </div><!-- rock mode -->
 

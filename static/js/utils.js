@@ -1,3 +1,6 @@
+///////////////////////////////////////
+// Draw frame
+///////////////////////////////////////
 function draw_frame(frame_type,dats,wh){
 
   const canvas = document.getElementById("canvas_"+frame_type);
@@ -11,6 +14,10 @@ function draw_frame(frame_type,dats,wh){
   // console.log('all drawn');
 }
 
+
+///////////////////////////////////////
+// reflection table
+///////////////////////////////////////
 function addRow_tagTable(miller_indices) {
   var TABLE_MILLER=document.getElementById('table_Miller_indices')
     if (!extract_list_indices_from_table().includes(miller_indices)) {
@@ -49,7 +56,7 @@ function clearTable(){
   }
 }
 
-////// function hover row point table miller
+// function hover row point table miller
 function highlight(miller_indices,val){
 
   var found = false;
@@ -80,6 +87,10 @@ function highlight(miller_indices,val){
   }
 }
 
+
+///////////////////////////////////////
+// help gif
+///////////////////////////////////////
 var gif_dialog;
 $(document).ready(function () {
   gif_dialog = $( "#dialog-gif" ).dialog({
@@ -103,6 +114,11 @@ function open_gif_dialog(elt,tle,gif){
   gif_dialog.dialog( "open" );
 };
 
+
+
+///////////////////////////////////////
+// Structure stuffs
+///////////////////////////////////////
 function set_structure(mol){
   console.log(mol)
   // var formData = {'mol':mol}
@@ -143,6 +159,7 @@ $(document).ready(function () {
     event.preventDefault();
     new_structure();
   });
+
 
 
   function new_structure(){
@@ -190,7 +207,6 @@ function show_error(data,err){
   $('#cif_error').show()
 }
 
-// $(':file_cif').on('change', function () {
 function upload_cif(){
   var files = $('#file_cif')[0].files;
   if (files.length>0) {
@@ -249,6 +265,13 @@ function open_link(link){
 };
 
 
+function open_file(link){
+  window.open(link);
+}
+
+///////////////////////////////////////
+// Mathjax
+///////////////////////////////////////
 function update_formula(formula){
   // window.MathJax = {
   //   startup: {

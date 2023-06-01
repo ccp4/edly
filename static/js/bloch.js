@@ -421,7 +421,7 @@ angular.module('app')
   $scope.integrate_rock=function(){
   $http.post('integrate_rock')
     .then(function(response){
-      $log.log(response.data);
+      // $log.log(response.data);
       $scope.set_available_graphs('int',true);
       $scope.show_integrated()
     });
@@ -608,6 +608,14 @@ angular.module('app')
     $scope.bloch_solve_reset();
   }
 
+  $scope.download_hkl=function(){
+    $http.post('to_shelx')
+      .then(function(response){
+        // $log.log(response.data);
+        open_file(response.data.hkl_file)
+    });
+  }
+
 
 
   //////////////////////////////////////////////////////////////
@@ -643,7 +651,8 @@ angular.module('app')
     $scope.info.graph='int';
     $http.post('show_integrated',JSON.stringify({'refl':$scope.refl}))
       .then(function(response){
-          $rootScope.$emit('load_fig2',response.data)
+        // $scope.info.modes['integrated']=true;
+        $rootScope.$emit('load_fig2',response.data)
     });
   }
 
@@ -728,7 +737,7 @@ angular.module('app')
     $http.post('update_refl',JSON.stringify({'refl':$scope.refl,'clear':clear}))
       .then(function(response){
         $scope.refl=response.data.refl;
-        $log.log(response.data);
+        // $log.log(response.data);
         $scope.add_refl();
     });
     if ($scope.auto_refresh){
