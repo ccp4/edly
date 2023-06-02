@@ -3,14 +3,16 @@ version=$(grep "## [0-9]" changelog.md  | head -n1 | cut -d" " -f2)
 echo $version
 
 python3 -m venv .env
-pip install flask plotly wheel tarikDrevonUtils ccp4ED==1.0.9
-cd .env
 source bin/activate
+.env/bin/pip install flask plotly wheel tarikDrevonUtils
+# cd .env
 
 if [ $1 -eq dev ];then
   git clone git@github.com:ccp4/electron-diffraction.git
   cd electron-diffraction
   pip install -e .
+else
+  .env/bin/pip install ccp4ED==1.1.0
 fi
 
 
