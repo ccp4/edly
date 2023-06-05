@@ -159,6 +159,7 @@ def init():
         if (now-session.get('last_time'))>days*24*3600:
             clear_session()
             session['new'] = True
+            init_session()
     else:
         init_session()
         session['new'] = True
