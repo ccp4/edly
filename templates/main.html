@@ -60,7 +60,7 @@
           <a href="" onclick="dialog_new_structure()">New</a>
           {% for x in structures %}
           <!-- <a href="" ng-repeat="x in structures" ng-click="set_structure(x)">{a x a}</a> -->
-            <a href="" onclick="set_structure('{{x}}')">{{ x }}</a>
+            <a href="" name="struct_{{x}}" onclick="set_structure('{{x}}')">{{ x }}</a>
           {% endfor %}
         </div>
        </div>

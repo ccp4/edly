@@ -1,10 +1,16 @@
 # Version log
 ## 0.0.7dev
+###Mon  5 Jun 19:38:33 BST 2023
+- selenium test
+###Mon  5 Jun 19:37:07 BST 2023
+- issue#43 : Rfactor
+  - Show thickness dependent R factor
+  - Fo vs Fc at selected thickness
+
 ###Thu  1 Jun 17:30:09 BST 2023
 - issue#27 : hkl to shelx
-    - script
-    - download button
-    test
+  - script
+  - download button
 ###Thu 1 Jun 10:54:33 BST 2023
 - issue#29:bloch rock
   - enable exp/sim rocking curves option

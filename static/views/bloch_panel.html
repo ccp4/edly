@@ -121,15 +121,15 @@ Parameters Panel
 
       <!-- buttons -->
       <div class="row" style="margin-bottom:10px;margin-left:-5px;margin-top:5px">
-        <a class="btn-sm btn-primary btn_u" ng-style="u_style['single']" ng-click="set_mode('u','single')" ng-mouseenter="showIt('u_single')" ng-mouseleave="hideIt('u_single')" >
+        <a id="u_single" class="btn-sm btn-primary btn_u" ng-style="u_style['single']" ng-click="set_mode('u','single')" ng-mouseenter="showIt('u_single')" ng-mouseleave="hideIt('u_single')" >
           <span class="gg-icon gg-arrow-down" />
           <!-- <span class="popuptext" style="" ng-show="popup['u_single']"> Set single mode for u </span> -->
         </a>
-        <a class="btn-sm btn-primary btn_u" ng-style="u_style['rock']" ng-click="set_mode('u','rock')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
+        <a id="u_rock" class="btn-sm btn-primary btn_u" ng-style="u_style['rock']" ng-click="set_mode('u','rock')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
           <span class="gg-icon gg-spectrum" ></span>
           <!-- <span class="popuptext" style="" ng-show="popup['u_rock']"> Set rocking curve for u </span> -->
         </a>
-        <a class="btn-sm btn-primary btn_u" ng-style="u_style['lacbed']" ng-click="set_mode('u','lacbed')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
+        <a id="u_lacbed" class="btn-sm btn-primary btn_u" ng-style="u_style['lacbed']" ng-click="set_mode('u','lacbed')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
           <span class="gg-icon gg-shape-circle" style="border:solid 8px;"></span>
           <!-- <span class="popuptext" style="" ng-show="popup['lacbed']"> Set lacbed pattern for u </span> -->
         </a>
@@ -145,19 +145,19 @@ Parameters Panel
         <!-- buttons -->
         <div class="row" style="margin-left:5px">
           <span style="margin-left: 0px;"ng-show="dat['pets']">
-            <a class="btn-sm btn-primary popup" ng-style="u0_style['auto']" ng-click="set_mode('u0','auto')" ng-mouseenter="showIt('u_auto')" ng-mouseleave="hideIt('u_auto')" >
+            <a id="u_auto" class="btn-sm btn-primary popup" ng-style="u0_style['auto']" ng-click="set_mode('u0','auto')" ng-mouseenter="showIt('u_auto')" ng-mouseleave="hideIt('u_auto')" >
               <span class="glyphicon glyphicon-lock" />
               <span class="popuptext" style="" ng-show="popup['u_auto']"> Lock u to experimental frames  </span>
             </a>
           </span>
           <span style="margin-left:0px;">
-            <a class="btn-sm btn-primary popup" ng-style="u0_style['edit']" ng-click="set_mode('u0','edit')" ng-mouseenter="showIt('u_edit')" ng-mouseleave="hideIt('u_edit')">
+            <a id="u_edit" class="btn-sm btn-primary popup" ng-style="u0_style['edit']" ng-click="set_mode('u0','edit')" ng-mouseenter="showIt('u_edit')" ng-mouseleave="hideIt('u_edit')">
               <span class="glyphicon glyphicon-pencil" />
               <span class="popuptext" style="" ng-show="popup['u_edit']"> Edit u manually  </span>
             </a>
           </span>
           <span style="margin-left:0px;">
-            <a class="btn-sm btn-primary popup" ng-style="u0_style['move']" ng-click="set_mode('u0','move')" ng-mouseenter="showIt('u_move')" ng-mouseleave="hideIt('u_move')">
+            <a id="u_move" class="btn-sm btn-primary popup" ng-style="u0_style['move']" ng-click="set_mode('u0','move')" ng-mouseenter="showIt('u_move')" ng-mouseleave="hideIt('u_move')">
               <span class="glyphicon glyphicon-move" />
               <span class="popuptext" style="" ng-show="popup['u_move']"> Change Euler angles of u using arrows  </span>
             </a>
@@ -167,7 +167,7 @@ Parameters Panel
         <!-- edit mode -->
         <div class="bloch_param" ng-show="info.modes['u0']=='edit'" >
           <span> u = </span>
-          <input ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
+          <input id="u_input" ng-model="bloch['u']" ng-key-enter="update_bloch()" ng-change="bloch_solve_reset()" type="text" class="bloch_input" style="width:180px" >
         </div>
         <!-- move mode-->
         <div ng-show="info.modes['u0']=='move'" >
@@ -297,7 +297,7 @@ Parameters Panel
 <div class="row "">
   <table style="margin-left: 5px;"><tr>
     <td class="td-in" style="width: 50%;">
-      <div class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()" ng-style="bloch_solve_style" ng-bind="bloch_solve_btn"></div>
+      <div id="solve_btn" class="btn-sm btn-primary bloch_solve_param"  ng-click="update_bloch()" ng-style="bloch_solve_style" ng-bind="bloch_solve_btn"></div>
     </td>
     <!-- <div class="btn-sm btn-primary rock_solve_param" ng-click="solve()" ng-style="solve_button_style">
       {a solve_btn a}
