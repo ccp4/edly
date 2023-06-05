@@ -411,6 +411,8 @@ angular.module('app')
           $scope.nbeams = response.data.nbeams;
           $scope.set_available_graphs('rock',true);
           $scope.set_available_graphs('int',false);
+          $scope.set_available_graphs('Rfactor',false);
+          $scope.set_available_graphs('FovsFc',false);
           $scope.set_rock_sim(1);
           $scope.get_rock_state();
         })
@@ -423,6 +425,10 @@ angular.module('app')
     .then(function(response){
       // $log.log(response.data);
       $scope.set_available_graphs('int',true);
+      if ($scope.exp_refl){
+        $scope.set_available_graphs('Rfactor',true);
+        $scope.set_available_graphs('FovsFc',true);
+      }
       $scope.show_integrated()
     });
   }
@@ -666,6 +672,17 @@ angular.module('app')
     });
   }
 
+  $scope.update_graph_fig=function(graph){
+    $scope.info.graph=graph;
+    $http.post('show_graph',JSON.stringify({'graph':graph,'thick':$scope.bloch['thick'],'thicks':$scope.bloch['thicks'],'refl':$scope.refl}) )
+      .then(function(response){
+        $scope.info.modes['single']=false;
+        $rootScope.$emit('load_fig2',response.data)
+        // $scope.fig2 = response.data;
+    });
+
+  }
+
   $scope.update_graph=function(){
     $log.log('update_graph : ',$scope.info.graph);
     if (!$scope.info.modes.single){
@@ -678,6 +695,12 @@ angular.module('app')
           break;
         case 'int':
           $scope.show_integrated();
+          break;
+        case 'Rfactor':
+          $scope.update_graph_fig('Rfactor')
+          break;
+        case 'FovsFc':
+          $scope.update_graph_fig('FovsFc')
           break;
         case 'u3d':
           $scope.show_u();
@@ -706,7 +729,7 @@ angular.module('app')
       // $log.log('adding ',key,' to available graphs')
       $scope.info.graphs[all_graphs[key]]=key;
     }
-    else if (!val){
+    else if (!val && (all_graphs[key] in $scope.info.graphs) ){
       delete $scope.info.graphs[all_graphs[key]];
     }
     // $log.log($scope.info.graphs);
@@ -791,6 +814,7 @@ angular.module('app')
         $scope.bloch        = response.data.bloch;
         $scope.rock         = response.data.rock;
         $scope.exp_rock     = response.data.exp_rock;
+        $scope.exp_refl     = response.data.exp_refl;
         $scope.rock_state   = response.data.rock_state;
         $scope.expand       = response.data.expand;
         $scope.refl         = response.data.refl;
@@ -801,8 +825,11 @@ angular.module('app')
         $scope.info.cell_diag = response.data.cell_diag;
         $scope.u_style[$scope.info.modes['u']] ={"border-style":'solid'};
         $scope.u0_style[$scope.info.modes['u0']]={"border-style":'solid'};
+        $log.log($scope.info.modes['integrated'])
         $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
-        $scope.set_available_graphs('int',false);
+        $scope.set_available_graphs('int',$scope.info.modes['integrated']);
+        $scope.set_available_graphs('Rfactor',$scope.info.modes['integrated']);
+        $scope.set_available_graphs('FovsFc',$scope.info.modes['integrated']);
         // $scope.info.graph = $scope.info.graphs[response.data.graph];
         $scope.info.graph = response.data.graph;
         $scope.info.rock_axis = response.data.rock_axis;
@@ -832,6 +859,7 @@ angular.module('app')
   var bloch_colors={'reset':'#337ab7','blue':'#337ab7','red':'#ff0000','green':'#107014'}
   var all_graphs={'thick':'thickness','u3d':'3d view','scat':'scattering factors',
     'rock':'rocking curve','int':'integrated curve',
+    'Rfactor':'R factor','FovsFc':'Fo vs Fc',
     }
   $scope.info.graphs = {'thickness':'thick','3d view':'u3d','scattering factors':'scat',};
   $scope.show={}

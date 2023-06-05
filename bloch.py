@@ -489,12 +489,58 @@ def show_integrated():
 
 @bloch.route('/integrate_rock', methods=['POST'])
 def integrate_rock():
-    rock = ut.load_pkl(file=rock_path(session['id']))
-    thicks=session['bloch']['thicks']
-    rock.set_beams_vs_thickness(thicks)
-    rock.integrate()
-    session['bloch_modes']['integrated']=True
+    if not session['bloch_modes']['integrated']:
+        rock = ut.load_pkl(file=rock_path(session['id']))
+        thicks=session['bloch']['thicks']
+        rock.set_beams_vs_thickness(thicks)
+        rock.integrate();
+        rock.Rfactor(load_pets().hkl);
+        session['bloch_modes']['integrated']=True
     return 'done'
+
+@bloch.route('/show_graph', methods=['POST'])
+def show():
+    data = json.loads(request.data.decode())
+    graph=data['graph']
+    if graph=='Rfactor':
+        fig=show_Rfactor()
+    elif graph=='FovsFc':
+        fig=show_FovsFc(data['thick'])
+    return fig.to_json()
+
+def show_Rfactor():
+    rock = ut.load_pkl(file=rock_path(session['id']))
+    # z,R = rock.z,rock.R
+    fig = px.line(rock.R[1:],markers=True)
+    fig.update_layout(
+        title="R factor",
+        hovermode='closest',
+        paper_bgcolor="LightSteelBlue",
+        xaxis_title='z(Angstrom)',yaxis_title='',
+        width=fig_wh, height=fig_wh,
+    )
+    return fig
+
+def show_FovsFc(thick):
+    df_exp = load_pets().hkl
+    rock = ut.load_pkl(file=rock_path(session['id']))
+
+    z0 = rock.df_int.columns[abs(rock.z-thick).argmin()]        #;print(z0)
+    refl = rock.df_int.loc[rock.df_int.index.isin(df_exp.index)].index
+
+    I_exp = df_exp.loc[refl,'I'].values
+    I_sim = rock.df_int.loc[refl,z0].values
+    # print(I_sim.shape,I_exp.shape)
+    fig = px.scatter(I_sim,I_exp)#,markers=True)
+
+    fig.update_layout(
+        title="Iobserved vs Icalc at z=%s" %z0 ,
+        hovermode='closest',
+        paper_bgcolor="LightSteelBlue",
+        xaxis_title='I_calc',yaxis_title='I_obs',
+        width=fig_wh, height=fig_wh,
+    )
+    return fig
 
 ########################
 #### Thickness stuffs
@@ -734,6 +780,7 @@ def init_bloch_panel():
     session_data['rock']  = get_session_data('rock')
     session_data['rock_state'] = rock_state
     session_data['exp_rock']   = session['dat']['rock']
+    session_data['exp_refl']   = session['dat']['pets']
     session_data['cell_diag']  = cell_diag
     session_data['rock_axis']  = rock_axis
     # print('init bloch:',session['bloch_modes'])
@@ -759,3 +806,6 @@ def load_b0():
         b0 = ut.load_pkl(session['b0_path'])
 
     return b0
+
+def load_pets():
+    return pets_data[session['mol']]
