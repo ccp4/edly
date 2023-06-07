@@ -10,15 +10,17 @@ from EDutils import xds                 #;imp.reload(xds)
 
 chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol
-# get_path=lambda mol,key,frame_str:os.path.join(mol_path(mol),key,'%s.tiff' %frame_str)
 get_path   = lambda mol,key,frame_str:os.path.join(mol_path(mol),key,frame_str)
+#data processing paths
 pets_path  = lambda mol:os.path.join(mol_path(mol),'pets','%s.pts' %mol)
 dials_path = lambda mol:os.path.join(mol_path(mol),'dials')
 xds_path   = lambda mol:os.path.join(mol_path(mol),'xds','XDS_ASCII.HKL')
+### simulations paths
 get_pkl    = lambda id:'static/data/tmp/%s/b.pkl' %id
 rock_path  = lambda id:'static/data/tmp/%s/rock_.pkl' %id
 felix_path = lambda mol:os.path.join(mol_path(mol),'felix')
 felix_pkl  = lambda session:os.path.join(felix_path(session['mol']),'felix.pkl')
+sim_path   = lambda mol:os.path.join(mol_path(mol),'rocks')
 
 pets_data={}
 

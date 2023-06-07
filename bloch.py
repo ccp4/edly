@@ -293,6 +293,37 @@ def get_bloch_sim():
 ##############################
 #### Rocking curve stuffs
 ##############################
+@bloch.route('/load_rock', methods=['POST'])
+def load_rock_data():
+    data = json.loads(request.data.decode())#;print(data)
+    session['rock_name']=data['rock_name']
+    rock = load_rock()
+    session['rock'] = {'u0':rock.df.u[0].tolist(),'u1':rock.df.u[-1].tolist(),'nframes':rock.df.shape[0]}
+    session['bloch_modes']['integrated']='df_int' in rock.__dict__
+    nbs = '%d-%d' %(rock.df.nbeams.min(),rock.df.nbeams.max())
+
+    return json.dumps({'rock':get_session_data('rock'),'nbeams':nbs,
+        'modes':session['bloch_modes']})
+
+@bloch.route('/save_rock', methods=['POST'])
+def save_rock_data():
+    data = json.loads(request.data.decode())#;print(data)
+    session['rock_name']=data['rock_name']
+    rocks_dir='static/data/%s/rocks' %session['mol']
+    if not os.path.exists(rocks_dir):
+        check_output('mkdir %s' %rocks_dir,shell=True,).decode()
+    rock_dir = os.path.join(rocks_dir,session['rock_name'])
+    msg='already exists'
+    if not os.path.exists(rock_dir):
+        cmd = 'mkdir %s;' %(rock_dir)
+        cmd+= 'mv %s/rock_.pkl %s;'%(session['path'],rock_dir)
+        cmd+= 'mv %s/u*.pkl %s;'%(session['path'],rock_dir)
+        msg=check_output(cmd,shell=True,).decode()
+        rock=load_rock()
+        rock.change_path(rock_dir)
+    rock_names = [os.path.basename(s) for s in glob.glob(os.path.join(sim_path(session['mol']),'*'))]
+    return json.dumps({'msg':msg,'rock_names':rock_names})
+
 @bloch.route('/rock_state', methods=['GET'])
 def rock_state():
     if not session['rock_state'] == 'done':
@@ -372,7 +403,7 @@ def init_rock():
     print(p.communicate())
 
     session['rock_state'] = 'init'
-    session['bloch_modes']['integrated']=False
+    session['bloch_modes']['integrated'] = False
     session['rock'] = r_args
     session['bloch'].update({k:data['bloch'][k] for k in ['keV','Nmax','Smax','thick']})
     data = {s : get_session_data(s) for s in ['rock']}
@@ -395,8 +426,7 @@ def solve_rock():
     # print(session['rock'],uvw)
     rock = bl.Bloch_cont(path=session['path'],tag='',uvw=uvw,Sargs=Sargs)
     session['rock_state'] = 'done'
-    nbeams = np.array([rock.load(i).nbeams for i  in range(rock.n_simus)] )
-    nbs = '%d-%d' %(nbeams.min(),nbeams.max())
+    nbs = '%d-%d' %(rock.df.nbeams.min(),rock.df.nbeams.max())
     return json.dumps({'nbeams':nbs})
 
 @bloch.route('/overlay_rock', methods=['POST'])
@@ -409,11 +439,12 @@ def overlay_rock():
 def get_rock_sim():
     data = json.loads(request.data.decode())
     rock_sim = data['sim']
-    sims = np.sort(glob.glob(os.path.join(session['path'],'u_*.pkl')))
-
-    i    = max(min(rock_sim,sims.size),1)-1
-    sim  = sims[i] #;print(i,sim)
-    session['b0_path'] = sim
+    rock = load_rock()
+    i = max(min(rock_sim,rock.df.shape[0]),1)-1
+    sim_file = rock.df.pkl[i]
+    # sims = #np.sort(glob.glob(os.path.join(session['path'],'u_*.pkl')))
+    # sim  = sims[i] #;print(i,sim)
+    session['b0_path'] = sim_file
     session['frame']   = data['frame']
     b0 = load_b0()
     u = b0.u
@@ -426,9 +457,11 @@ def show_rock():
     data = json.loads(request.data.decode())
     refl = data['refl']
     tle = "Rocking curves "
-    if os.path.exists(rock_path(session['id'])) :
+    rock=get_rock()
+    fig=go.Figure()
+    if rock:
         rock_x = data['rock_x']
-        rock = ut.load_pkl(file=rock_path(session['id']))
+        rock = load_rock()
         update_rock_thickness()
         df = pd.DataFrame()
         rock_frames=session['rock_frames']
@@ -465,14 +498,14 @@ def show_rock():
 
 @bloch.route('/update_rock_thickness', methods=['POST'])
 def update_rock_thickness():
-    rock = ut.load_pkl(file=rock_path(session['id']))
+    rock = load_rock()
     rock.do('set_thickness',thick=session['bloch']['thick'])
 
 @bloch.route('/show_integrated', methods=['POST'])
 def show_integrated():
     data = json.loads(request.data.decode())
     refl = data['refl']
-    rock = ut.load_pkl(file=rock_path(session['id']))
+    rock = load_rock()
     df = rock.df_int.loc[refl].transpose()
     df.index=rock.z
     fig = px.line(df,markers=True)
@@ -490,11 +523,12 @@ def show_integrated():
 @bloch.route('/integrate_rock', methods=['POST'])
 def integrate_rock():
     if not session['bloch_modes']['integrated']:
-        rock = ut.load_pkl(file=rock_path(session['id']))
+        rock = load_rock()
         thicks=session['bloch']['thicks']
         rock.set_beams_vs_thickness(thicks)
         rock.integrate();
-        rock.Rfactor(load_pets().hkl);
+        if session['dat']['pets']:
+            rock.Rfactor(load_pets().hkl);
         session['bloch_modes']['integrated']=True
     return 'done'
 
@@ -506,10 +540,11 @@ def show():
         fig=show_Rfactor()
     elif graph=='FovsFc':
         fig=show_FovsFc(data['thick'])
+    session['graph']=graph
     return fig.to_json()
 
 def show_Rfactor():
-    rock = ut.load_pkl(file=rock_path(session['id']))
+    rock = load_rock()
     # z,R = rock.z,rock.R
     fig = px.line(rock.R[1:],markers=True)
     fig.update_layout(
@@ -523,7 +558,7 @@ def show_Rfactor():
 
 def show_FovsFc(thick):
     df_exp = load_pets().hkl
-    rock = ut.load_pkl(file=rock_path(session['id']))
+    rock = load_rock()
 
     z0 = rock.df_int.columns[abs(rock.z-thick).argmin()]        #;print(z0)
     refl = rock.df_int.loc[rock.df_int.index.isin(df_exp.index)].index
@@ -609,7 +644,7 @@ def to_shelx():
     output_file_shelx = f"shelx_thick_{thick}A.hkl"
     file = os.path.join(session['path'], output_file_shelx)
 
-    rock = ut.load_pkl(file=rock_path(session['id']))
+    rock = load_rock()
     df = rock.integrate(thick)
     hkl = pd.DataFrame(index=df.index,
         columns=['h','k','l','I','sig'])
@@ -699,9 +734,12 @@ def get_session_data(key):
 
 @bloch.route('/init_bloch_panel', methods=['GET'])
 def init_bloch_panel():
-    b0=load_b0()
+    session['b0_path']=get_pkl(session['id'])
+    b0 = load_b0()
     b1,b2,b3 = np.array(b0.crys.reciprocal_vectors)/(2*np.pi)
     cell_diag = 1/np.linalg.norm(b1+b2+b3) #Angstrom
+    rock_names = [os.path.basename(s) for s in glob.glob(os.path.join(sim_path(session['mol']),'*'))]
+
     # print('cell_diag %1f Angstrom' %cell_diag)
     if session['new'] :
         print(colors.green+'new session'+colors.black)
@@ -714,7 +752,7 @@ def init_bloch_panel():
         bloch_args['dmin']=cell_diag/bloch_args['Nmax']
         bloch_modes = {
             'u0'        : 'auto'    ,#auto,edit,rotate
-            'u'         : 'single'  ,#single,rock,lacbed
+            'u'         : 'rock'    ,#single,rock,lacbed
             'single'    : False     ,
             'is_px'     : True      ,
             'reversed'  : False     ,
@@ -737,11 +775,13 @@ def init_bloch_panel():
         session['pred_info']   = True # use dials predicted refl
         session['graph']       = 'thick'
         session['rock_frames'] = [-1,-1]
+        session['rock_name']   = "test_5" #"test%d" %len(rock_names)
         session['vis']         = vis
+
     #reinit on refresh
     expand_bloch = {
         'struct':False,'thick':False,
-        'refl':True,'sim':False,'u':True,}
+        'refl':True,'sim':False,'u':True,'load_rock':False}
     # vis = {'I':True,
     #     'Vga':'legendonly','Sw':'legendonly','I_pets':True,
     #     'rings':True}
@@ -773,7 +813,7 @@ def init_bloch_panel():
     session['time'] = now
     session_data = {k:session[k] for k in[
         'expand','bloch_modes','refl','graph',
-        'rings','max_res','dq_ring',
+        'rings','max_res','dq_ring','rock_name',
         ]}
     session_data['theta_phi'] = b_str(session['theta_phi'],2)
     session_data['bloch'] = get_session_data('bloch')
@@ -783,7 +823,9 @@ def init_bloch_panel():
     session_data['exp_refl']   = session['dat']['pets']
     session_data['cell_diag']  = cell_diag
     session_data['rock_axis']  = rock_axis
+    session_data['rock_names'] = rock_names
     # print('init bloch:',session['bloch_modes'])
+    print(session['rock_name'])
     return json.dumps(session_data)
 
 
@@ -806,6 +848,13 @@ def load_b0():
         b0 = ut.load_pkl(session['b0_path'])
 
     return b0
+
+def load_rock():
+    file='static/data/%s/rocks/%s/rock_.pkl' %(session['mol'],session['rock_name'])
+    if not os.path.exists(file):
+        file = rock_path(session['id'])
+    if os.path.exists(file):
+        return ut.load_pkl(file=file)
 
 def load_pets():
     return pets_data[session['mol']]

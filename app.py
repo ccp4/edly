@@ -196,7 +196,7 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol']  = 'glycine'
+    session['mol']  = 'GaAs'
     session['mode'] = 'bloch'
     session['viewer_molecule'] = False;
 
@@ -245,11 +245,11 @@ def init_mol():
             nb_frames = min(pets_frames,nb_frames)
         else:
             nb_frames = pets_frames
-        if 'omega' in pets.__dict__:
-            ###will have to fix this later
-            if mol=='glycine':pets.omega=157
-            dat['omega']=pets.omega
-            # print("omega=%.1fdeg information found in exp data " %dat['omega'])
+        # if 'omega' in pets.__dict__:
+        #     ###will have to fix this later
+        #     if mol=='glycine':pets.omega=157
+        #     dat['omega']=pets.omega
+        #     # print("omega=%.1fdeg information found in exp data " %dat['omega'])
 
     ## initialize structure
     struct_file = get_structure_file()

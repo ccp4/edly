@@ -236,7 +236,7 @@ angular.module('app').
   // $scope.frame_offset_on=false;
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true}
   $scope.expand_str={false:'expand',true:'minimize'};
-  $scope.expand={};
+  $scope.expand={'rock_settings':true};
   $scope.popup={};
 
 

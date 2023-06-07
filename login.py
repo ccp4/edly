@@ -80,6 +80,7 @@ def viewer():
 @login.route('/', methods=['GET', 'POST'])
 def home():
     if not session.get('logged_in'):
+        session['new'] = True
         return render_template('login.html')
     else:
         return redirect(url_for('login.viewer'))

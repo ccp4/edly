@@ -203,7 +203,7 @@ angular.module('app')
   // Bloch single
   ////////////////////////////////////////////////////////////////////////////////////////////////
   $scope.update_bloch=function(){
-    // $log.log($scope.bloch);//['Smax'],$scope.bloch['Nmax'])
+    // $log.log($scope.bloch_solve_btn);
     if ($scope.bloch_solve_btn=='Solve'){
         $scope.bloch_solve_set('Preparing','red');
         // $log.log('solving bloch for frame ',$scope.frame, ' with bloch' , $scope.bloch);
@@ -255,14 +255,21 @@ angular.module('app')
     }
     // rock
     else if ($scope.bloch_solve_btn=='Solve rock'){
+      $log.log('rocking curve ... ')
       if ($scope.init_bloch_done==true){
-        // $log.log('rock mode. Solve button : ',$scope.bloch_solve_btn,' rock state',$scope.rock_state)
+        $log.log('Solving rocking curve ... ')
         $scope.solve_rock();
       }
       else{
         if ($scope.rock_state=='done'){
-          $scope.update_refl();
-          $scope.get_rock_sim();
+          $log.log('Init with rocking curve ... ')
+          if ($scope.rocks.saved){
+            $scope.load_rock()
+          }
+          else{
+            $scope.update_refl();
+            $scope.get_rock_sim();
+          }
         }
       }
     }
@@ -276,10 +283,11 @@ angular.module('app')
     }
   }
   $scope.bloch_solve_reset=function(){
+    // $log.log('solve reset')
     if ($scope.info.modes['u']=='single'){
       $scope.bloch_solve_set('Solve','reset');
     }
-    else{
+    else {
       $scope.bloch_solve_set('Solve '+$scope.info.modes['u'],'reset');
     }
   }
@@ -401,8 +409,6 @@ angular.module('app')
         $scope.rock = response.data.rock;
         $scope.rock_state='init';
         $scope.bloch_solve_set($scope.rock_state,'red')
-        // $scope.solve_rock_btn=$scope.rock_state;
-        // $scope.rock_style={'background-color':'red'};
         var interval;
         interval = $interval($scope.get_rock_state,500);
         $http.post('solve_rock')
@@ -415,6 +421,7 @@ angular.module('app')
           $scope.set_available_graphs('FovsFc',false);
           $scope.set_rock_sim(1);
           $scope.get_rock_state();
+          $scope.rocks.saved=false;
         })
       })
   }
@@ -478,9 +485,53 @@ angular.module('app')
   }
 
   $scope.rock_reset=function(){
-    $scope.bloch_solve_set('Solve rock');
+    $scope.bloch_solve_set('Solve rock','blue');
     // $log.log($scope.rock);
     $scope.set_rock_frame(-1);
+  }
+
+  $scope.load_rock=function(){
+    // $log.log('rock select : ',$scope.rocks.select);
+    $scope.rocks.name=$scope.rocks.select;
+    $http.post('load_rock',JSON.stringify({'rock_name':$scope.rocks.name}))
+    .then(function(response){
+      // $log.log(response.data);
+      $scope.rock=response.data.rock;
+      $scope.info.modes  = response.data.modes;
+      $scope.nbeams      = response.data.nbeams;
+      $scope.rock_state  = 'done';
+      $scope.rocks.saved = $scope.rock_names.includes($scope.rocks.name);
+      $scope.bloch_solve_set('done','green');
+      $scope.set_rock_graphs()
+      $scope.get_rock_sim(1);
+    });
+  }
+  $scope.save_rock=function(){
+    if (!$scope.rock_names.includes($scope.rocks.name)){
+      $http.post('save_rock',JSON.stringify({'rock_name':$scope.rocks.name}))
+      .then(function(response){
+        $log.log(response.data.msg);
+        $scope.rock_names = response.data.rock_names;
+        $scope.rocks.saved = $scope.rock_names.includes($scope.rocks.name);
+        $scope.rocks.select = $scope.rocks.name;
+      });
+    }
+    else{
+      $scope.expand['rock_settings']=true;
+      show_popup('rock_name_popup');
+    }
+  }
+
+  $scope.set_rock_graphs=function(){
+    $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
+    $scope.set_available_graphs('int',$scope.info.modes['integrated']);
+    $scope.set_available_graphs('Rfactor',$scope.info.modes['integrated'] && $scope.info.modes['pets']);
+    $scope.set_available_graphs('FovsFc',$scope.info.modes['integrated'] && $scope.info.modes['pets']);
+    if (!(all_graphs[$scope.info.graph] in $scope.info.graphs)){
+      $log.log('graph ',$scope.info.graph,' not available')
+      $scope.info.graph='thick';
+      $scope.update_graph();
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -823,20 +874,23 @@ angular.module('app')
         $scope.info.dq_ring = response.data.dq_ring;
         $scope.info.rings   = response.data.rings;
         $scope.info.cell_diag = response.data.cell_diag;
+        $scope.info.graph     = response.data.graph;
+        $scope.info.rock_axis = response.data.rock_axis;
+        $scope.rock_names  = response.data.rock_names;
+        $scope.rocks={
+            'name'  : response.data.rock_name,
+            'saved' : $scope.rock_names.includes(response.data.rock_name),
+            'select': response.data.rock_name,
+        }
+        //
         $scope.u_style[$scope.info.modes['u']] ={"border-style":'solid'};
         $scope.u0_style[$scope.info.modes['u0']]={"border-style":'solid'};
-        $log.log($scope.info.modes['integrated'])
-        $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
-        $scope.set_available_graphs('int',$scope.info.modes['integrated']);
-        $scope.set_available_graphs('Rfactor',$scope.info.modes['integrated']);
-        $scope.set_available_graphs('FovsFc',$scope.info.modes['integrated']);
-        // $scope.info.graph = $scope.info.graphs[response.data.graph];
-        $scope.info.graph = response.data.graph;
-        $scope.info.rock_axis = response.data.rock_axis;
-
+        if (!($scope.rocks.name in $scope.rock_names)){
+          $scope.rocks.select = $scope.rock_names[0];
+        }
+        $scope.set_rock_graphs()
         $scope.bloch_solve_reset();
         $log.log('bloch init done');
-        // $log.log(response.data.b0_path)
         $scope.update_bloch();
         $scope.dmin_str=String($scope.bloch['dmin']).slice(0,4)
         $scope.init_bloch_done=true;
@@ -853,6 +907,8 @@ angular.module('app')
   $scope.popup={}
   $scope.sim_rock = 1;
   $scope.rock_sim = 1;
+  $scope.show_rock_name_select=false;
+
   $scope.u_style  = {'single':'','rock':'','lacbed':''};
   $scope.u0_style = {'auto':'','edit':'','move':''};
   $scope.input={'theta':false,'phi':false,'dtp':false ,'rock_sim':true};

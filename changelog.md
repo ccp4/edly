@@ -1,5 +1,18 @@
 # Version log
 ## 0.0.7dev
+###Wed  7 Jun 17:49:34 BST 2023
+- issue#45 :load save rock data
+  - save rock
+  - load rock
+  - refactor loading rock and simulation
+  - warning when trying to overwrite save
+  - load properly on refresh
+- quick layout change
+- fix update nbeams
+###Tue  6 Jun 16:21:35 BST 2023
+- issue#45 :load save rock data
+  - frontend load button
+- changed layout rocking curve settings and integration
 ###Mon  5 Jun 19:38:33 BST 2023
 - selenium test
 ###Mon  5 Jun 19:37:07 BST 2023

@@ -286,3 +286,16 @@ function update_formula(formula){
   console.log(math)
   MathJax.Hub.Queue(["Text",math,formula]);
 }
+
+
+function show_popup(elt){
+  popup=document.getElementById(elt)
+  popup.style.display="block";
+  window.setTimeout(function(){
+    popup.style.display = "none";
+  }, 2000);
+}
+function focus(elt){
+  // console.log('focus',elt);
+  document.getElementById(elt).focus();
+}
