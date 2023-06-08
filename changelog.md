@@ -1,5 +1,10 @@
 # Version log
 ## 0.0.7dev
+###Thu  8 Jun 13:20:22 BST 2023
+- issue#26 : installation
+  - tests can take parameters `sleep` and `headless` and `port`
+  - added fixtures 
+
 ###Thu  8 Jun 11:24:06 BST 2023
 - option to run server in debug mode and with another port number
 ###Wed  7 Jun 17:49:34 BST 2023
