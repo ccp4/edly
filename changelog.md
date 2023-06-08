@@ -1,5 +1,7 @@
 # Version log
 ## 0.0.7dev
+###Thu  8 Jun 11:24:06 BST 2023
+- option to run server in debug mode and with another port number
 ###Wed  7 Jun 17:49:34 BST 2023
 - issue#45 :load save rock data
   - save rock

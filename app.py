@@ -105,6 +105,12 @@ def set_structure():
     init_mol()
     return session['mol']
 
+@app.route('/set_mode', methods=['POST'])
+def set_mode():
+    data = request.data.decode() #json.loads(request.data.decode())
+    session['mode'] = data
+    # print(colors.red+session['mode']+colors.black)
+    return session['mode']
 
 ################################################
 #### frame
@@ -132,16 +138,6 @@ def update_keyval():
     return json.dumps({'key':form['key'],'val':session[form['key']]})
 
 
-
-########################
-#### structure related
-########################
-@app.route('/set_mode', methods=['POST'])
-def set_mode():
-    data = request.data.decode() #json.loads(request.data.decode())
-    session['mode'] = data
-    # print(colors.red+session['mode']+colors.black)
-    return session['mode']
 
 
 
