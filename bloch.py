@@ -457,7 +457,7 @@ def show_rock():
     data = json.loads(request.data.decode())
     refl = data['refl']
     tle = "Rocking curves "
-    rock=get_rock()
+    rock=load_rock()
     fig=go.Figure()
     if rock:
         rock_x = data['rock_x']
@@ -478,7 +478,7 @@ def show_rock():
 
     if session['bloch_modes']['exp_rock'] :
         rock_x='F'
-        df = pets_data[session['mol']].rpl[['hkl','F','I']]
+        df = load_pets().rpl[['hkl','F','I']]
         df = df.loc[df.hkl.isin(refl)]
         fig = px.line(df,x='F',y='I',color='hkl',markers=True)
 
@@ -825,7 +825,7 @@ def init_bloch_panel():
     session_data['rock_axis']  = rock_axis
     session_data['rock_names'] = rock_names
     # print('init bloch:',session['bloch_modes'])
-    print(session['rock_name'])
+    # print(session['rock_name'])
     return json.dumps(session_data)
 
 

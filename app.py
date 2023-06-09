@@ -1,4 +1,4 @@
-# import importlib as imp
+import importlib as imp
 from subprocess import check_output,Popen,PIPE
 import json,os,sys,glob,time,datetime,crystals,re #,base64,hashlib
 import tifffile,mrcfile,cbf
@@ -6,6 +6,7 @@ from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,rende
 from functools import wraps
 import numpy as np,pandas as pd
 from EDutils import utilities as ut             #;imp.reload(ut)
+from EDutils import readers                 ;imp.reload(readers)
 # from EDutils import felix as fe                 #;imp.reload(fe)
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
@@ -15,12 +16,6 @@ from blochwave import bloch
 from blochwave import bloch_pp as bl            #;imp.reload(bl)
 from in_out import*
 app = Blueprint('app', __name__)
-
-dsp.plt.switch_backend('agg')
-# felix_data = {}
-# pets_data = {}
-
-
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -30,9 +25,11 @@ def login_required(f):
         else:
             # flash("You need to login first")
             return redirect(url_for('login'))
-    return wrap
 
-
+@app.route('/get_dl_state', methods=['GET'])
+def get_dl_state():
+    cmd="grep '%'  dl.log  | tail -n1 | sed -rE 's/([0-9]*%)/;\\1;/g' | cut -d';' -f2"
+    return subprocess.check_output(cmd,shell=True).decode().strip()
 
 ######################################################
 #### Structure related
@@ -49,7 +46,6 @@ def upload_cif():
         print(colors.red+msg)
         print(colors.magenta,e,colors.black)
         return "%s : %s" %(msg, e.__str__())
-
 
 @app.route('/new_structure', methods=['POST'])
 def new_structure():
@@ -112,21 +108,35 @@ def set_mode():
     # print(colors.red+session['mode']+colors.black)
     return session['mode']
 
+def get_structure_file():
+    '''reading priorities:
+    - built-in
+    - cif
+    - pdb
+    '''
+    struct_file=''
+    mol = session['mol']
+    if mol in crystals.Crystal.builtins:
+        struct_file=mol
+    else:
+        cif_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
+        if len(cif_files):
+            struct_file=cif_files[0]
+            base_file = os.path.basename(struct_file)[:-4]
+            ##crystals library is rubbish as saved cif messes up the symmetry
+        else:
+            pdb_files = glob.glob(os.path.join(mol_path(mol),'*.pdb'))
+            if len(pdb_files):
+                struct_file = pdb_files[0]
+    return struct_file
+
 ################################################
-#### frame
+#### frames related
 ################################################
 @app.route('/get_frame', methods=['POST'])
 def get_frame():
     data=json.loads(request.data.decode())
-    # zmax  = data['zmax']
-    frame = int(data['frame'])
-    exp_img,sim_img = ['static/images/dummy.png']*2
-    if session['dat']['sim']:
-        sim_img = get_frame_img(frame,'sim').tolist()
-    if session['dat']['exp']:
-        exp_img = get_frame_img(frame,'exp').tolist()
-    session['frame']=frame  #;print(frame)
-    return json.dumps({'exp':exp_img,'sim':sim_img})
+    return json.dumps(get_frame_img(int(data['frame']),data['type']).tolist() )
 
 @app.route('/update_keyval', methods=['POST'])
 def update_keyval():
@@ -137,7 +147,27 @@ def update_keyval():
     session['last_time']=time.time()
     return json.dumps({'key':form['key'],'val':session[form['key']]})
 
-
+def get_frame_img(frame,key):
+    offset = ''
+    if key=='sim':
+        frame=min(max(0,frame-session['offset']),session['sim']['nb_frames']-1)
+        offset='(%d frames offset )' %session['offset']
+    else:
+        frame=min(max(0,frame),session['exp']['nb_frames']-1)
+    # frame_str=str(frame+session[key]['min_frame']).zfill(session[key]['pad'])
+    # print(session[key]['pad'],frame,session[key]['min_frame'],frame_str)
+    # img_file = get_path(session['mol'],key,
+    #     '%s%s.%s' %(session[key]['prefix'],frame_str,session[key]['fmt']))
+    img_path = get_path(session['mol'],key,'*.%s' %session[key]['fmt'])
+    img_file = np.sort(glob.glob(img_path))[frame]
+    fmt = img_file.split('.')[-1]
+    im = readers.read(img_file)
+    wh = im.shape[0]
+    step=1
+    if wh>512:
+        step = wh//512#int(np.ceil())
+        im = im[::step,::step]
+    return im.flatten()
 
 
 
@@ -160,10 +190,10 @@ def init():
         init_session()
         session['new'] = True
 
-    #### Done at every refresh
+    #### Done at every init
     init_mol()
 
-    # print('init with session mode : '+colors.red+session['mode']+colors.black)
+    ####sanity checks
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
     if session['dat']['exp'] :
@@ -182,7 +212,6 @@ def init():
     # session_data['structures'] = [s for s in structures if s!=session['mol']]
     # session_data['gifs'] = gifs
     return json.dumps(session_data)
-
 
 def init_session():
     id = '%s_%s' %(session['username'],create_id())
@@ -211,8 +240,8 @@ def init_session():
 def init_mol():
     # print(colors.red+'init_mol'+colors.black)
     mol = session['mol']
-    sim = get_frames(mol,'sim')
-    exp = get_frames(mol,'exp')
+    sim = init_frames(mol,'sim')
+    exp = init_frames(mol,'exp')
     dat_type=update_exp_data(mol)
     dat = {
         'exp':type(exp)==dict,
@@ -266,7 +295,7 @@ def init_mol():
         crys_dat['nb_atoms']=len(crys.atoms)
         crys_dat['spg_ref']=False
         ### space group stuff
-        dataset = read_space_group(struct_file)  #;print(dataset)
+        dataset = ut.read_space_group(struct_file)  #;print(dataset)
         if not dataset:
             try :
                 dataset = crys.symmetry()
@@ -309,158 +338,15 @@ def init_mol():
     session['last_time']  = now
     session['time']       = now
 
-
-
+def init_frames(mol,frame_type):
+    frames_dict = readers.detect_frame(os.path.join(mol_path(mol),frame_type))
+    if frames_dict:
+        print(colors.green+'format detected for %s frames :' %frame_type, end="")
+        print(colors.yellow,'%s (%d)' %(frames_dict['fmt'],frames_dict['nb_frames']) ,colors.black)
+    return frames_dict
 
 def clear_session():
     print('warning:tmp directory %s not used since %d days. Removing content ...' %(session.get('path'),days))
     print(check_output('rm -rf %s/*' %session.get('path'),shell=True).decode())
     # init_args()
     print(colors.red+'init0'+colors.black)
-
-def get_structure_file():
-    '''reading priorities:
-    - built-in
-    - cif
-    - pdb
-    '''
-    struct_file=''
-    mol = session['mol']
-    if mol in crystals.Crystal.builtins:
-        struct_file=mol
-    else:
-        cif_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
-        if len(cif_files):
-            struct_file=cif_files[0]
-            base_file = os.path.basename(struct_file)[:-4]
-            ##crystals library is rubbish as saved cif messes up the symmetry
-        else:
-            pdb_files = glob.glob(os.path.join(mol_path(mol),'*.pdb'))
-            if len(pdb_files):
-                struct_file = pdb_files[0]
-    return struct_file
-
-
-def get_frames(mol,frame_type):
-    frames_dict=None
-    files = glob.glob(get_path(mol,frame_type,'*.*'))
-    if not len(files):
-        return
-    fmt,i = '',0
-    while fmt not in fmts:
-        fmt = files[i].split('.')[-1]
-        i+=1
-    print(colors.green+'format detected for %s frames :' %frame_type +colors.yellow+'%s' %fmt +colors.black)
-    # print(colors.red,get_path(mol,dat,'*'),colors.black)
-    if fmt:
-        frames    = np.sort(glob.glob(get_path(mol,frame_type,'*.%s' %fmt))).tolist()
-        nb_frames = len(frames)
-        min_pad   = int(np.ceil(np.log10(nb_frames)))
-        ###It is assumed that the frame number comes just before the extension
-        frame0    = os.path.basename(frames[0])
-        frame_str = re.findall(
-            r"[0-9]{%d,}\.%s" %(min_pad,fmt),
-            frame0)[0].replace('.%s' %fmt,'')
-        prefix    = frame0.replace('.%s' %fmt,'').replace(frame_str,'')
-        pad       = len(frame_str)
-        min_frame = int(frame_str)
-
-        # print('frames info : ', frame0,frame_str,pad,prefix,' ',min_frame)
-        max_frame    = int(os.path.basename(frames[-1]).replace('.'+fmt,'').replace(prefix,''))
-        frames_dict = {
-            'nb_frames':nb_frames,
-            'min_frame':min_frame,
-            'max_frame':max_frame,'pad':pad,'fmt':fmt,
-            'prefix':prefix,
-        }
-        # print(frames_dict)
-    return frames_dict
-
-fmts = ['mrc','tiff','cbf']
-def tiff_reader(tiff_file)  :
-    with open(tiff_file,'rb') as f:
-        I = tifffile.imread(f)
-    return I
-
-def cbf_reader(cbf_file):
-    content = cbf.read(cbf_file)
-    numpy_array_with_data = content.data
-    # header_metadata = content.metadata
-    # print(colors.blue,header_metadata,colors.black)
-    return numpy_array_with_data
-
-def mrc_reader(mrc_file):
-    with mrcfile.open(mrc_file) as mrc:
-        return mrc.data
-
-img_readers = {
-    'mrc' : mrc_reader,
-    'tiff': tiff_reader,
-    'cbf' : cbf_reader,
-}
-
-def get_frame_img(frame,key):
-    # session['modes']['analysis']='frames'
-    offset = ''
-    if key=='sim':
-        frame=min(max(0,frame-session['offset']),session['sim']['nb_frames']-1)
-        offset='(%d frames offset )' %session['offset']
-    else:
-        frame=min(max(0,frame),session['exp']['nb_frames']-1)
-    frame_str=str(frame+session[key]['min_frame']).zfill(session[key]['pad'])
-    # print(session[key]['pad'],frame,session[key]['min_frame'],frame_str)
-    img_file = get_path(session['mol'],key,
-        '%s%s.%s' %(session[key]['prefix'],frame_str,session[key]['fmt']))
-    fmt = img_file.split('.')[-1]
-    im = img_readers[fmt](img_file)
-    wh = im.shape[0]
-    step=1
-    if wh>512:
-        step = wh//512#int(np.ceil())
-        im = im[::step,::step]
-    # print(im.shape)
-    return im.flatten()
-
-
-def read_space_group(struct_file):
-    dataset={}
-    if struct_file.split('.')[-1]=='cif':
-        with open(struct_file,'r') as f:
-            lines=f.readlines()
-        spg_info = {
-            'lattice_system'      :['_space_group_crystal_system','_symmetry_cell_setting'],
-            'international_number':['_space_group_IT_number'     ,],
-            'international_symbol':['_space_group_name_H-M_alt'  ,'_symmetry_space_group_name_H-M'],
-        }
-
-        # (key,vals),l=next(spg_info),next(lines)
-        for l in lines:
-            if l.strip() in ['_space_group_symop_operation_xyz','_symmetry_equiv_pos_as_xyz']:
-                break
-            for key,vals in spg_info.items():
-                for v in vals:
-                    if v==l.split(' ')[0]:
-                        val = l.replace(v,'').strip(" '\n")
-                        # print('match found:',l.split(' ')[0],v,val)
-                        dataset[key]=val
-                        break
-
-    elif struct_file.split('.')[-1]=='pdb':
-        with open(struct_file,'r') as f:
-            lines=f.readlines()
-        for l in lines:
-            if 'SYMMETRY OPERATORS FOR SPACE GROUP' in l:
-                dataset['international_symbol'] = l.split(':')[1].strip()
-                break
-
-    if dataset:
-        print(colors.green+'Reading space group info manually in cif file'+colors.black)
-        if 'international_symbol' in dataset.keys() and 'international_number' not in dataset.keys():
-            with open('static/spg/spg_groups_hm.json','r') as f:
-                spg_hm=json.load(f)
-            hm = dataset['international_symbol']
-            if hm in spg_hm.keys():
-                dataset['international_number'] = spg_hm[hm]
-                print(colors.blue+'retrieved space group number from dictionary'+colors.black)
-
-    return dataset

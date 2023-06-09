@@ -15,7 +15,8 @@ def chrome_driver(pytestconfig):
         options.add_argument('headless')
 
     chrome_driver = webdriver.Chrome(options=options)
-    chrome_driver.get('http://localhost:%s/viewer' %pytestconfig.getoption('port'))
+    chrome_driver.get('http://%s:%s/viewer' %(
+        pytestconfig.getoption('ip'),pytestconfig.getoption('port')))
     if not pytestconfig.getoption('headless'):
         chrome_driver.maximize_window()
     return chrome_driver

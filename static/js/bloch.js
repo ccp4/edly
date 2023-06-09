@@ -522,7 +522,7 @@ angular.module('app')
     }
   }
 
-  $scope.set_rock_graphs=function(){
+  $scope.set_rock_graphs=function(init=0){
     $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
     $scope.set_available_graphs('int',$scope.info.modes['integrated']);
     $scope.set_available_graphs('Rfactor',$scope.info.modes['integrated'] && $scope.info.modes['pets']);
@@ -530,7 +530,9 @@ angular.module('app')
     if (!(all_graphs[$scope.info.graph] in $scope.info.graphs)){
       $log.log('graph ',$scope.info.graph,' not available')
       $scope.info.graph='thick';
-      $scope.update_graph();
+      if (!init){
+        $scope.update_graph();
+      }
     }
   }
 
@@ -837,29 +839,32 @@ angular.module('app')
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  $scope.init=function(){
-    // wait for the main ctrl init to be over
-    $scope.init_done=false;
-    let initInterval = setInterval(function(){
-      $http.get('init_done')
-      .then(function(response) {
-        $scope.init_done=response.data;
-        if ($scope.init_done){
-          clearInterval(initInterval);
-          $log.log('main init complete')
-          $scope.init_bloch_panel();
-          }
-          else{
-            $log.log('waiting for main init to complete')
-          }
-        })
-      },200);
-    }
+  // $scope.init=function(){
+  //   // wait for the main ctrl init to be over
+  //   $scope.init_done=false;
+  //   let initInterval = setInterval(function(){
+  //     $http.get('init_done')
+  //     .then(function(response) {
+  //       $scope.init_done=response.data;
+  //       if ($scope.init_done){
+  //         clearInterval(initInterval);
+  //         $log.log('main init complete')
+  //         $scope.init_bloch_panel();
+  //         }
+  //         else{
+  //           $log.log('waiting for main init to complete')
+  //         }
+  //       })
+  //     },200);
+  //   }
 
-  $scope.init_bloch_panel=function(){
-    $log.log('Starting init bloch panel');
-    $scope.init_bloch_done=false;
-    $http.get('init_bloch_panel')
+  // $scope.init_bloch_panel=function(){
+  $rootScope.$on('init_bloch_panel',
+    function(event,frame,init){
+      $scope.frame = frame;
+      $log.log('Starting init bloch panel');
+      $scope.init_bloch_done=false;
+      $http.get('init_bloch_panel')
       .then(function(response){
         $scope.theta_phi    = response.data.theta_phi.split(',');
         $scope.bloch        = response.data.bloch;
@@ -883,19 +888,21 @@ angular.module('app')
             'select': response.data.rock_name,
         }
         //
-        $scope.u_style[$scope.info.modes['u']] ={"border-style":'solid'};
-        $scope.u0_style[$scope.info.modes['u0']]={"border-style":'solid'};
         if (!($scope.rocks.name in $scope.rock_names)){
           $scope.rocks.select = $scope.rock_names[0];
         }
-        $scope.set_rock_graphs()
-        $scope.bloch_solve_reset();
-        $log.log('bloch init done');
-        $scope.update_bloch();
+        $scope.u_style[$scope.info.modes['u']] ={"border-style":'solid'};
+        $scope.u0_style[$scope.info.modes['u0']]={"border-style":'solid'};
         $scope.dmin_str=String($scope.bloch['dmin']).slice(0,4)
         $scope.init_bloch_done=true;
+        $scope.bloch_solve_reset();
+        $scope.set_rock_graphs(1)
+        $log.log('bloch init done');
+        // if (init){
+        //   $scope.update_bloch();
+        // }
       });
-  }
+    })
 
   $scope.info=bloch_shared;
   var changed=true;
@@ -921,7 +928,7 @@ angular.module('app')
   $scope.show={}
   $scope.auto_refresh=true;
   $scope.auto_refresh_style='';
-  $scope.init();
+  // $scope.init();
 
 }]);
 

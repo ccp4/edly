@@ -10,9 +10,10 @@ def pytest_addoption(parser):
         - h    : show this help
     '''
     # parser = argparse.ArgumentParser()
-    parser.addoption('--headless' ,action='store_true',default=False)
     parser.addoption('--port'     ,action="store" ,default=8020)
     parser.addoption('--sleep'    ,action="store" ,default=1)
+    parser.addoption('--ip'       ,action="store" ,default="localhost")
+    parser.addoption('--headless' ,action='store_true',default=False)
     # print(parser)
     # args = parser.parse_args()
 

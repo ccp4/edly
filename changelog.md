@@ -1,9 +1,22 @@
 # Version log
 ## 0.0.7dev
+###Fri  9 Jun 14:27:01 BST 2023
+- bug fixes :
+  - fixed CHUNK ERROR by sending only one image at a time
+  - fixed padding resolution for more general case
+  - fixed rock update on frames mode on refresh
+  - fixed calling `update_graph` in `set_rock_graphs` on init
+refactor :
+  - read image file directly using glob and frame number
+  - moved image readers to EDutils
+  - moved spacegroup to EDutils
+  - calling `init_bloch_panel` from `init` to guarantee order
+
+
 ###Thu  8 Jun 13:20:22 BST 2023
 - issue#26 : installation
   - tests can take parameters `sleep` and `headless` and `port`
-  - added fixtures 
+  - added fixtures
 
 ###Thu  8 Jun 11:24:06 BST 2023
 - option to run server in debug mode and with another port number

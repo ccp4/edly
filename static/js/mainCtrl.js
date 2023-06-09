@@ -155,17 +155,18 @@ angular.module('app').
   $scope.update_img=function(){
     $scope.frames.active_frame = $scope.frame;
     // $log.log('reloading frame',$scope.frames)
-    $http.post('get_frame',JSON.stringify({'frame':$scope.frame-1}))//,'zmax':$scope.zmax}))
-      .then(function(response){
-        $scope.data['exp'] = response.data.exp;
+    $http.post('get_frame',JSON.stringify({'frame':$scope.frame-1,'type':'exp'}))
+    .then(function(response){
+        $scope.data['exp'] = response.data;
         $scope.draw_frame("exp");
-
-        if ($scope.dat['sim']==true){
-          $scope.data['sim'] = response.data.sim;
-          $scope.draw_frame("sim");
-
-        }
-    });
+      });
+      if ($scope.dat['sim']==true){
+        $http.post('get_frame',JSON.stringify({'frame':$scope.frame-1,'type':'sim'}))
+        .then(function(response){
+            $scope.data['sim'] = response.data;
+            $scope.draw_frame("sim");
+        });
+      }
   }
 
   $scope.update_keyval=function(key,val,refresh){
@@ -227,8 +228,8 @@ angular.module('app').
         $scope.mode = response.data.mode;
         $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
-
-        $scope.update(1);
+        $rootScope.$emit('init_bloch_panel',$scope.frame,0);
+        $scope.update();
     });
   }
 
