@@ -229,9 +229,12 @@ angular.module('app').
         $scope.modes = response.data.modes;
         $scope.mode_style[$scope.mode]=sel_style;
         $rootScope.$emit('init_bloch_panel',$scope.frame,0);
-        $scope.update();
     });
   }
+  $rootScope.$on('update',function(event,data){
+      $scope.update();
+  })
+
 
   $scope.changed=true;
   // $scope.frame_offset_on=false;

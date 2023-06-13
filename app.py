@@ -167,7 +167,8 @@ def get_frame_img(frame,key):
     if wh>512:
         step = wh//512#int(np.ceil())
         im = im[::step,::step]
-    return im.flatten()
+    img = np.array(im.flatten()/im.max()*1000,dtype=int)
+    return img
 
 
 

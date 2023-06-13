@@ -898,9 +898,7 @@ angular.module('app')
         $scope.bloch_solve_reset();
         $scope.set_rock_graphs(1)
         $log.log('bloch init done');
-        // if (init){
-        //   $scope.update_bloch();
-        // }
+        $rootScope.$emit('update');
       });
     })
 

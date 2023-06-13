@@ -205,7 +205,7 @@ Parameters Panel
       <div ng-show="info.modes['u']=='rock'" class="">
         <div>
           <span> Rocking curve mode </span>
-          <span class="popup glyphicon"  ng-class="{'glyphicon-arrow-down':!expand['load_rock'],'glyphicon-arrow-up':expand['load_rock']}" ng-click="expand['load_rock']=!expand['load_rock']" ng-mouseenter="popup['show_load_rocks']=true" ng-mouseleave="popup['show_load_rocks']=false" >
+          <span id="showl_load_rock" class="popup glyphicon"  ng-class="{'glyphicon-arrow-down':!expand['load_rock'],'glyphicon-arrow-up':expand['load_rock']}" ng-click="expand['load_rock']=!expand['load_rock']" ng-mouseenter="popup['show_load_rocks']=true" ng-mouseleave="popup['show_load_rocks']=false" >
             <span class="popuptext" ng-show="popup['show_load_rocks']">Load previously <br> simulated data.</span>
           </span>
         </div>

@@ -1,5 +1,9 @@
 # Version log
 ## 0.0.7dev
+###Tue 13 Jun 12:33:39 BST 2023
+- minor changes to tests to get them to work headless for remote website
+- uses `rootScope` calls between controllers at init to force sequential execution 
+
 ###Fri  9 Jun 14:27:01 BST 2023
 - bug fixes :
   - fixed CHUNK ERROR by sending only one image at a time
