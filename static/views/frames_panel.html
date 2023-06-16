@@ -1,12 +1,11 @@
 <!-- Frames panel -->
-<div class="panel" ng-show="!modes['molecule'] && max_frame>0">
+<div class="panel bloch_panel" ng-show="!modes['molecule'] && max_frame>0">
   <div class="row">
       <span style="padding-left: 5px;font-size:18px" > Frames : </span>
       <span class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!expand['frame_settings'],'glyphicon-minus-sign':expand['frame_settings']}" ng-click="expand['frame_settings']=!expand['frame_settings']" ng-mouseenter="popup['frame_settings']=true" ng-mouseleave="popup['frame_settings']=false" >
         <span class="popuptext" ng-show="popup['frame_settings']"> settings  </span>
       </span>
   </div>
-
 
   <table>
     <!-- settings -->
@@ -44,7 +43,7 @@
     </td></tr>
     <!-- u frame (shown in bloch mode)-->
     <tr ng-show="mode=='bloch' && dat['pets']"><td>
-      <div style="padding:10px">
+      <div style="padding:10px;">
         $\mathbf u_{frame}$ =
          <span ng-bind="frames.u"></span>
          <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['u_frame']=true" ng-mouseleave="popup['u_frame']=false">

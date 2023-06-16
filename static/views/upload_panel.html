@@ -1,19 +1,103 @@
-<!--  ///////////////////////// -->
-<!-- Exp panel -->
-<!--  ///////////////////////// -->
-<div class="panel bloch_panel"  >
+<!-- importer -->
+<div class="panel bloch_panel" style="padding:0px">
+
+  <!-- header -->
+  <div>
+    <span style="padding-left: 5px;font-size:15px" > Import menu </span>
   <!-- ng-show="modes['analysis']=='frames' && !modes['molecule']"> -->
-  <a class="btn btn-primary myBtn popup" ng-click="upload('exp')" ng-mouseenter="showIt('exp')" ng-mouseleave="hideIt('exp')">
-    <img src="/static/images/exp_button.png" />
-    <span class="popuptext" ng-show="popup['exp']"> Upload experimental dataset </span>
-  </a>
-  <a class="btn btn-primary myBtn popup" ng-click="upload('sim')" ng-mouseenter="showIt('sim')" ng-mouseleave="hideIt('sim')">
-    <img src="/static/images/bloch_button.png" />
-    <span class="popuptext" ng-show="popup['sim']"> Upload simulated dataset </span>
-  </a>
-  <a class="btn btn-primary myBtn popup" ng-click="upload('pets')" ng-mouseenter="showIt('pets')" ng-mouseleave="hideIt('pets')">
-    <img src="/static/images/proc_button.png" />
-    <span class="popuptext" ng-show="popup['pets']">
-      Import processed data from :<br> pets,dials or xds </span>
-  </a>
+    <a class="popup" ng-click="expand['importer']=!expand['importer']" ng-mouseenter="showIt('expand_importer')" ng-mouseleave="hideIt('expand_importer')" style="float:right;bottom:0px">
+      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
+        <span class="popuptext" style="" ng-show="popup['expand_importer']" ng-bind="expand_str[expand['expand_importer']]"></span>
+      </span>
+    </a>
+  </div>
+
+  <!--content  -->
+  <div style="margin-left:5px;margin-bottom: 5px;" ng-show="expand['importer']">
+    <!-- buttons -->
+    <div style="margin-bottom: 5px;" >
+      <a class="btn-lg btn-primary popup" ng-style="import_style['frames']" ng-click="set_import('frames')" ng-mouseenter="showIt('import_frames')" ng-mouseleave="hideIt('import_frames')">
+        <span class="glyphicon glyphicon-th" />
+        <span class="popuptext" ng-show="popup['import_frames']"> Import experimental dataset </span>
+      </a>
+      <a class="btn-lg btn-primary popup" ng-style="import_style['pets']" ng-click="set_import('pets')" ng-mouseenter="showIt('import_pets')" ng-mouseleave="hideIt('import_pets')">
+        <span class="glyphicon glyphicon-cog" />
+        <span class="popuptext" ng-show="popup['import_pets']">
+          Import processed data (pets,dials or xds ) </span>
+      </a>
+      <a class="btn-lg btn-primary popup" ng-style="import_style['cif']" ng-click="set_import('cif')" ng-mouseenter="showIt('import_cif')" ng-mouseleave="hideIt('import_cif')">
+        <span class="gg-icon gg-share" style="margin-right: 10px;"/>
+        <span class="popuptext" ng-show="popup['import_cif']">
+          Import a cif file </span>
+      </a>
+    </div>
+
+    <!-- Import frames -->
+    <div ng-show="import_mode=='frames'">
+      <div style="font-size:16px" >Import Frames :</div>
+      <div>
+        <div style="font-size:16px;margin-left:10px" >Zenodo database : </div>
+        <a class="btn-sm btn-primary popup" style="float:right;margin-right:7px;margin-top:-5px" ng-click="download_frames()" ng-mouseenter="showIt('update_cloud')" ng-mouseleave="hideIt('update_cloud')">
+          <span class="glyphicon glyphicon-cloud" />
+          <span class="popuptext" ng-show="popup['update_cloud']"> update zenodo </span>
+        </a>
+        <select ng-model="zenodo.record" style="width: 200px;margin-left:20px" ng-options="x.title for x in zenodo.records" ng-change="change_files_table()" ></select>
+      </div>
+      <!-- record file table -->
+      <div style="margin-left:10px;margin-top:10px;margin-right:7px;margin-bottom: 10px;overflow-y: scroll;max-height: 30vh;">
+        <table class="table table-bordered" style="table-layout:fixed;width:99%"  >
+          <thead><tr style="width:70%"><th>file </th><th style="width:30%">size</th></tr>
+          <tbody>
+            <tr ng-repeat="(name,x) in zenodo.record.files">
+              <td style="word-wrap:break-word;">
+                <div style="cursor: pointer" ng-click="update_link(x)" ng-bind="name"> </div>
+              </td>
+              <td style=""><span ng-bind="x.size"/></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- link input and download button -->
+      <div>
+        link :
+        <input type="text" ng-model="download_link" style="width: 180px;" ng-key-enter="download_frames()" ng-change="">
+        <a ng-hide="frames_downloaded" style="margin:0px;" class="btn-sm btn-primary popup" ng-click="download_frames()" ng-mouseenter="showIt('download_frames')" ng-mouseleave="hideIt('download_frames')">
+          <span class="glyphicon glyphicon-cloud-download" />
+          <span class="popuptext" ng-show="popup['download_frames']"> Download frames from cloud to server </span>
+        </a>
+        <span ng-show="frames_downloaded" style="color:green;margin-left:5px;">
+          <span class="glyphicon glyphicon-saved" />
+        </span>
+      </div>
+
+      <!-- download info -->
+      <div ng-class="theta_phi" ng-show="download_info!='done'">
+        Download info :
+        <span ng-bind="download_info"></span>
+      </div>
+
+      <!-- content info -->
+      <div ng-class="theta_phi" ng-show="frames_downloaded">
+       <table class="table" style="table-layout:fixed;width:95%;overflow-y: scroll;max-height: 30vh;"  >
+         <thead><tr style="width:80%"><th> datasets </th><th style="width:20%">import</th></tr>
+         <tbody>
+           <tr ng-repeat="x in data_folders">
+             <td style="word-wrap:break-word;"><div ng-bind="x"> </div></td>
+             <td style="">
+               <a class="btn-sm btn-primary" ng-click="import_frames(x)" >
+                 <span class="glyphicon glyphicon-import" style="cursor: pointer"/>
+              </a>
+            </td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+    </div>
+
+    <!-- import pets -->
+    <div ng-show="import_mode['pets']">
+    </div>
+
+  </div><!-- expand -->
 </div>

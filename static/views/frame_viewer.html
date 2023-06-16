@@ -13,15 +13,22 @@
     </div>
   </div>
   <!-- Experimental frame  -->
-  <div class="col-sm-6" ng-if="dat['exp']==true">
+  <div class="col-sm-6" style="margin-top:20px;margin-bottom:30px;padding-bottom:20px;background-color: #537887;" ng-if="dat['exp']==true">
     <h3> Experimental Frames </h3>
-    <div class="row" >
-      <div style="text-align:center">Brightness:<input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px"></div>
-    </div>
-    <div class="row">
-      <div class="frame">
-        <canvas id="canvas_exp" style="border:1px solid grey"></canvas>
-      </div>
+    <div style="display:grid;justify-content: space-around">
+      <table style="" ><tbody>
+        <tr><td>
+          <span style="float:left" ng-bind="exp_folder"/>
+          <span style="float:right">Brightness:
+            <input type="number" ng-model="zmax['exp']" ng-keypress=update_zmax($event,'exp') style="width: 70px;"/>
+          </span>
+        </td></tr>
+        <tr class="frame" ><td>
+          <!-- style="text-align:center;margin-bottom:20px;"> -->
+          <canvas id="canvas_exp" style="border:1px solid grey"></canvas>
+        </td></tr>
+      </tbody></table>
     </div>
   </div>
+
 </div><!-- container-->

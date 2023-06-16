@@ -1,8 +1,15 @@
 # Version log
 ## 0.0.7dev
+###Fri 16 Jun 10:21:28 BST 2023
+- issue#44 import info
+  - import frames from local database (creates symlink to exp)
+  - download and extract from zenodo to local database 
+  - browse zenodo database
+
+
 ###Tue 13 Jun 12:33:39 BST 2023
 - minor changes to tests to get them to work headless for remote website
-- uses `rootScope` calls between controllers at init to force sequential execution 
+- uses `rootScope` calls between controllers at init to force sequential execution
 
 ###Fri  9 Jun 14:27:01 BST 2023
 - bug fixes :

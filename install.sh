@@ -4,7 +4,7 @@ echo $version
 
 python3 -m venv .env
 source bin/activate
-.env/bin/pip install flask plotly wheel tarikDrevonUtils
+.env/bin/pip install flask plotly wheel opencv-python tarikDrevonUtils
 # cd .env
 
 if [ $1 -eq dev ];then
@@ -21,3 +21,12 @@ fi
 bower install jquery angular angular-aria angular-touch angular-bootstrap bootstrap-css bootstrap angular-chart jquery-ui plotly MathJax
 cd static
 ln -s ../bower_components .
+
+
+###
+if [ $2 -eq test ];then
+  pip install selenium==4.9.1
+  if [ $(chromium.chromedriver --version | cut -d" " -f2) == "114.0.5735.106"];then
+    echo ok
+  fi
+fi

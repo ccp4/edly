@@ -22,6 +22,42 @@ felix_path = lambda mol:os.path.join(mol_path(mol),'felix')
 felix_pkl  = lambda session:os.path.join(felix_path(session['mol']),'felix.pkl')
 sim_path   = lambda mol:os.path.join(mol_path(mol),'rocks')
 
+def data_path(link):
+    filename=os.path.basename(link.replace('?download=1',''))
+    fmt=get_compressed_fmt(filename)                            #;print('fmt:',fmt)
+    #not good but should work
+    record='custom'
+    if 'zenodo.org' in link :
+        # print(link.split('record/'))
+        record=link.split('record/')[1].split('/files')[0]
+
+    filename=filename.replace('.%s' %fmt,'')
+    return 'static/database/%s_%s' %(record,filename)
+
+uncompress_fmts={
+    'zip'       :'unzip',
+    # 'h5'        :'',
+    'bz2'       :'bunzip2',
+    'rar'       :'unrar',
+    'tar'       :'tar -xvf',
+    'ser.bz2'   :'bunzip2',
+    'tar.bz2'   :'tar -xvjf',
+    'tar.gz'    :'tar -xvzf',
+    'tar.xz'    :'tar -xJf',
+    # 'LP'        :'',
+    # 'LP.bz2'    :''
+}
+compress_fmts = list(uncompress_fmts.keys())
+def get_compressed_fmt(link):
+    filename=os.path.basename(link.replace('?download=1',''))   #;print(filename)
+    fmts=[fmt for fmt in compress_fmts if fmt in filename]      #;print(fmts)
+    if len(fmts)==1:
+        return fmts[0]
+    elif len(fmts)==2:
+        return fmts[1]
+    else:
+        return ''
+
 pets_data={}
 
 def update_exp_data(mol):

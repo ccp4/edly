@@ -5,15 +5,15 @@ import tifffile,mrcfile,cbf
 from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
 from functools import wraps
 import numpy as np,pandas as pd
-from EDutils import utilities as ut             #;imp.reload(ut)
-from EDutils import readers                 ;imp.reload(readers)
-# from EDutils import felix as fe                 #;imp.reload(fe)
+from EDutils import utilities as ut                 #;imp.reload(ut)
+from EDutils import readers                         #;imp.reload(readers)
+# from EDutils import felix as fe                   #;imp.reload(fe)
 from utils import displayStandards as dsp
 from utils import glob_colors as colors
 import plotly.express as px
 import plotly.graph_objects as go
 from blochwave import bloch
-from blochwave import bloch_pp as bl            #;imp.reload(bl)
+from blochwave import bloch_pp as bl                #;imp.reload(bl)
 from in_out import*
 app = Blueprint('app', __name__)
 def login_required(f):
@@ -25,11 +25,100 @@ def login_required(f):
         else:
             # flash("You need to login first")
             return redirect(url_for('login'))
+# records=ut.load_pkl('static/spg/records.pkl')
+
+######################################################
+#### import related
+######################################################
 
 @app.route('/get_dl_state', methods=['GET'])
 def get_dl_state():
-    cmd="grep '%'  dl.log  | tail -n1 | sed -rE 's/([0-9]*%)/;\\1;/g' | cut -d';' -f2"
-    return subprocess.check_output(cmd,shell=True).decode().strip()
+    log_file="%s/dl.log" %(session['path'])
+    cmd=r"grep '%%'  %s" %log_file
+    cmd+=r" | tail -n1 | sed -rE 's/([0-9]*%%)/;\1;/g' | cut -d';' -f2"
+    dl_state=check_output(cmd,shell=True).decode().strip()
+    msg='Download state : \n%s\n' %dl_state
+    if dl_state=="100%":
+        cmd = 'tail -n1 %s' %os.path.realpath("%s/uncompress.log" %session['path'])
+        file_extract=check_output(cmd,shell=True).decode().strip()
+        msg='Extracting : \n%s\n' %file_extract
+    return msg
+
+@app.route('/download_frames', methods=['POST'])
+def download_frames():
+    link = request.data.decode()
+    job  = r'''#!/bin/bash
+#auto generated download and uncompress job script
+
+if [ ! -d {filepath} ];then
+    mkdir -p {filepath}
+fi
+cd {filepath}
+wget -o {log_path} -O {filename} {link}
+{uncompress_cmd} {filename} > {cmd_log}
+rm {filename}
+    '''.format(
+        filepath        = os.path.realpath(data_path(link)),
+        log_path        = os.path.realpath("%s/dl.log" %session['path']),
+        link            = link.replace('?download=1',''),
+        filename        = os.path.basename(link.replace('?download=1','')),
+        uncompress_cmd  = uncompress_fmts[get_compressed_fmt(link)],
+        cmd_log         = os.path.realpath("%s/uncompress.log" %session['path']),
+    )#;print(job)
+
+    job_file="%s/dl.sh" %(session['path'])      #;print(job_file)
+    with open(job_file,'w') as f :
+        f.write(job)
+
+    cmd = 'bash %s' %job_file
+    out=check_output(cmd,shell=True).decode().strip()#;print(out)
+    return out
+
+@app.route('/import_frames', methods=['POST'])
+def import_frames():
+    link=request.data.decode()
+    fmt=get_compressed_fmt(link)
+    if fmt not in compress_fmts:
+        msg='Compressed file should be of the following formats :\n %s' %(','.join(compress_fmts))
+    else:
+        msg='ready to download'
+    return json.dumps({'msg':msg})
+
+@app.route('/check_dl_frames', methods=['POST'])
+def check_dl_frames():
+    link     = request.data.decode()
+    filepath = data_path(link)                #;print(filepath)
+    dl       = os.path.exists(data_path(link))
+    folders  = []
+    if dl:
+        cmd=r'cd {path};for dir in `find {folder} -type d`;do for fmt in img cbf smv tiff;do find $dir -maxdepth 1 -type f -name "*.$fmt" -not -name ".*" | head -n1;done;done'.format(
+            path    = 'static/database',
+            folder  = os.path.basename(filepath),
+        )
+        # print(cmd)
+        files = check_output(cmd,shell=True).decode().strip()
+        folders = [os.path.dirname(f) for f in files.split('\n')]
+        # print(files,folders)
+    return json.dumps({'dl':dl,'folders':folders})
+
+@app.route('/create_sym_link', methods=['POST'])
+def create_sym_link():
+    folder = request.data.decode()  #;print(folder)
+    cmd='if [ -L {exp_path} ];then rm {exp_path};fi;ln -s {folder} {exp_path}'.format(
+        folder   =os.path.realpath('static/database/%s' %folder),
+        exp_path = os.path.join(mol_path(session['mol']),'exp')
+        )
+    # print(cmd)
+    out=check_output(cmd,shell=True).decode().strip()    #;print(out)
+    session['exp'] = init_frames(session['mol'],'exp')
+    session['dat']['exp']=True
+    return json.dumps({'dat':session['dat'],
+        'nb_frames':session['exp']['nb_frames'],
+        'folder':session['exp']['folder'],
+        })
+
+
+
 
 ######################################################
 #### Structure related
@@ -159,7 +248,7 @@ def get_frame_img(frame,key):
     # img_file = get_path(session['mol'],key,
     #     '%s%s.%s' %(session[key]['prefix'],frame_str,session[key]['fmt']))
     img_path = get_path(session['mol'],key,'*.%s' %session[key]['fmt'])
-    img_file = np.sort(glob.glob(img_path))[frame]
+    img_file = np.sort(glob.glob(img_path))[frame]  #;print(img_file)
     fmt = img_file.split('.')[-1]
     im = readers.read(img_file)
     wh = im.shape[0]
@@ -167,7 +256,11 @@ def get_frame_img(frame,key):
     if wh>512:
         step = wh//512#int(np.ceil())
         im = im[::step,::step]
-    img = np.array(im.flatten()/im.max()*1000,dtype=int)
+    min_v = 0#im.mean()
+    scale = 1#3000/im.max()
+    im = np.maximum(im.flatten()-min_v,0)*scale
+    # print(min_v,scale)
+    img = np.array(im,dtype=int)
     return img
 
 
@@ -194,6 +287,10 @@ def init():
     #### Done at every init
     init_mol()
 
+    ### get zenodo records
+    # records_d=records.title.to_dict()
+    # json_records=json.dumps(dict(zip(records_d.values(),records.keys())
+
     ####sanity checks
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
@@ -204,8 +301,12 @@ def init():
     ####### package info to frontend
     info=['mol','dat','frame','crys','mode','zmax','nb_frames',
         'offset','cmap','cmaps','heatmaps','nb_colors',
-        'new','b0_path']
+        'new','b0_path',]
     session_data = {k:session[k] for k in info}
+    folder=''
+    if session['dat']['exp']:
+        folder=session['exp']['folder']
+    session_data['folder']=folder
     session['init'] = True
     # print(colors.magenta+'init done : ',session['init'],colors.black)
 
@@ -245,13 +346,13 @@ def init_mol():
     exp = init_frames(mol,'exp')
     dat_type=update_exp_data(mol)
     dat = {
-        'exp':type(exp)==dict,
-        'sim':type(sim)==dict,
-        'pets':type(dat_type)==str,
-        'dat_type':dat_type,
-        'felix':os.path.exists(os.path.join(mol_path(mol),'felix')),
-        'rock':False,
-        'omega':0,
+        'exp'       : type(exp)==dict,
+        'sim'       : type(sim)==dict,
+        'pets'      : type(dat_type)==str,
+        'dat_type'  : dat_type,
+        'felix'     : os.path.exists(os.path.join(mol_path(mol),'felix')),
+        'rock'      : False,
+        'omega'     : 0,
         }
 
     # get the max number of frames for frontend from frames simulated/experimental frames
@@ -326,7 +427,7 @@ def init_mol():
         # print('mol init :',session['bloch_modes'])
         if session['bloch_modes']['u0']=='auto' and not dat['pets']:
             session['bloch_modes']['u0'] = 'edit'
-    if not session.get('frame'):session['frame'] = 1
+    if not session.get('frame') :session['frame']  = 1
     if not session.get('offset'):session['offset'] = 0
 
     now = time.time()
@@ -340,10 +441,13 @@ def init_mol():
     session['time']       = now
 
 def init_frames(mol,frame_type):
-    frames_dict = readers.detect_frame(os.path.join(mol_path(mol),frame_type))
+    frame_path  = os.path.join(mol_path(mol),frame_type)
+    frames_dict = readers.detect_frame(frame_path)
     if frames_dict:
         print(colors.green+'format detected for %s frames :' %frame_type, end="")
         print(colors.yellow,'%s (%d)' %(frames_dict['fmt'],frames_dict['nb_frames']) ,colors.black)
+        cmd = "basename `readlink %s`" %frame_path
+        frames_dict['folder'] = check_output(cmd,shell=True).decode().strip()
     return frames_dict
 
 def clear_session():

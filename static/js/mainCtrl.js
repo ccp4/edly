@@ -5,6 +5,19 @@ angular.module('app').
   var timer;
   var sel_style = {"border-style":'solid','background-color':'#18327c'};
 
+  // mouseenter event
+  $scope.showIt = function (val) {
+      timer = $timeout(function () {
+          $scope.popup[val] = true;
+      }, 500);
+  };
+  // mouseleave event
+  $scope.hideIt = function (val) {
+      $timeout.cancel(timer);
+      $scope.popup[val]=false;
+  };
+
+
   $scope.set_mode=function(val){
     $scope.mode_style[$scope.mode] = '';
     $scope.mode = val;
@@ -22,20 +35,6 @@ angular.module('app').
         }
       });
   }
-
-
-  // mouseenter event
-  $scope.showIt = function (val) {
-      timer = $timeout(function () {
-          $scope.popup[val] = true;
-      }, 500);
-  };
-  // mouseleave event
-  $scope.hideIt = function (val) {
-      $timeout.cancel(timer);
-      $scope.popup[val]=false;
-  };
-
 
   $scope.update = function(init=0){
     switch ($scope.mode){
@@ -56,6 +55,71 @@ angular.module('app').
       case 'ms':
         $log.log('ms');break;
     }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  //Import
+  ///////////////////////////////////////////////////////////////////
+  $scope.set_import=function(val){
+    $scope.import_style[$scope.import_mode]=false;
+    $scope.import_mode = val;
+    $scope.import_style[val]=sel_style;
+  }
+
+  $scope.update_link=function(file){
+    $scope.download_link='https://zenodo.org'+file.link;
+    $scope.check_dl_frames();
+  }
+
+  $scope.check_dl_frames=function(){
+    $http.post('check_dl_frames',$scope.download_link)
+    .then(function(response){
+      $scope.frames_downloaded=response.data.dl;
+      if ($scope.frames_downloaded){
+        $scope.data_folders=response.data.folders;
+      }
+    })
+  }
+
+  $scope.change_files_table=function(){
+    // $log.log($scope.zenodo.record)
+    $scope.update_link($scope.zenodo.record.files[Object.keys($scope.zenodo.record.files)[0]])
+    $scope.download_info='done';
+  }
+
+  $scope.download_frames=function(){
+    $http.post('import_frames',$scope.download_link)
+    .then(function(response){
+      $scope.download_info=response.data.msg;
+
+      // $log.log($scope.download_info,$scope.download_info=='ready to download' )
+      if ($scope.download_info=='ready to download'){
+        var interval = $interval(function () {
+          $http.get('get_dl_state')
+          .then(function(response) {
+            $scope.download_info=response.data;
+          })
+        },500);
+        $http.post('download_frames',$scope.download_link)
+        .then(function(response){
+          $interval.cancel(interval);
+          $scope.download_info='done';
+          $scope.check_dl_frames();
+        })
+      }
+    })
+  }
+
+  $scope.import_frames=function(folder){
+    $http.post('create_sym_link',folder)
+    .then(function(response){
+      $scope.dat                 = response.data.dat;
+      $scope.max_frame           = response.data.nb_frames;
+      $scope.exp_folder          = response.data.folder;
+      $scope.frame               = 1;
+      $scope.frames.active_frame = $scope.frame;
+      $scope.update();
+    })
   }
 
 
@@ -202,6 +266,7 @@ angular.module('app').
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
+
   $scope.init = function(){
     $http.get('init')
       .then(function(response){
@@ -210,9 +275,13 @@ angular.module('app').
         $scope.cif_file  = $scope.crys.file!='?';
         // $log.log($scope.crys.file,$scope.cif_file)
         // frames related stuffs
-        $scope.dat       = response.data.dat;
-        $scope.frame     = response.data.frame;
-        $scope.max_frame = response.data.nb_frames;
+        $scope.dat                 = response.data.dat;
+        $scope.frame               = response.data.frame;
+        $scope.max_frame           = response.data.nb_frames;
+        $scope.exp_folder          = response.data.folder;
+        $scope.frames.active_frame = response.data.frame;
+        $scope.frames.offset       = response.data.offset;
+        $scope.frames.u            = '';
 
         $scope.data      = {'exp':0,'sim':0};
         $scope.zmax      = response.data.zmax;
@@ -220,9 +289,14 @@ angular.module('app').
         $scope.heatmaps  = response.data.heatmaps;
         $scope.cmaps     = response.data.cmaps;
         $scope.caxis     = {'cmap':response.data.cmap};
-        $scope.frames.offset = response.data.offset;
-        $scope.frames.active_frame = response.data.frame;
-        $scope.frames.u = '';
+
+        // $scope.zenodo_records = response.data.zenodo_records;
+        $http.get('/static/spg/records.json')
+        .then(function(response){
+          $scope.zenodo.records = response.data;
+          $scope.zenodo.record  = $scope.zenodo.records[Object.keys($scope.zenodo.records)[0]];
+          $scope.update_link($scope.zenodo.record.files[Object.keys($scope.zenodo.record.files)[0]])
+        })
 
         // mode : frames, bloch, felix
         $scope.mode = response.data.mode;
@@ -234,10 +308,16 @@ angular.module('app').
   $rootScope.$on('update',function(event,data){
       $scope.update();
   })
-
-
+  $scope.zenodo={'record':'','records':''}
   $scope.changed=true;
+  $scope.frames_downloaded=false;
+  $scope.download_info='done';
+  $scope.import_mode='frames';
+  $scope.import_style = {frames:'',pets:'',cif:''};
+  $scope.import_style[$scope.import_mode]=sel_style;
+
   // $scope.frame_offset_on=false;
+
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={'rock_settings':true};
