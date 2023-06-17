@@ -123,7 +123,7 @@
   <div id="dialog" title="new project">
     <p>Create a new structure?</p>
     <!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span> -->
-    <form>
+    <form id="form_cif">
       <fieldset>
         <label for="name">Name</label>
         <input type="text" name="name" id="name" value="" class="text ui-widget-content ui-corner-all">
@@ -145,7 +145,7 @@
         </div>
         <div id="cif_file">
           <label for="file_cif"> file : </label>
-          <input type = "file" class="glyphicon glyphicon-file" name = "file_cif" id="file_cif" onchange="upload_cif()"/>
+          <input type = "file" class="glyphicon glyphicon-file" name = "file" id="input_cif_file" onchange="upload_file('cif')"/>
         </div>
 
         <!-- Allow form submission with keyboard without duplicating the dialog button -->

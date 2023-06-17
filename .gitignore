@@ -16,7 +16,8 @@ dat/*
 **/png
 **/tiff
 static/data
-
+test/dat
+test/*
 
 # Distribution / packaging
 .Python

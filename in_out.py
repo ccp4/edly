@@ -15,6 +15,28 @@ get_path   = lambda mol,key,frame_str:os.path.join(mol_path(mol),key,frame_str)
 pets_path  = lambda mol:os.path.join(mol_path(mol),'pets','%s.pts' %mol)
 dials_path = lambda mol:os.path.join(mol_path(mol),'dials')
 xds_path   = lambda mol:os.path.join(mol_path(mol),'xds','XDS_ASCII.HKL')
+dat_path   = lambda mol:os.path.join(mol_path(mol),'dat')
+tmp_dat_folder = lambda session:os.path.join(session['path'],'tmp_dat')
+proc_dat_files  = {
+    'xds'  : ['XDS_ASCII.HKL'],
+    'pets' : ['*.pts','*.rpl','*.xyz','*.cor','*.hkl','*.cenloc','*.cif_pets','*_dyn.cif_pets','*.cif'],
+    'dials': ['*.expt', '*.refl','reflections.txt'],
+    }
+def check_proc_data(path):
+    missing_files='?'
+    dtype='unknown'
+    for dat_type,dat_files in proc_dat_files.items():
+        files = np.array([len(glob.glob(os.path.join(path,f)))>=1
+            for f in dat_files])
+        if ~all(files) and any(files):
+            dtype=dat_type
+            missing_files=', '.join(np.array(dat_files)[~files])
+        if all(files):
+            dtype=dat_type;
+            missing_files=''
+            break
+    return {'dat_type':dtype,'missing_files':missing_files}
+
 ### simulations paths
 get_pkl    = lambda id:'static/data/tmp/%s/b.pkl' %id
 rock_path  = lambda id:'static/data/tmp/%s/rock_.pkl' %id
@@ -60,29 +82,48 @@ def get_compressed_fmt(link):
 
 pets_data={}
 
-def update_exp_data(mol):
-    dat_type=None
-    if os.path.exists(dials_path(mol)):
-        dat_type='dials'
-    elif os.path.exists(pets_path(mol)):
-        dat_type='pets'
-    elif os.path.exists(xds_path(mol)):
-        dat_type='xds'
+def get_dat_types(mol):
+    dat_types = [dat_type  for dat_type in ['dials','pets','xds']
+        if os.path.exists(os.path.join(mol_path(mol),dat_type))]
+    return dat_types
 
-    if not mol in pets_data.keys():
-        if os.path.exists(dials_path(mol)):
-            pets_data[mol]=dials.Dials(dials_path(mol))
-        elif os.path.exists(pets_path(mol)):
-            pets_data[mol]=pets.Pets(pets_path(mol),gen=False,dyn=0)
-        elif os.path.exists(xds_path(mol)):
-            pets_data[mol]=xds.XDS(xds_path(mol))
+def load_dat_type(mol):
+    dat_type = get_dat_type(mol)        #;print(dat_type)
+    if dat_type=='dials':
+        pets_data[mol]=dials.Dials(dials_path(mol))
+    elif dat_type=='pets':
+        pets_data[mol]=pets.Pets(pets_path(mol),gen=False,dyn=0)
+    elif dat_type=='xds':
+        pets_data[mol]=xds.XDS(xds_path(mol))
+    # print(list(pets_data.keys()))
     print(colors.green+'processed data type for structure %s : %s' %(mol,dat_type)+colors.black)
     return dat_type
 
-def load_pets(session):
-    pts_file = pets_path(session['mol'])
-    if os.path.exists(pts_file):
-        return pets.Pets(pts_file)
+def get_dat_type(mol):
+    dat_type=None
+    if os.path.exists(dat_path(mol)):
+        cmd = 'basename `readlink %s`' %dat_path(mol)      #;print(cmd)
+        dat_type = check_output(cmd,shell=True).decode().strip()#;print(dat_type)
+    return dat_type
+
+def select_dat_type(mol,dat_type):
+    cmd = 'cd {mol_path};if [ -L dat ];then rm dat;fi;ln -s {dat_type} dat'.format(
+        dat_type = dat_type,
+        mol_path = mol_path(mol),
+    )
+    out = check_output(cmd,shell=True).decode().strip();print(out)
+
+
+def update_exp_data(mol):
+    dat_type=''
+    dat_types=get_dat_types(mol)
+    if len(dat_types):
+        #if data are available but no link is found,
+        #create one for the first available data
+        if not os.path.exists(dat_path(mol)):
+            select_dat_type(mol,dat_types[0])
+        dat_type=load_dat_type(mol)
+    return dat_type
 
 def load_felix(session):
     if not os.path.exists(felix_pkl(session)):

@@ -207,14 +207,14 @@ function show_error(data,err){
   $('#cif_error').show()
 }
 
-function upload_cif(){
-  var files = $('#file_cif')[0].files;
+function upload_file(file_type){
+  var files = $('#input_'+file_type+'_file')[0].files;
   if (files.length>0) {
     var file = files[0];
     extension = file.name.split('.').pop();
     // console.log(extension);
-    if (extension !='cif'){
-      show_error('upload a cif file thank you',true);return
+    if (file_type=='cif' && extension !=file_type){
+      show_error('upload a '+file_type+' file thank you',true);return
     }
     else{
       // console.log(file.size);
@@ -222,18 +222,34 @@ function upload_cif(){
         show_error('max upload size is 10Mo',true);return
       }
       else{
-        // console.log(file);
+        var form = $('#form_'+file_type)[0];
+        // console.log(files,form);
         $.ajax({
-         url: 'upload_cif',
+         url: 'upload_file',
          type: 'POST',
          // data: {'name':file.name},
-         data: new FormData($('form')[0]),
+         data: new FormData(form),
          cache: false,
          contentType: false,
          processData: false,
          success: function(data){
-           if (data!='ok'){show_error(data,true)}
-          else{show_error(data,false)}
+           if (file_type=='cif'){
+             if (data!='ok'){
+               show_error(data,true)
+             }
+             else{
+               show_error(data,false)
+             }
+           }
+           else if (file_type =='dat'){
+             elt = $('#input_'+file_type+'_file')[0]
+             angular.element(elt).scope().check_dat();
+           }
+           else if (file_type =='Cif'){
+             elt = $('#input_'+file_type+'_file')[0]
+             angular.element(elt).scope().check_cif();
+           }
+
          },
        });
      }
@@ -287,6 +303,12 @@ function update_formula(formula){
   MathJax.Hub.Queue(["Text",math,formula]);
 }
 
+function get_file_name(id){
+  return $('#input_'+id+'_file')[0].files[0].name;
+}
+function clear_files(id){
+  return $('#input_'+id+'_file')[0].value="";
+}
 
 function show_popup(elt){
   popup=document.getElementById(elt)

@@ -27,10 +27,34 @@ def login_required(f):
             return redirect(url_for('login'))
 # records=ut.load_pkl('static/spg/records.pkl')
 
+
+
+@app.route('/set_mode', methods=['POST'])
+def set_mode():
+    data = request.data.decode() #json.loads(request.data.decode())
+    session['mode'] = data
+    # print(colors.red+session['mode']+colors.black)
+    return session['mode']
+
 ######################################################
 #### import related
 ######################################################
+@app.route('/upload_file', methods=['POST'])
+def upload_file():
+    try:
+        f = request.files['file']
+        # print(request.files)
+        filename = os.path.join(session['path'],'upload',f.filename)
+        f.save(filename)
+        return 'ok'
+    except Exception as e:
+        msg='could not import file:'
+        print(colors.red+msg)
+        print(colors.magenta,e,colors.black)
+        return "%s : %s" %(msg, e.__str__())
 
+################
+#### import frames
 @app.route('/get_dl_state', methods=['GET'])
 def get_dl_state():
     log_file="%s/dl.log" %(session['path'])
@@ -117,25 +141,81 @@ def create_sym_link():
         'folder':session['exp']['folder'],
         })
 
+################
+#### import dats
+@app.route('/check_dat', methods=['POST'])
+def check_dat():
+    filename = request.data.decode() #;print(data)
+    new_filename = filename.strip('()').replace(' ','_')#;print(new_filename)
+    data_folder  = tmp_dat_folder(session)
+    unzip_cmd=''
+    if filename.split('.')[-1] == 'zip':
+        unzip_cmd='unzip %s >/dev/null;rm %s;' %((new_filename,)*2)
+
+    cmd="\
+if [ -d  {data_folder} ];then rm -rf {data_folder};fi;\
+mkdir {data_folder};\
+mv '{filepath}' {data_folder}/{new_filename};\
+cd {data_folder};{unzip_cmd}\
+".format(
+        data_folder  = data_folder,
+        unzip_cmd    = unzip_cmd,
+        filepath     = os.path.join(session['path'],'upload',filename),
+        new_filename = new_filename,
+    )#;print(colors.magenta,cmd,colors.black)
+
+    out=check_output(cmd,shell=True).decode().strip()#;print(out)
+    dat_info=check_proc_data(data_folder)
+    # print(dat_info)
+    return json.dumps(dat_info)
 
 
+@app.route('/import_dat', methods=['POST'])
+def import_dat():
+    # dat_type = request.data.decode()  #;print(folder)
+    tmp_folder  = tmp_dat_folder(session)
+    dat_info    = check_proc_data(tmp_folder)
+    cmd = 'if [ -d {dat_path} ];then rm -rf {dat_path};fi;mv {tmp_path} {dat_path}'.format(
+        tmp_path = tmp_folder,
+        dat_path = os.path.join(mol_path(session['mol']),dat_info['dat_type'])
+    )#;print(cmd)
+    out=check_output(cmd,shell=True).decode().strip()#;print(out)
+    return out
+
+@app.route('/load_dat_type', methods=['POST'])
+def load_data_type():
+    dat_type = request.data.decode()
+    select_dat_type(session['mol'],dat_type)
+
+    dat_type  = load_dat_type(session['mol'])
+    dat_types = get_dat_types(session['mol'])
+    session['dat']['pets']      = any(dat_types)
+    session['dat']['dat_type']  = dat_type
+    session['dat']['dat_types'] = dat_types
+    return json.dumps(session['dat'])
+
+################
+#### import cif
+@app.route('/import_cif', methods=['POST'])
+def import_cif():
+    filename = request.data.decode() #;print(data)
+    new_filename = filename.strip('()').replace(' ','_')#;print(new_filename)
+
+    cmd="rm -f {mol_path}/*.cif; mv '{filepath}' {mol_path}/{new_filename};rm -f {path}*.cif;rm -f {path}/upload/*.cif".format(
+        filepath     = os.path.join(session['path'],'upload',filename),
+        mol_path     = mol_path(session['mol']),
+        new_filename = new_filename,
+        path         = session['path'],
+    )#;print(colors.magenta,cmd,colors.black)
+
+    out=check_output(cmd,shell=True).decode().strip()#;print(out)
+
+    crys_dat = init_structure()
+    return json.dumps(crys_dat)
 
 ######################################################
 #### Structure related
 ######################################################
-@app.route('/upload_cif', methods=['POST'])
-def upload_cif():
-    try:
-        f = request.files['file_cif']
-        cif_file=os.path.join(session['path'],f.filename)
-        f.save(cif_file)
-        return 'ok'
-    except Exception as e:
-        msg='could not import cif file:'
-        print(colors.red+msg)
-        print(colors.magenta,e,colors.black)
-        return "%s : %s" %(msg, e.__str__())
-
 @app.route('/new_structure', methods=['POST'])
 def new_structure():
     data = request.form
@@ -189,13 +269,6 @@ def set_structure():
     session['mol']=data['mol']
     init_mol()
     return session['mol']
-
-@app.route('/set_mode', methods=['POST'])
-def set_mode():
-    data = request.data.decode() #json.loads(request.data.decode())
-    session['mode'] = data
-    # print(colors.red+session['mode']+colors.black)
-    return session['mode']
 
 def get_structure_file():
     '''reading priorities:
@@ -339,22 +412,76 @@ def init_session():
     session['heatmaps']  = {k:np.array(255 * np.array(dsp.getCs(k, session['nb_colors'])).flatten(), dtype=np.uint8).tolist()
         for k in session['cmaps']}
 
+def init_structure():
+    struct_file = get_structure_file()
+    crys_dat=dict(zip(
+    ['file','a','b','c','alpha','beta','gamma','a1', 'a2', 'a3','chemical_formula',
+        'nb_atoms','lattice_system'],
+    ['?']*13))
+    crys_dat['spg_ref']=False
+    if struct_file:
+        try:
+            b0=bloch.Bloch(struct_file,path=session['path'],init=False,name='b',solve=False,Nmax=1)
+            print('saving bloch object')
+            b0.save()
+            # b0=ut.load_pkl(session['b0_path'])
+        except:
+            return crys_dat
+            
+        crys,cif_file = b0.crys,b0.cif_file
+        crys_dat = {'file':os.path.basename(cif_file),'cif_file':cif_file}
+        crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
+        crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
+            b_str(crys.lattice_parameters,2).split(',') )))
+        formula = re.sub("([0-9]+)", r"_{\1}", crys.chemical_formula).replace(' ','')
+        crys_dat['chemical_formula'] = formula
+        crys_dat['lattice_system']   = crys.lattice_system.name
+        crys_dat['nb_atoms'] = len(crys.atoms)
+        crys_dat['spg_ref']  = False
+        ### space group stuff
+        dataset = ut.read_space_group(struct_file)  #;print(dataset)
+        if not dataset:
+            try :
+                dataset = crys.symmetry()
+            except:
+                dataset={}
+                print(colors.red+'Crystal.symmetry() failed'+colors.black)
+        crys_dat['spg']=all([k in dataset.keys() for k in
+            ['international_number','international_symbol']])
+        if crys_dat['spg']:
+            crys_dat.update({k:dataset[k] for k in['international_number','international_symbol']})
+            crys_dat['spg_ref'] = 'http://img.chem.ucl.ac.uk/sgp/large/%s%s.htm' %(
+                str(crys_dat['international_number']).zfill(3),
+                ['az1','ay1'][crys.lattice_system.name=='monoclinic']
+            )
+            if 'lattice_system' in dataset.keys():crys_dat['lattice_system'] = dataset['lattice_system']
+
+    # print(crys_dat)
+    # print(formula)
+    return crys_dat
+
 def init_mol():
     # print(colors.red+'init_mol'+colors.black)
     mol = session['mol']
     sim = init_frames(mol,'sim')
     exp = init_frames(mol,'exp')
-    dat_type=update_exp_data(mol)
+    if  mol not in pets_data.keys():
+        dat_type = update_exp_data(mol)
+    dat_type = get_dat_type(mol)
     dat = {
         'exp'       : type(exp)==dict,
         'sim'       : type(sim)==dict,
         'pets'      : type(dat_type)==str,
         'dat_type'  : dat_type,
+        'dat_types' : get_dat_types(mol),
         'felix'     : os.path.exists(os.path.join(mol_path(mol),'felix')),
         'rock'      : False,
         'omega'     : 0,
         }
 
+    upload_path=os.path.join(session['path'],'upload')
+    if not os.path.exists(upload_path):
+        check_output("mkdir %s" %upload_path,shell=True).decode().strip()
     # get the max number of frames for frontend from frames simulated/experimental frames
     # or processed data.
     # Note : sometimes processed datasets may have discarded experimental frames
@@ -378,49 +505,8 @@ def init_mol():
         #     dat['omega']=pets.omega
         #     # print("omega=%.1fdeg information found in exp data " %dat['omega'])
 
-    ## initialize structure
-    struct_file = get_structure_file()
-    if struct_file:
-        b0=bloch.Bloch(struct_file,path=session['path'],name='b',solve=False)
-        print('saving bloch object')
-        b0.save()
-        # b0=ut.load_pkl(session['b0_path'])
+    crys_dat=init_structure()
 
-        crys,cif_file=b0.crys,b0.cif_file
-        crys_dat = {'file':os.path.basename(cif_file),'cif_file':cif_file}
-        crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
-        crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
-            b_str(crys.lattice_parameters,2).split(',') )))
-        formula = re.sub("([0-9]+)", r"_{\1}", crys.chemical_formula).replace(' ','')
-        crys_dat['chemical_formula'] = formula
-        crys_dat['lattice_system']=crys.lattice_system.name
-        crys_dat['nb_atoms']=len(crys.atoms)
-        crys_dat['spg_ref']=False
-        ### space group stuff
-        dataset = ut.read_space_group(struct_file)  #;print(dataset)
-        if not dataset:
-            try :
-                dataset = crys.symmetry()
-            except:
-                dataset={}
-                print(colors.red+'Crystal.symmetry() failed'+colors.black)
-        crys_dat['spg']=all([k in dataset.keys() for k in
-            ['international_number','international_symbol']])
-        if crys_dat['spg']:
-            crys_dat.update({k:dataset[k] for k in['international_number','international_symbol']})
-            crys_dat['spg_ref'] = 'http://img.chem.ucl.ac.uk/sgp/large/%s%s.htm' %(
-                str(crys_dat['international_number']).zfill(3),
-                ['az1','ay1'][crys.lattice_system.name=='monoclinic']
-            )
-            if 'lattice_system' in dataset.keys():crys_dat['lattice_system'] = dataset['lattice_system']
-    else:
-        crys_dat=dict(zip(
-        ['file','a','b','c','alpha','beta','gamma','a1', 'a2', 'a3','chemical_formula',
-            'nb_atoms','lattice_system'],
-        ['?']*13))
-        crys_dat['spg_ref']=False
-    # print(crys_dat)
-    # print(formula)
 
     #related to /set_viewer
     if session.get('bloch_modes'):
@@ -432,8 +518,8 @@ def init_mol():
 
     now = time.time()
     # session['cif_file'] = struct_file
+    session['dat'].update(dat)
     session['crys']       = crys_dat
-    session['dat']        = dat
     session['sim']        = sim
     session['exp']        = exp
     session['nb_frames']  = nb_frames

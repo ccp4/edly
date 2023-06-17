@@ -20,9 +20,9 @@
         <span class="glyphicon glyphicon-th" />
         <span class="popuptext" ng-show="popup['import_frames']"> Import experimental dataset </span>
       </a>
-      <a class="btn-lg btn-primary popup" ng-style="import_style['pets']" ng-click="set_import('pets')" ng-mouseenter="showIt('import_pets')" ng-mouseleave="hideIt('import_pets')">
+      <a class="btn-lg btn-primary popup" ng-style="import_style['dat']" ng-click="set_import('dat')" ng-mouseenter="showIt('import_dat')" ng-mouseleave="hideIt('import_dat')">
         <span class="glyphicon glyphicon-cog" />
-        <span class="popuptext" ng-show="popup['import_pets']">
+        <span class="popuptext" ng-show="popup['import_dat']">
           Import processed data (pets,dials or xds ) </span>
       </a>
       <a class="btn-lg btn-primary popup" ng-style="import_style['cif']" ng-click="set_import('cif')" ng-mouseenter="showIt('import_cif')" ng-mouseleave="hideIt('import_cif')">
@@ -32,7 +32,10 @@
       </a>
     </div>
 
+
+    <!--/////////////////////////////////////  -->
     <!-- Import frames -->
+    <!--/////////////////////////////////////  -->
     <div ng-show="import_mode=='frames'">
       <div style="font-size:16px" >Import Frames :</div>
       <div>
@@ -95,8 +98,96 @@
      </div>
     </div>
 
-    <!-- import pets -->
-    <div ng-show="import_mode['pets']">
+
+    <!--/////////////////////////////////////  -->
+    <!-- import dat -->
+    <!--/////////////////////////////////////  -->
+    <div ng-show="import_mode=='dat'" style="margin-top:10px;margin-bottom:10px;">
+      <div style="font-size:16px" >Import Processed Data :</div>
+      <!-- upload file  -->
+      <div style="margin-left:10px;">
+        <span > From file : <span/>
+        <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['import_dat_files']=true" ng-mouseleave="popup['import_dat_files']=false" >
+          <span style="text-align:left;width:300px;font-size:16px" class="popuptext" ng-show="popup['import_dat_files']">
+             Please, import as followed : <br>
+             <ul>
+               <li ng-repeat="(dat_type,files) in dat_type_files" style="">
+                 <span ng-bind="dat_type" /> :  <span ng-bind="files"/>
+               </li>
+              </ul>
+          </span>
+        </span>
+      </div>
+      <!-- input file form  -->
+      <div style="display: inline-block;margin-left:20px;margin-top:5px;">
+        <form id="form_dat"><fieldset>
+          <input class="glyphicon glyphicon-file" id="input_dat_file" style="display: inline-block;width:220px;font-size: 16px;" type = "file" name="file"   onchange="upload_file('dat')"/>
+          <!-- <span class="btn-sm btn-primary" onclick="upload_file('dat')"> R </span> -->
+          <span  style="margin-left:0px;">
+            <span ng-show="dat_valid"  style="color:green" class="glyphicon glyphicon-ok"/>
+            <span ng-show="!dat_valid" style="color:red"   class="glyphicon glyphicon-remove"/>
+          </span>
+        </fieldset></form>
+      </div>
+      <!-- message -->
+      <div style="margin-left:10px;margin-top:5px;">
+        Processed data type : <span ng-bind="dat_info.dat_type" style="font-weight: bold;font-size: 16px;"/>
+        <div ng-show="!dat_valid && dat_info.missing_files!='?'" style="margin-left:10px;">
+          Missing files : <span style="color:red;" ng-bind="dat_info.missing_files"/>
+        </div>
+      </div>
+      <!-- import btn -->
+      <div ng-show="dat_valid" style="display:grid;justify-content: space-around;margin-top:5px;margin-bottom:10px">
+        <div style="cursor: pointer;" class="btn-sm btn-primary" ng-click="import_dat()" >
+          <span style="margin-left:5px">Import processed data<span/>
+          <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
+        </div>
+      </div>
+
+      <!-- Choose processed data from software -->
+      <div style="font-size:16px;margin-top: 10px;" >Select Processed Data :</div>
+      <div style="margin-top:10px;margin-bottom:5px">
+        <span style="margin-left:10px;"> Available : <span/>
+        <select ng-model="dat.dat_type" style="width: 60px" ng-options="x for x in dat.dat_types" ng-change="load_dat_type()" ></select>
+        </span>
+      </div>
+    </div>
+
+
+
+    <!--/////////////////////////////////////  -->
+    <!-- import cif -->
+    <!--/////////////////////////////////////  -->
+    <div ng-show="import_mode=='cif'"  style="margin-top:10px;margin-bottom:10px;">
+      <div style="font-size:16px" > Import a cif file : </div>
+      <!-- upload file  -->
+      <div style="display: inline-block;margin-left:20px;margin-top:5px;">
+        <form id="form_Cif"><fieldset>
+          <input class="glyphicon glyphicon-file" id="input_Cif_file" style="display: inline-block;width:220px;font-size: 16px;" type = "file" name="file"   onchange="upload_file('Cif')"/>
+          <!-- <span class="btn-sm btn-primary" onclick="upload_file('dat')"> R </span> -->
+          <span  style="margin-left:0px;">
+            <span ng-show="valid_cif"  style="color:green" class="glyphicon glyphicon-ok"/>
+            <span ng-hide="valid_cif"  style="color:red"   class="glyphicon glyphicon-remove"/>
+          </span>
+        </fieldset></form>
+      </div>
+      <!-- import btn -->
+      <div ng-show="valid_cif" style="display:grid;justify-content: space-around;margin-top:10px;margin-bottom:5px">
+        <div style="cursor: pointer;" class="btn-sm btn-primary" ng-click="import_cif()" >
+          <span style="margin-left:5px">Import cif file<span/>
+          <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
+        </div>
+      </div>
+      <div ng-show="!cif_imported" style="margin-left:10px;margin-top:5px;">
+        <span style="color:red;text-align:center;font-size: 14px;">
+          Importing cif file ...
+        </span>
+      </div>
+
+      <div style="font-size:16px;margin-top:10px;margin-bottom:5px;" >
+        Current cif file :
+        <div style="margin-left:20px" ng-bind="crys.file"></div>
+      </div>
     </div>
 
   </div><!-- expand -->

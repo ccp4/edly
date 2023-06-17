@@ -18,6 +18,7 @@ else
 fi
 
 
+cd edly
 bower install jquery angular angular-aria angular-touch angular-bootstrap bootstrap-css bootstrap angular-chart jquery-ui plotly MathJax
 cd static
 ln -s ../bower_components .

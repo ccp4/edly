@@ -1,11 +1,26 @@
 # Version log
 ## 0.0.7dev
+### Sat 17 Jun 04:30:12 BST 2023
+- issue#44 import info
+  - import processed data
+  - options to choose from processed data
+  - update exp info on refresh
+  - import cif file
+- refactor :
+  - created `upload_cif` into `upload_file` for file submission into tmp/upload
+  - created `init_structure` to reload on `import_cif`
+  - symlink created to link processed data to software directory (dials/pets/xds)
+- bug :
+- electron-diffraction  library pets.py has issues retrieving molecule basename
+
 ###Fri 16 Jun 10:21:28 BST 2023
 - issue#44 import info
   - import frames from local database (creates symlink to exp)
-  - download and extract from zenodo to local database 
+  - download and extract from zenodo to local database
   - browse zenodo database
-
+  - import frames/processed/cif layout
+- minor refactor of structure_panel
+- minor refactor of frames_viewer
 
 ###Tue 13 Jun 12:33:39 BST 2023
 - minor changes to tests to get them to work headless for remote website

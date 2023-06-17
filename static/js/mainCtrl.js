@@ -122,6 +122,63 @@ angular.module('app').
     })
   }
 
+  //////////
+  // import processed data
+  $scope.check_dat=function(){
+    filename=get_file_name("dat");
+    // $log.log('dat',$scope.dat.dat_type, ' ' ,filename)
+    $http.post('check_dat',filename)
+    .then(function(response){
+      $scope.dat_valid = response.data.dat_type!='unknown' && response.data.missing_files=='';
+      $scope.dat_info  = response.data;
+      // $log.log('valid dat',$scope.dat_valid)
+    })
+    return 1;
+  }
+
+  $scope.import_dat=function(){
+    $http.post('import_dat')
+    .then(function(response){
+        $log.log(response.data);
+        $scope.dat.dat_type=$scope.dat_info.dat_type;
+        $scope.load_dat_type()
+        $scope.dat_info={'dat_type':'unknown','missing_files':'?'};
+        $scope.dat_valid=false;
+        clear_files('dat');
+    })
+  }
+
+  $scope.load_dat_type=function(){
+    $http.post('load_dat_type',$scope.dat.dat_type)
+    .then(function(response){
+      $scope.dat=response.data;
+    })
+  }
+
+  //////////
+  // import cif
+  $scope.check_cif=function(){
+    filename  = get_file_name("Cif");
+    file_type = filename.split('.').pop();
+    $scope.valid_cif = file_type=='cif';
+    // $scope.valid_cif = true;
+    $scope.$apply()
+    // $log.log(filename,file_type,file_type=='cif',$scope.cif_valid);
+  }
+
+  $scope.import_cif=function(){
+    filename=get_file_name("Cif");
+    $log.log(filename);
+    $scope.cif_imported=false;
+    $http.post('import_cif',filename)
+    .then(function(response){
+        $scope.cif_imported=true;
+        $scope.valid_cif=false;
+        $scope.crys=response.data;
+        clear_files('Cif');
+        $scope.show_structure(1)
+    })
+  }
 
   ///////////////////////////////////////////////////////////////////
   // Frames
@@ -257,8 +314,13 @@ angular.module('app').
     }
   }
 
-  $scope.show_structure = function(){
-    $scope.expand['struct']=!$scope.expand['struct']
+  $scope.show_structure = function(val=-1){
+    if (val<0){
+      $scope.expand['struct']=!$scope.expand['struct']
+    }
+    else{
+      $scope.expand['struct']=val;
+    }
     // $log.log($scope.crys.chemical_formula)
     update_formula($scope.crys.chemical_formula);
   }
@@ -290,6 +352,7 @@ angular.module('app').
         $scope.cmaps     = response.data.cmaps;
         $scope.caxis     = {'cmap':response.data.cmap};
 
+
         // $scope.zenodo_records = response.data.zenodo_records;
         $http.get('/static/spg/records.json')
         .then(function(response){
@@ -312,15 +375,24 @@ angular.module('app').
   $scope.changed=true;
   $scope.frames_downloaded=false;
   $scope.download_info='done';
-  $scope.import_mode='frames';
-  $scope.import_style = {frames:'',pets:'',cif:''};
+  $scope.import_mode='cif';
+  $scope.import_style = {frames:'',dat:'',cif:''};
   $scope.import_style[$scope.import_mode]=sel_style;
-
+  $scope.dat_type_files = {
+      'xds'   : 'A single XDS_ASCII.HKL file ' ,
+      'pets'  : 'A zip file containing .pts .rpl .xyz .cor .hkl .cenloc files, .dyn_cif_pets and a cif file.' ,
+      'dials' : 'A zip file containing at least imported.expt, indexed.refl and reflections.txt files',
+  }
+  $scope.dat_types = Object.keys($scope.dat_type_files);
+  $scope.dat_valid = false;
+  $scope.valid_cif = false;
+  $scope.cif_imported=true;
+  $scope.dat_info={'dat_type':'unknown','missing_files':'?'};
   // $scope.frame_offset_on=false;
 
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true}
   $scope.expand_str={false:'expand',true:'minimize'};
-  $scope.expand={'rock_settings':true};
+  $scope.expand={'rock_settings':true,'importer':true, 'struct':false};
   $scope.popup={};
 
 
