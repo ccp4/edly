@@ -9,33 +9,52 @@
 
   <table>
     <!-- settings -->
-    <tr ng-show="expand['frame_settings']"><td>
+    <tr ng-show="expand['frame_settings']" style="margin-bottom:5px"><td>
       Simulation frames offset:
       <input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" />
     </td></tr>
+
     <!-- Frames selection input -->
     <tr><td>
-      <span >
-        <a href=""  ng-click="frames.manual=false">
-          No:
-        </a>
-        <span  ng-hide="frames.manual" ng-bind="frames.active_frame" tabindex="1" class="btn-sm btn-primary" ng-keydown="update_frame_event($event)"  ng-dblclick="frames.manual=true" ></span>
+      <span ng-click="frames.manual=!frames.manual" style="cursor:pointer;" > No: </span>
+      <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['move_frame']=true" ng-mouseleave="popup['move_frame']=false" style="top:-10px;">
+        <span ng-show="popup['move_frame']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
+          <b>Click on 'No' to toggle between frame selection modes.</b><br>
+            <span ng-show="frames.manual">
+              Type frame number and press enter to update frame.
+            </span>
+            <span ng-hide="frames.manual">
+              Click on frame button and use hot keys :
+              <br> &nbsp; d : increase frame by 1
+              <br> &nbsp; a : decrease frame by 1
+              <br> &nbsp; w : increase frame by <span style="font-style:italic;">jump_frames</span>
+              <br> &nbsp; s : decrease frame by <span style="font-style:italic;">jump_frames</span>
+              <br> &nbsp; q : multiply <span style="font-style:italic;">jump_frames</span> by 2
+              <br> &nbsp; e : divide   <span style="font-style:italic;">jump_frames</span> by 2
+              <br> &nbsp; backspace : reset <span style="font-style:italic;">jump_frames</span>  to default 10
+              <br> &nbsp; <span style="font-style:italic;">jump_frames</span>  = <span ng-bind="frames.jump_frames"/>
+            </span>
+        </span>
+      </span>
+      <span>
+        <span  ng-hide="frames.manual" tabindex="1"  ng-bind="frames.active_frame" style="cursor:pointer;" class="btn-sm btn-primary" ng-keydown="update_frame_event($event)"  ng-dblclick="frames.manual=true" />
         <input ng-show="frames.manual" ng-model="frames.active_frame" min="1" max="max_frame" ng-key-enter="update_frame()" style="width:30px;">
       </span>
       <span> / <span ng-bind="max_frame"/></span>
-      <a class="btn-sm btn-primary btn-rock" ng-click="set_frame('i');">
+      <span class="btn-sm btn-primary btn-rock" style="cursor:pointer;" ng-click="set_frame('i');">
         <span class="glyphicon glyphicon-fast-backward"></span >
-      </a>
-      <a class="btn-sm btn-primary"  ng-click="set_frame('-')">
+      </span>
+      <span class="btn-sm btn-primary" style="cursor:pointer;" ng-click="set_frame('-')">
         <span class="glyphicon glyphicon-step-backward"></span >
-      </a>
-      <a class="btn-sm btn-primary"  ng-click="set_frame('+')">
+      </span>
+      <span class="btn-sm btn-primary" style="cursor:pointer;" ng-click="set_frame('+')">
         <span class="glyphicon glyphicon-step-forward"></span >
-      </a>
-      <a class="btn-sm btn-primary btn-rock" ng-click="set_frame('f')">
+      </span>
+      <span class="btn-sm btn-primary btn-rock" style="cursor:pointer;" ng-click="set_frame('f')">
         <span class="glyphicon glyphicon-fast-forward"></span >
-      </a>
+      </span>
     </td></tr>
+
     <!-- colormap -->
     <tr ng-show="mode=='frames'"><td style="padding-top:10px" >
       color map :

@@ -10,7 +10,7 @@ source bin/activate
 if [ $1 -eq dev ];then
   git clone git@github.com:ccp4/electron-diffraction.git
   git switch exp
-  git checkout 7c292bf
+  git checkout acbd992
   cd electron-diffraction
   pip install -e .
 else

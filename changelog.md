@@ -1,5 +1,10 @@
 # Version log
 ## 0.0.7dev
+### Mon 19 Jun 10:44:50 BST 2023
+- issue#47 : jump by frames
+- only allow bloch mode if a cif is provided
+- ED==acbd992
+
 ### Sat 17 Jun 04:30:12 BST 2023
 - issue#44 import info
   - import processed data

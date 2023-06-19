@@ -176,6 +176,8 @@ angular.module('app').
         $scope.valid_cif=false;
         $scope.crys=response.data;
         clear_files('Cif');
+        $scope.cif_file  = $scope.crys.file!='?';
+        // $log($scope.cif_file)
         $scope.show_structure(1)
     })
   }
@@ -193,26 +195,29 @@ angular.module('app').
       $scope.update_frame();
   }
   $scope.inc_frame=function(){
-    $scope.frames.active_frame+=1;//=Math.min($scope.max_frame,$scope.frame+1);
+    $scope.frames.active_frame+=1;
     $scope.update_frame();
   };
   $scope.dec_frame=function(){
-    $scope.frames.active_frame-=1;//=Math.max(1,$scope.frame-1);
+    $scope.frames.active_frame-=1;
+    $scope.update_frame();
+  };
+  $scope.change_frame=function(s){
+    $scope.frames.active_frame+=s;
     $scope.update_frame();
   };
 
   $scope.update_frame_event=function(e){
     switch (e.keyCode){
-      case 37: $scope.dec_frame();break;
-      case 39: $scope.inc_frame();break;
-      case 13:
-        $scope.toggle_reload();
-        // $scope.toggle_reload();
-        // $scope.update_frame();
-        break;
+      case 87 : $scope.change_frame(-1);break;
+      case 83 : $scope.change_frame(+1);break;
+      case 68 : $scope.change_frame(+$scope.frames.jump_frames);break;
+      case 65 : $scope.change_frame(-$scope.frames.jump_frames);break;
+      case 81 : $scope.frames.jump_frames=Math.max($scope.frames.jump_frames/2,1);break;
+      case 69 : $scope.frames.jump_frames=Math.min($scope.frames.jump_frames*2,200);break;
+      case 8  : $scope.frames.jump_frames=10;break;
     }
-  }
-
+  };
 
   $scope.update_frame=function(){
     $scope.frame=Math.max(1,Math.min($scope.frames.active_frame,$scope.max_frame));
@@ -222,10 +227,6 @@ angular.module('app').
       $scope.update();
     }
     $scope.frames.active_frame=$scope.frame;
-
-    // $scope.frame = $scope.frames.active_frame;
-    // $scope.frame=Math.max(1,Math.min($scope.frame,$scope.max_frame));
-    // $scope.bloch_solve_reset();
   }
 
   $scope.update_zmax=function(event,frame_type){
@@ -375,7 +376,7 @@ angular.module('app').
   $scope.changed=true;
   $scope.frames_downloaded=false;
   $scope.download_info='done';
-  $scope.import_mode='cif';
+  $scope.import_mode='frames';
   $scope.import_style = {frames:'',dat:'',cif:''};
   $scope.import_style[$scope.import_mode]=sel_style;
   $scope.dat_type_files = {
@@ -390,9 +391,9 @@ angular.module('app').
   $scope.dat_info={'dat_type':'unknown','missing_files':'?'};
   // $scope.frame_offset_on=false;
 
-  $scope.frames = {offset:0,active_frame:0,reload:true,manual:true}
+  $scope.frames = {offset:0,active_frame:0,reload:true,manual:true,jump_frames:10}
   $scope.expand_str={false:'expand',true:'minimize'};
-  $scope.expand={'rock_settings':true,'importer':true, 'struct':false};
+  $scope.expand={'rock_settings':true,'importer':false, 'struct':false};
   $scope.popup={};
 
 
