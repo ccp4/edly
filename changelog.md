@@ -1,9 +1,20 @@
 # Version log
 ## 0.0.7dev
+### Mon 19 Jun 17:04:54 BST 2023
+- issue#44 import info
+  - allow structure creation without cif
+- issue#46 no refresh on structure change
+  - refactor `new_structure` and `set_structure` into main controller
+  - added open_structure button in import menu
+  - implemented searchable structure
+  - fetch molecule info(dat,frames,cif)
+- created new_form.html
+- fixed bug with pedestal (overflow index into colormap)
+
 ### Mon 19 Jun 11:14:43 BST 2023
 - issue#47 : jump by frames
   -  added pedestal
-  - switch keys  s and w for frame navigation 
+  - switch keys  s and w for frame navigation
 ### Mon 19 Jun 10:58:28 BST 2023
 - minor css changes
 ### Mon 19 Jun 10:44:50 BST 2023

@@ -3,13 +3,15 @@ from flask import render_template,make_response
 from subprocess import check_output
 import crystals,glob,os,socket,json,datetime
 from functools import wraps
-from in_out import structures,builtins,gifs
+from in_out import builtins,gifs,get_structures
 login = Blueprint('login', __name__)
 server_home='/'
 if socket.gethostname()=='tarik-CCP4':server_home=''
 version_cmd=r'grep "## [0-9]" changelog.md  | head -n1 | cut -d" " -f2'
 version=check_output(version_cmd,shell=True).decode()
 year = datetime.date.today().strftime('%Y')
+
+structures=get_structures()
 
 @login.route('/login', methods=['GET','POST'])
 def log_in():

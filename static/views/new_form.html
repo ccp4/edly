@@ -1,0 +1,46 @@
+<div id="dialog" title="new project" style="display:none">
+  <h3>Create a new project</h3>
+
+  <!-- <span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span> -->
+  <form id="form_cif">
+    <fieldset>
+      <div>
+        Name :
+        <input type="text" ng-change="new_project.cif_error=false" ng-model="new_project.name" id="new_name" class="text ui-widget-content ui-corner-all">
+      </div>
+
+      <div style="margin-top: 10px;">
+        <span style="font-size:16px;"> Include a structure : </span>
+        <input type="checkbox" ng-model="new_project.is_struct" />
+      </div>
+      <!-- radio buttons -->
+      <div ng-show="new_project.is_struct" style="margin-left:10px;margin-top: 5px;">
+        <div> Please, provide structure information :</div>
+        <div style="margin-left:80px;margin-top: 5px;" >
+          <span> <input type="radio" id="radio_builtin" value="builtin"  ng-model="new_project.struct_type"/> <span>builtins <span/>
+          <span> <input type="radio" id="radio_pdb"     value="pdb"      ng-model="new_project.struct_type"/> <span>pdb      <span/>
+          <span> <input type="radio" id="radio_cif"     value="cif"      ng-model="new_project.struct_type"/> <span>cif      <span/>
+        </div>
+        <!-- content -->
+        <div style="margin-top:5px;margin-left:15px" ng-switch="new_project.struct_type">
+          <div ng-switch-when="builtin" id="new_builtin">
+            Builtin name :
+            <select ng-model="new_project.builtin" ng-options="x for x in builtins" name="builtin" id="input_buitin"></select>
+          </div>
+          <div ng-switch-when="pdb" id="new_pdb">
+            pdb id :
+            <input type="text" ng-model="new_project.pdb" name="pdb" id="input_pdb" class="text ui-widget-content ui-corner-all">
+          </div>
+          <div ng-switch-when="cif" id="new_cif">
+            Cif file :
+            <input type="file" class="glyphicon glyphicon-file" name="file" id="input_cif_file" onchange="upload_file('cif')"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
+  </form>
+  <div ng-show="new_project.error" id="cif_error" style="text-align:center;margin-top:20px;" ng-style="new_project['error_color']" ng-bind="new_project.error_msg"></div>
+</div>

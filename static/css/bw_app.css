@@ -301,4 +301,43 @@ img {
   margin-right: 4px
 }
 
+
+#search_struct {
+  background-image: url('/static/images/searchicon.png');
+  background-position: 5px 5px;
+  background-repeat: no-repeat;
+  width: 230px;
+  font-size: 16px;
+  padding: 5px 5px 5px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 0px;
+}
+
+#search_ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width:230px;
+  border: solid;
+  border-width: thin;
+}
+#search_ul .li_search {
+  border: 1px solid #ddd;
+  margin-top: 0px; /* Prevent double borders */
+
+  padding: 0px;
+  text-decoration: none;
+  font-size: 14px;
+  color: black;
+  display: block
+}
+.li_search{
+  cursor:pointer;
+  background-color: #f6f6f6;
+  padding-left:5px;
+}
+#search_ul .li_search:hover:not(.header) {
+  background-color: #eee;
+}
+
 </style>

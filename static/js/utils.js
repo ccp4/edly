@@ -92,7 +92,7 @@ function highlight(miller_indices,val){
 // help gif
 ///////////////////////////////////////
 var gif_dialog;
-$(document).ready(function () {
+$(document).ready(function(){
   gif_dialog = $( "#dialog-gif" ).dialog({
     autoOpen: false,
     height: 980,
@@ -134,92 +134,21 @@ function set_structure(mol){
 };
 
 
-var dialog, form;
-$(document).ready(function () {
-
-  dialog = $( "#dialog" ).dialog({
-    autoOpen: false,
-    height: 500,
-    width: 400,
-    modal: true,
-    buttons: {
-      "create ": new_structure,
-      Cancel: function() {
-        dialog.dialog( "close" );
-      },
-    },
-    close: function() {
-      form[ 0 ].reset();
-      $('#cif_error').hide()
-      // allFields.removeClass( "ui-state-error" );
-    }
-  });
-
-  form = dialog.find( "form" ).on( "submit", function( event ) {
-    event.preventDefault();
-    new_structure();
-  });
-
-
-
-  function new_structure(){
-  //   // e.preventDefault();
-    var val='';
-    if      ($('#radio_cif')[0].checked)  {val='cif'}
-    else if ($('#radio_pdb')[0].checked)  {val='pdb'}
-    else if ($('#radio_file')[0].checked) {val='file'}
-    else{return};
-    var formData = {
-        'name':$('#name')[0].value,
-        'cif':$('#cif')[0].value,
-        'pdb':$('#pdb')[0].value,
-        'file':$('#file_cif')[0].value.replace('C:\\fakepath\\',''),
-        'val':val,
-      };
-    // console.log(formData);
-    $.ajax({
-      type:'POST',
-      url:'new_structure',
-      data:formData,
-      success: function(data){
-         // console.log(data);
-         if (data=='ok'){
-           dialog.dialog( "close" );
-           window.location='viewer'
-         }
-         else{
-           show_error(data,true)
-         }
-      }
-    });
-  };
-
-});
-
-function show_error(data,err){
-  var msg='',color='green';
-  if (err){
-    msg='error : ';
-    color='red'
-  }
-  $('#cif_error')[0].innerHTML=msg+data;
-  $('#cif_error')[0].style.color=color;
-  $('#cif_error').show()
-}
-
 function upload_file(file_type){
   var files = $('#input_'+file_type+'_file')[0].files;
+  elt = $('#input_'+file_type+'_file')[0]
+  scope = angular.element(elt).scope()
   if (files.length>0) {
     var file = files[0];
     extension = file.name.split('.').pop();
     // console.log(extension);
-    if (file_type=='cif' && extension !=file_type){
-      show_error('upload a '+file_type+' file thank you',true);return
+    if (file_type=='cif' && extension!='cif'){
+      scope.show_error('upload a '+file_type+' file thank you',1);return
     }
     else{
       // console.log(file.size);
-      if (file.size > 10000*1024) {
-        show_error('max upload size is 10Mo',true);return
+      if (file_type=='cif' && file.size > 10000*1024) {
+        scope.show_error('max upload size is 10Mo',1);return
       }
       else{
         var form = $('#form_'+file_type)[0];
@@ -234,46 +163,21 @@ function upload_file(file_type){
          processData: false,
          success: function(data){
            if (file_type=='cif'){
-             if (data!='ok'){
-               show_error(data,true)
-             }
-             else{
-               show_error(data,false)
-             }
+             scope.show_error(data,data!='ok')
            }
            else if (file_type =='dat'){
-             elt = $('#input_'+file_type+'_file')[0]
-             angular.element(elt).scope().check_dat();
+             scope.check_dat();
            }
            else if (file_type =='Cif'){
-             elt = $('#input_'+file_type+'_file')[0]
-             angular.element(elt).scope().check_cif();
+             scope.check_cif();
            }
-
          },
        });
      }
    }
   }
 }
-// });
 
-
-function dialog_new_structure(){
-  dialog.dialog( "open" );
-};
-
-function set_cif(){
-  $('#cif_cif').hide()
-  $('#cif_pdb').hide()
-  $('#cif_file').hide()
-  // $(`#cif_${id}`).show()
-  if      ($('#radio_cif')[0].checked)  {$('#cif_cif').show()}
-  else if ($('#radio_pdb')[0].checked)  {$('#cif_pdb').show()}
-  else if ($('#radio_file')[0].checked) {$('#cif_file').show()}
-};
-set_cif();
-// console.log(new FormData($('form')[0]));
 
 function open_link(link){
   // console.log(link);
@@ -303,6 +207,9 @@ function update_formula(formula){
   MathJax.Hub.Queue(["Text",math,formula]);
 }
 
+function get_input_value(id){
+  return $('#'+id)[0].value;
+}
 function get_file_name(id){
   return $('#input_'+id+'_file')[0].files[0].name;
 }

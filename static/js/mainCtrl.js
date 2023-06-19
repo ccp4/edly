@@ -57,6 +57,70 @@ angular.module('app').
     }
   }
 
+
+  ///////////////////////////////////////////////////////////////////
+  //New structure
+  ///////////////////////////////////////////////////////////////////
+  $scope.new_structure=function(){
+    $http.post('new_structure',JSON.stringify($scope.new_project))
+    .then(function(response){
+      // $log.log(response.data);
+      if(response.data.msg){
+        $scope.new_project.error = true;
+        $scope.show_error(response.data.msg,1)
+      }
+      else{
+        $scope.structures=response.data.structures;
+        close_dialog();
+        $scope.set_structure($scope.new_project.name)
+      }
+    })
+  }
+
+  $scope.set_structure=function(mol){
+    $http.post('set_structure',JSON.stringify({'mol':mol}))
+    .then(function(response){
+        $scope.init();
+    })
+  }
+
+  $scope.get_structure_info=function(mol){
+    $http.post('get_structure_info',JSON.stringify({'mol':mol}))
+    .then(function(response){
+      // $log.log(response.data)
+      $scope.open_mol=response.data;
+    })
+  }
+  $scope.get_structure_info_e=function(){
+    $scope.get_structure_info($scope.open_mol.name);
+  }
+  $scope.search_name=function(e){
+    var filter, a, i, txtValue;
+    filter=get_input_value("search_struct").toUpperCase();
+    $scope.structures_filtered=[];
+    $log.log(filter);
+    for (i = 0; i < $scope.structures.length; i++) {
+        txtValue = $scope.structures[i];
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            $scope.structures_filtered.push(txtValue);
+        }
+    }
+    // $log.log(filter,$scope.structures_filtered)
+  }
+
+  $scope.select_mol=function(x){
+    $scope.open_mol.name=x;
+    $scope.structures_filtered=[];
+    $scope.get_structure_info(x);
+  }
+
+  $scope.show_error=function(msg,err){
+    $scope.new_project.error_msg = msg;
+    color = {0:'green',1:'red'}[err];
+    $scope.new_project.error_color={'color':color}
+    $log.log($scope.new_project.error_color)
+  }
+
   ///////////////////////////////////////////////////////////////////
   //Import
   ///////////////////////////////////////////////////////////////////
@@ -250,8 +314,11 @@ angular.module('app').
     vm = $scope.frames.pedestal;
     vM = $scope.zmax[frame_type];
     for (let i = 0; i < vals.length; i += 1) {
-      vals[i] = Math.floor(( Math.min(Math.max(dats[i]-vm,0),vM-1)/(vM-vm) )*$scope.nb_colors);
+      v = Math.max(Math.min(dats[i],vM)-vm,0)/(vM-vm);//between 0 and 1
+      vals[i] = Math.floor(v*($scope.nb_colors-1))   ;//#index into the colormap
     }
+    // const max = vals.reduce((a, b) => Math.max(a, b), -Infinity);
+    // $log.log(max)
 
     var cs   = $scope.heatmaps[$scope.caxis.cmap];//$scope.caxis.cmap;//.vals;
     const arr = new Uint8ClampedArray(4*dats.length);
@@ -335,9 +402,12 @@ angular.module('app').
   $scope.init = function(){
     $http.get('init')
       .then(function(response){
-        $scope.structure = response.data.mol;
-        $scope.crys      = response.data.crys;
-        $scope.cif_file  = $scope.crys.file!='?';
+        $scope.structures = response.data.structures//;$log.log($scope.structures)
+        $scope.builtins   = response.data.builtins  //;$log.log($scope.builtins)
+        $scope.structure  = response.data.mol;
+        $scope.crys       = response.data.crys;
+        $scope.cif_file   = $scope.crys.file!='?';
+
         // $log.log($scope.crys.file,$scope.cif_file)
         // frames related stuffs
         $scope.dat                 = response.data.dat;
@@ -365,6 +435,7 @@ angular.module('app').
           $scope.update_link($scope.zenodo.record.files[Object.keys($scope.zenodo.record.files)[0]])
         })
 
+        $scope.get_structure_info($scope.structure )
         // mode : frames, bloch, felix
         $scope.mode = response.data.mode;
         $scope.modes = response.data.modes;
@@ -379,8 +450,8 @@ angular.module('app').
   $scope.changed=true;
   $scope.frames_downloaded=false;
   $scope.download_info='done';
-  $scope.import_mode='frames';
-  $scope.import_style = {frames:'',dat:'',cif:''};
+  $scope.import_mode='open_struct';
+  $scope.import_style = {open_struct:'',frames:'',dat:'',cif:''};
   $scope.import_style[$scope.import_mode]=sel_style;
   $scope.dat_type_files = {
       'xds'   : 'A single XDS_ASCII.HKL file ' ,
@@ -394,11 +465,17 @@ angular.module('app').
   $scope.dat_info={'dat_type':'unknown','missing_files':'?'};
   // $scope.frame_offset_on=false;
 
+  $scope.new_project={'name':'',
+    'is_struct':false,'struct_type':'cif',
+    'builtin':'Ac','pdb':'',
+    'error':false,'error_color':{'color':'green'},'error_msg':''};
+
+
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true,jump_frames:10}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={'rock_settings':true,'importer':false, 'struct':false};
   $scope.popup={};
-
+  $scope.structures_filtered=[];
 
   $scope.modes={'molecule':false};
   $scope.mode_style = {bloch:'',frames:'',felix:'',reload:''};

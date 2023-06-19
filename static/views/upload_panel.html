@@ -15,6 +15,10 @@
   <div style="margin-left:5px;margin-bottom: 5px;" ng-show="expand['importer']">
     <!-- buttons -->
     <div style="margin-bottom: 5px;" >
+      <a class="btn-lg btn-primary popup" ng-style="import_style['open_struct']" ng-click="set_import('open_struct')" ng-mouseenter="showIt('open_struct')" ng-mouseleave="hideIt('open_struct')">
+        <span class="glyphicon glyphicon-folder-open" />
+        <span class="popuptext" ng-show="popup['open_struct']"> Open an existing structure </span>
+      </a>
       <a class="btn-lg btn-primary popup" ng-style="import_style['frames']" ng-click="set_import('frames')" ng-mouseenter="showIt('import_frames')" ng-mouseleave="hideIt('import_frames')">
         <span class="glyphicon glyphicon-th" />
         <span class="popuptext" ng-show="popup['import_frames']"> Import experimental dataset </span>
@@ -29,6 +33,46 @@
         <span class="popuptext" ng-show="popup['import_cif']">
           Import a cif file </span>
       </a>
+    </div>
+
+    <!--/////////////////////////////////////  -->
+    <!-- Open structure -->
+    <!--/////////////////////////////////////  -->
+    <div ng-show="import_mode=='open_struct'">
+      <div style="font-size:16px" > Open existing folder :</div>
+      <div style="margin-left:10px;margin-top:5px;">
+        <!-- <span> <select ng-model="open_mol.name" ng-options="x for x in structures" ng-change="get_structure_info(open_mol.name)"/></span> -->
+        <span >
+          <!-- style="float:right;margin-right:5px;">  -->
+          <input  id="search_struct" placeholder="Search name" type="text" ng-model="open_mol.name" ng-keyup="search_name($event)" ng-key-enter="get_structure_info_e()"/>
+          <ul id="search_ul" style="overflow-y:scroll;max-height:100px">
+            <li class="li_search" ng-click="select_mol(x)" ng-repeat=" x in structures_filtered"><span ng-bind="x"/></li>
+          </ul>
+        </span>
+      </div>
+      <div style="margin-top:10px;">
+        <span> Name : <span ng-bind="open_mol.name"/> </span>
+        <div style="cursor: pointer;float:right;margin-right:5px;" class="btn-sm btn-primary" ng-click="get_structure_info(open_mol.name)" >
+          <span class="glyphicon glyphicon-refresh"/>
+        </div>
+      </div>
+      <div style="margin-left:10px;margin-top:5px;">
+        <div> cif            : <span ng-bind="open_mol.cif" /></div>
+        <div> frames         : <span ng-bind="open_mol.exp" /></div>
+        <div> processed data : <span ng-bind="open_mol.dat" /></div>
+        <!-- <table>
+          <tr><td> cif            </td><td>:</td><td><span ng-bind="open_mol.cif" /></td></tr>
+          <tr><td> frames         </td><td>:</td><td><span ng-bind="open_mol.exp" /></td></tr>
+          <tr><td> processed data </td><td>:</td><td><span ng-bind="open_mol.dat" /></td></tr>
+        </table> -->
+      </div>
+
+      <div ng-show="structures.indexOf(open_mol.name)>=0" style="display:grid;justify-content: space-around;margin-top:5px;margin-bottom:10px">
+        <div style="cursor: pointer;" class="btn-sm btn-primary" ng-click="set_structure(open_mol.name)" >
+          <span style="margin-left:5px">Open structure<span/>
+          <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
+        </div>
+      </div>
     </div>
 
 

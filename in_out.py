@@ -81,6 +81,13 @@ def get_compressed_fmt(link):
         return ''
 
 pets_data={}
+def get_frames_folder(mol,frame_type):
+    folder=""
+    frame_path  = os.path.join(mol_path(mol),frame_type)
+    if os.path.exists(frame_path):
+        cmd = "basename `readlink %s`" %frame_path
+        folder=check_output(cmd,shell=True).decode().strip()
+    return folder
 
 def get_dat_types(mol):
     dat_types = [dat_type  for dat_type in ['dials','pets','xds']
@@ -136,7 +143,11 @@ def load_felix(session):
         print(colors.red+'felix created sucessfully'+colors.black)
     return fe.load_felix(felix_path(session['mol']))
 
-structures = [os.path.basename(s) for s in glob.glob("static/data/*") if not s=="static/data/tmp"]
+def get_structures():
+    structures =[os.path.basename(s)
+        for s in glob.glob("static/data/*") if not s=="static/data/tmp"]
+    return structures
+
 builtins = crystals.Crystal.builtins
 gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
 fig_wh=725

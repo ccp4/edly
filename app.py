@@ -199,6 +199,11 @@ def load_data_type():
 @app.route('/import_cif', methods=['POST'])
 def import_cif():
     filename = request.data.decode() #;print(data)
+    _import_cif(filename)
+    crys_dat = init_structure()
+    return json.dumps(crys_dat)
+
+def _import_cif(filename):
     new_filename = filename.strip('()').replace(' ','_')#;print(new_filename)
 
     cmd="rm -f {mol_path}/*.cif; mv '{filepath}' {mol_path}/{new_filename};rm -f {path}*.cif;rm -f {path}/upload/*.cif".format(
@@ -210,65 +215,80 @@ def import_cif():
 
     out=check_output(cmd,shell=True).decode().strip()#;print(out)
 
-    crys_dat = init_structure()
-    return json.dumps(crys_dat)
+
 
 ######################################################
 #### Structure related
 ######################################################
 @app.route('/new_structure', methods=['POST'])
 def new_structure():
-    data = request.form
-    mol = data['name']
-    val = data['val']
+    data = json.loads(request.data.decode())#;print(data)
+    mol  =  data['name']
+    msg  = ''
 
-    path=mol_path(mol)
-    cif_file=os.path.join(path,data[val])
-    if val=='cif':cif_file+='.cif'
-    elif val=='pdb':cif_file+='.pdb'
-    # elif val=='file':cif_file.replace('.cif','.struct.cif')
-
-    msg = 'cif file issue'
-    if not mol :#or mol=="new":
-        msg='Choose a proper name for the structure'
-    else:
-        if not os.path.exists(path):
-            try:
-                check_output('mkdir %s' %path,shell=True)
-                if   val=='cif' :
-                    crys = crystals.Crystal.from_database(data['cif'])
-                    ut.crys2felix(crys,opt='w',out=cif_file)
-                    cif_file=data[val]
-                elif val=='pdb' :
-                    crys = crystals.Crystal.from_pdb(data['pdb'],download_dir='.')
-                    check_output('mv pdb%s.ent %s' %(data['pdb'],cif_file),shell=True)
-                elif val=='file':
-                    cif_path=os.path.join(session['path'],data['file'])
-                    if os.path.exists(cif_path):
-                        check_output('cp %s %s' %(cif_path,cif_file),shell=True)
-
-                #check sucessful import
-                if cif_file:
-                    session['mol']=mol
-                    init_mol()
-                    msg='ok'
-            except Exception as e:
-                check_output('rm -rf %s' %path,shell=True)
-                raise Exception(e)
-                msg=e.__str__()
+    if not mol=='' : #or mol=="new":
+        new_mol_path = mol_path(mol)
+        if not os.path.exists(new_mol_path):
+            cmd='mkdir %s' %new_mol_path
+            out=check_output(cmd,shell=True).decode().strip()#;print(out)
+            # if a structure is provided
+            if data['is_struct']:
+                msg=import_structure_file(data)
         else:
-            msg='%s already exists' %mol
-    print(msg)
-    return msg
+            msg='folder %s already exists' %mol
+    else:
+        msg='Choose a proper name for the structure'
+    # structures = get_structures()
+    return json.dumps({'msg':msg,'structures':get_structures()})
+
+@app.route('/get_structure_info', methods=['POST'])
+def get_structure_info():
+    data = json.loads(request.data.decode())#;print(data)
+    mol  = data['mol']
+    cif_file='?'
+    cif_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
+    if len(cif_files):
+        cif_file = os.path.basename(cif_files[0])
+    frames_folder   = get_frames_folder(mol,'exp')
+    dat_type        = get_dat_type(mol)
+    # print(mol,cif_file,dat_type,frames_folder)
+    return json.dumps({
+        'name': mol,
+        'cif' : cif_file,
+        'dat' : dat_type,
+        'exp' : frames_folder,
+    })
+
 
 @app.route('/set_structure', methods=['POST'])
 def set_structure():
-    data = request.form
-    # data=json.loads(request.data.decode())
-    # print(data)
-    session['mol']=data['mol']
-    init_mol()
-    return session['mol']
+    data = json.loads(request.data.decode())
+    session['mol'] = data['mol']
+    return 'ok'
+
+def import_structure_file(data):
+    msg = 'cif file issue'
+    val = data['struct_type']
+    cif_file=os.path.join(path,data[val])
+
+    try:
+        if val=='builtin' :
+            crys = crystals.Crystal.from_database(data['builtin'])
+            cif_file+='.cif'
+            ut.crys2felix(crys,opt='w',out=cif_file)
+            cif_file=data[val]
+        elif val=='pdb' :
+            crys = crystals.Crystal.from_pdb(data['pdb'],download_dir='.')
+            cmd = 'mv pdb%s.ent %s.pdb' %(data['pdb'],data['pdb'])
+            check_output(cmd,shell=True).decode().strip()
+        elif val=='cif':
+            _import_cif(data['cif_file'])
+
+    except Exception as e:
+        raise Exception(e)
+        msg=e.__str__()
+    print(msg)
+    return msg
 
 def get_structure_file():
     '''reading priorities:
@@ -360,10 +380,6 @@ def init():
     #### Done at every init
     init_mol()
 
-    ### get zenodo records
-    # records_d=records.title.to_dict()
-    # json_records=json.dumps(dict(zip(records_d.values(),records.keys())
-
     ####sanity checks
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
@@ -379,13 +395,13 @@ def init():
     folder=''
     if session['dat']['exp']:
         folder=session['exp']['folder']
-    session_data['folder']=folder
+    session_data['folder']      = folder
+    session_data['builtins']    = list(builtins)
+    session_data['structures']  = get_structures()
     session['init'] = True
     # print(colors.magenta+'init done : ',session['init'],colors.black)
-
-    # print(session_data['max_frame'])
-    # session_data['structures'] = [s for s in structures if s!=session['mol']]
     # session_data['gifs'] = gifs
+
     return json.dumps(session_data)
 
 def init_session():
@@ -427,7 +443,7 @@ def init_structure():
             # b0=ut.load_pkl(session['b0_path'])
         except:
             return crys_dat
-            
+
         crys,cif_file = b0.crys,b0.cif_file
         crys_dat = {'file':os.path.basename(cif_file),'cif_file':cif_file}
         crys_dat.update({k:b_str(crys.__dict__[k],2) for k in ['a1', 'a2', 'a3']})
@@ -499,11 +515,6 @@ def init_mol():
             nb_frames = min(pets_frames,nb_frames)
         else:
             nb_frames = pets_frames
-        # if 'omega' in pets.__dict__:
-        #     ###will have to fix this later
-        #     if mol=='glycine':pets.omega=157
-        #     dat['omega']=pets.omega
-        #     # print("omega=%.1fdeg information found in exp data " %dat['omega'])
 
     crys_dat=init_structure()
 
@@ -532,9 +543,9 @@ def init_frames(mol,frame_type):
     if frames_dict:
         print(colors.green+'format detected for %s frames :' %frame_type, end="")
         print(colors.yellow,'%s (%d)' %(frames_dict['fmt'],frames_dict['nb_frames']) ,colors.black)
-        cmd = "basename `readlink %s`" %frame_path
-        frames_dict['folder'] = check_output(cmd,shell=True).decode().strip()
+        frames_dict['folder'] = get_frames_folder(mol,frame_type)
     return frames_dict
+
 
 def clear_session():
     print('warning:tmp directory %s not used since %d days. Removing content ...' %(session.get('path'),days))
