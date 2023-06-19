@@ -209,8 +209,8 @@ angular.module('app').
 
   $scope.update_frame_event=function(e){
     switch (e.keyCode){
-      case 87 : $scope.change_frame(-1);break;
-      case 83 : $scope.change_frame(+1);break;
+      case 83 : $scope.change_frame(-1);break;
+      case 87 : $scope.change_frame(+1);break;
       case 68 : $scope.change_frame(+$scope.frames.jump_frames);break;
       case 65 : $scope.change_frame(-$scope.frames.jump_frames);break;
       case 81 : $scope.frames.jump_frames=Math.max($scope.frames.jump_frames/2,1);break;
@@ -247,8 +247,10 @@ angular.module('app').
     // $log.log(wh);
 
     const vals = new Uint8ClampedArray(npts);
+    vm = $scope.frames.pedestal;
+    vM = $scope.zmax[frame_type];
     for (let i = 0; i < vals.length; i += 1) {
-      vals[i] = Math.floor((Math.min(dats[i],$scope.zmax[frame_type]-1)/$scope.zmax[frame_type])*$scope.nb_colors);
+      vals[i] = Math.floor(( Math.min(Math.max(dats[i]-vm,0),vM-1)/(vM-vm) )*$scope.nb_colors);
     }
 
     var cs   = $scope.heatmaps[$scope.caxis.cmap];//$scope.caxis.cmap;//.vals;
@@ -345,6 +347,7 @@ angular.module('app').
         $scope.frames.active_frame = response.data.frame;
         $scope.frames.offset       = response.data.offset;
         $scope.frames.u            = '';
+        $scope.frames.pedestal     = 0;
 
         $scope.data      = {'exp':0,'sim':0};
         $scope.zmax      = response.data.zmax;

@@ -10,8 +10,16 @@
   <div>
     <!-- settings -->
     <div ng-show="expand['frame_settings']" style="margin-bottom:5px">
-      Simulation frames offset:
-      <input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" />
+      <table><tbody>
+        <tr>
+          <td>Simulation frames offset</td><td> : </td>
+          <td><input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" /></td>
+        </tr>
+        <tr>
+          <td> Pedestal </td><td> : </td>
+          <td> <input type="number" min="0" ng-model="frames.pedestal" ng-key-enter="draw_frame('exp')" style="width: 80px" /></td>
+        </tr>
+      </tbody></table>
     </div>
 
     <!-- Frames selection input -->

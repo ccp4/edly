@@ -1,7 +1,11 @@
 # Version log
 ## 0.0.7dev
+### Mon 19 Jun 11:14:43 BST 2023
+- issue#47 : jump by frames
+  -  added pedestal
+  - switch keys  s and w for frame navigation 
 ### Mon 19 Jun 10:58:28 BST 2023
-- minor css changes 
+- minor css changes
 ### Mon 19 Jun 10:44:50 BST 2023
 - issue#47 : jump by frames
 - only allow bloch mode if a cif is provided
