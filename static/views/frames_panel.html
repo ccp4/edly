@@ -7,15 +7,15 @@
       </span>
   </div>
 
-  <table>
+  <div>
     <!-- settings -->
-    <tr ng-show="expand['frame_settings']" style="margin-bottom:5px"><td>
+    <div ng-show="expand['frame_settings']" style="margin-bottom:5px">
       Simulation frames offset:
       <input type="number" min="-max_frame" max="max_frame" ng-model="frames.offset" ng-key-enter="update_offset()" style="width: 80px" />
-    </td></tr>
+    </div>
 
     <!-- Frames selection input -->
-    <tr><td>
+    <div style="margin-top:10px">
       <span ng-click="frames.manual=!frames.manual" style="cursor:pointer;" > No: </span>
       <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['move_frame']=true" ng-mouseleave="popup['move_frame']=false" style="top:-10px;">
         <span ng-show="popup['move_frame']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
@@ -53,15 +53,15 @@
       <span class="btn-sm btn-primary btn-rock" style="cursor:pointer;" ng-click="set_frame('f')">
         <span class="glyphicon glyphicon-fast-forward"></span >
       </span>
-    </td></tr>
+    </div>
 
     <!-- colormap -->
-    <tr ng-show="mode=='frames'"><td style="padding-top:10px" >
+    <div ng-show="mode=='frames'" style="padding-top:10px" >
       color map :
       <select ng-model="caxis.cmap" ng-options="x for x in cmaps" ng-change="change_heatmap()"></select>
-    </td></tr>
+    </div>
     <!-- u frame (shown in bloch mode)-->
-    <tr ng-show="mode=='bloch' && dat['pets']"><td>
+    <div ng-show="mode=='bloch' && dat['pets']">
       <div style="padding:10px;">
         $\mathbf u_{frame}$ =
          <span ng-bind="frames.u"></span>
@@ -69,6 +69,6 @@
            <span class="popuptext" ng-show="popup['u_frame']"> Beam orientation based on experimental frames.</span>
          </span>
       </div>
-    </td></tr>
-  </table>
+    </div>
+  </div>
 </div>

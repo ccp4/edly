@@ -1,5 +1,7 @@
 # Version log
 ## 0.0.7dev
+### Mon 19 Jun 10:58:28 BST 2023
+- minor css changes 
 ### Mon 19 Jun 10:44:50 BST 2023
 - issue#47 : jump by frames
 - only allow bloch mode if a cif is provided

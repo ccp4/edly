@@ -4,8 +4,7 @@
   <!-- header -->
   <div>
     <span style="padding-left: 5px;font-size:15px" > Import menu </span>
-  <!-- ng-show="modes['analysis']=='frames' && !modes['molecule']"> -->
-    <a class="popup" ng-click="expand['importer']=!expand['importer']" ng-mouseenter="showIt('expand_importer')" ng-mouseleave="hideIt('expand_importer')" style="float:right;bottom:0px">
+    <a style="float:right;bottom:0px;margin-right:5px;" class="popup" ng-click="expand['importer']=!expand['importer']" ng-mouseenter="showIt('expand_importer')" ng-mouseleave="hideIt('expand_importer')" >
       <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
         <span class="popuptext" style="" ng-show="popup['expand_importer']" ng-bind="expand_str[expand['expand_importer']]"></span>
       </span>
