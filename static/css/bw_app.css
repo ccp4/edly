@@ -300,7 +300,12 @@ img {
   padding-top: 15px;
   margin-right: 4px
 }
-
+.frame_viewer{
+  margin-top:20px;
+  margin-bottom:30px;
+  padding-bottom:20px;
+  background-color: #537887;
+}
 
 #search_struct {
   background-image: url('/static/images/searchicon.png');

@@ -7,7 +7,7 @@
 
         <!-- solver tabs  -->
         <div class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
-          <a id="frames_panel" class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
+          <a id="frames_panel" ng-show="dat['exp'] || dat['sim']" class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
             <span class="gg-stack"></span >
             <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
           </a>

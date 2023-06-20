@@ -1,5 +1,16 @@
 # Version log
 ## 0.0.7dev
+### Tue 20 Jun 13:09:46 BST 2023
+- refactor
+  - modified sim frame panel to be the same as exp
+  - frames mode only available when frames are present
+- bug fixes :
+  - sanity check to prevent mode=frame is not frames present  
+  - update formula when change structure without refresh
+  - bloch_fig can only display dat info if no simulation available
+  - update_bloch calls fig only when called from rotation_mode
+  - added `defer` and removed `async` in calling mathjax hoping it fixes init pbs
+
 ### Mon 19 Jun 17:04:54 BST 2023
 - issue#44 import info
   - allow structure creation without cif

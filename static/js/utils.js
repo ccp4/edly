@@ -203,8 +203,13 @@ function update_formula(formula){
   //   }
   // };
   var math = MathJax.Hub.getAllJax("formula")[0];
-  console.log(math)
-  MathJax.Hub.Queue(["Text",math,formula]);
+
+  if (math){
+    MathJax.Hub.Queue(["Text",math,formula]);
+  }
+  else{
+    console.log('mathjax not init')    
+  }
 }
 
 function get_input_value(id){

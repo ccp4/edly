@@ -22,49 +22,58 @@ bloch = Blueprint('bloch', __name__)
 #### functions
 ########################
 def bloch_fig():
-    b0 = load_b0()
-    toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
-
-    is_px = session['bloch_modes']['is_px'] and session['dat']['pets']
-    if session['dat']['pets']:
+    is_dat = session['dat']['pets']
+    is_px = session['bloch_modes']['is_px'] and is_dat
+    if is_dat:
         pets = pets_data[session['mol']]
-
-    ########################
-    #### plot simulation data
-    ########################
-    if is_px:
-        df_pxy = pets.hkl_to_pixels(toplot.index.tolist(),session['frame'])
-        toplot['px']=df_pxy['px']
-        toplot['py']=df_pxy['py']
-
-    plts = {
-        'I'  :['Ix','blue' ,'circle'     ],
-        'Vga':['Vx','green','triangle-up'],
-        'Sw' :['Sx','red'  ,'diamond'    ],
-    }
-    toplot['Ix']=normalize( np.log10(np.maximum(abs(toplot['I'])  ,1e-5)))
-    toplot['Vx']=normalize( np.log10(np.maximum(abs(toplot['Vga']),1e-5)))
-    toplot['Sx']=normalize(-np.log10(np.maximum(abs(toplot['Sw']) ,1e-5)))
-    toplot.index.name='miller indices'
+    xm = session['max_res']
 
     fig=go.Figure()
-    for k,(v,c,m) in plts.items():
-        customdata=np.array([toplot[k].values, toplot.index.to_numpy()]).T
-        fig.add_trace(go.Scatter(
-            x=toplot['px'],y=toplot['py'],marker_size=toplot[v],
-            name=k,
-            visible=session['vis'][k],
-            hovertext=[k]*len(toplot),
-            marker_symbol=m,marker_color=c,
-            customdata=customdata,
-            hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{customdata[0]:.2e}<br>miller indices=%{customdata[1]}<extra></extra>',
-            mode='markers',
-        ))
+
+    b0 = load_b0()
+    is_sim='df_G' in b0.__dict__
+    if is_sim:
+        toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
+        if not xm:
+            xm = b0.df_G.q.max()#;print('xm set to ',xm)
+            xr,yr=[-xm,xm],[xm,-xm]
+
+        ##########################
+        #### plot simulation data
+        ##########################
+        if is_px:
+            df_pxy = pets.hkl_to_pixels(toplot.index.tolist(),session['frame'])
+            toplot['px']=df_pxy['px']
+            toplot['py']=df_pxy['py']
+
+        plts = {
+            'I'  :['Ix','blue' ,'circle'     ],
+            'Vga':['Vx','green','triangle-up'],
+            'Sw' :['Sx','red'  ,'diamond'    ],
+        }
+        toplot['Ix']=normalize( np.log10(np.maximum(abs(toplot['I'])  ,1e-5)))
+        toplot['Vx']=normalize( np.log10(np.maximum(abs(toplot['Vga']),1e-5)))
+        toplot['Sx']=normalize(-np.log10(np.maximum(abs(toplot['Sw']) ,1e-5)))
+        toplot.index.name='miller indices'
+
+
+        for k,(v,c,m) in plts.items():
+            customdata=np.array([toplot[k].values, toplot.index.to_numpy()]).T
+            fig.add_trace(go.Scatter(
+                x=toplot['px'],y=toplot['py'],marker_size=toplot[v],
+                name=k,
+                visible=session['vis'][k],
+                hovertext=[k]*len(toplot),
+                marker_symbol=m,marker_color=c,
+                customdata=customdata,
+                hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{customdata[0]:.2e}<br>miller indices=%{customdata[1]}<extra></extra>',
+                mode='markers',
+            ))
 
     ########################
     #### add exp data
     ########################
-    if session['dat']['pets'] and is_px:
+    if is_dat:
         pets = pets_data[session['mol']]
         df_pets = pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
         df_pets = df_pets.loc[~(df_pets.hkl == str((0,0,0)))]
@@ -83,66 +92,67 @@ def bloch_fig():
             hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x}<br>rpy=%{y}<br>value=%{customdata[0]:.2f}<br>miller indices=%{customdata[1]}<extra></extra>',
             mode='markers',
         ))
+        if is_px:
+            x_m,y_m = pets.nxy #pt_plot['px'].max() #*np.sqrt(2)
+            xr,yr=[0,x_m],[0,y_m]
+            if session['bloch_modes']['reversed']:yr=[y_m,0]
+        else:
+            if not xm:
+                xm=pt_plot[[px,py]].abs().max().max()#;print('xm set to ',xm)
+                xr,yr=[-xm,xm],[xm,-xm]
+
+    if is_dat or is_sim:
+        # print(is_dat,is_sim)
+        ########################
+        #### resolution rings
+        ########################
+        dq_ring = session['dq_ring']
+        rings=[]
+        if dq_ring:
+            t,qs = np.linspace(0,2*np.pi,100),np.arange(dq_ring,xm,dq_ring)
+            qr=qs
+            ct,st = np.cos(t),np.sin(t)
+            rx = lambda r:r*ct; ry=lambda r:r*st
+            if is_px:
+                # cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
+                if is_sim:
+                    cx,cy = toplot.loc[str((0,0,0)),['px','py']]
+                else:
+                    cx,cy=np.array(pets.nxy)/2
+                qr = qs/(pets.aper*np.sqrt(2))
+                rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
+
+            # print('qs : ',qs)
+            for q0,r0 in zip(qs,qr):
+                name='%.2f A' %(1/q0)
+                fig.add_trace(go.Scatter(
+                    x=rx(r0),y=ry(r0),
+                    legendgroup="resolution rings",
+                    legendgrouptitle_text="res rings",
+                    name=name,hovertext=['q=%.3f recA' %q0]*t.size,
+                    hovertemplate='<b>ring</b><br>%{hovertext}<br>res='+name+'<extra></extra>',
+                    visible=session['vis']['rings'],
+                    mode='lines',marker_color='purple',
+                ))
+            offset=3*is_sim+session['dat']['pets']
+            rings=list(range(offset,offset+qs.size))
+        session['rings']=rings              #;print('rings',rings)
+        session['last_time'] = time.time()
 
 
-    ########################
-    #### xmax
-    ########################
-    xm = session['max_res']
-    if not xm:xm = b0.df_G.q.max()
-    xr,yr=[-xm,xm],[xm,-xm]
-    if is_px:
-        x_m,y_m = pets.nxy #pt_plot['px'].max() #*np.sqrt(2)
-        xr,yr=[0,x_m],[0,y_m]
-        if session['bloch_modes']['reversed']:yr=[y_m,0]
-
-    ########################
-    #### resolution rings
-    ########################
-    dq_ring = session['dq_ring']
-    rings=[]
-    if dq_ring:
-        t,qs = np.linspace(0,2*np.pi,100),np.arange(dq_ring,xm,dq_ring)
-        qr=qs
-        ct,st = np.cos(t),np.sin(t)
-        rx = lambda r:r*ct; ry=lambda r:r*st
-        if is_px :
-            # cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
-            cx,cy = toplot.loc[str((0,0,0)),['px','py']]
-            qr = qs/(pets.aper*np.sqrt(2))
-            rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
-
-        # print('qs : ',qs)
-        for q0,r0 in zip(qs,qr):
-            name='%.2f A' %(1/q0)
-            fig.add_trace(go.Scatter(
-                x=rx(r0),y=ry(r0),
-                legendgroup="resolution rings",
-                legendgrouptitle_text="res rings",
-                name=name,hovertext=['q=%.3f recA' %q0]*t.size,
-                hovertemplate='<b>ring</b><br>%{hovertext}<br>res='+name+'<extra></extra>',
-                visible=session['vis']['rings'],
-                mode='lines',marker_color='purple',
-            ))
-        offset=3+session['dat']['pets']
-        rings=list(range(offset,offset+qs.size))
-    session['rings']=rings              #;print('rings',rings)
-    session['last_time'] = time.time()
-
-
-    ########################
-    #### layout
-    ########################
-    # print(session['bloch'])
-    fig.update_layout(
-        title="diffraction pattern z=%d A" %session['bloch']['thick'],
-        paper_bgcolor='LightSteelBlue',#cdcfd1',
-        # plot_bgcolor ='LightSteelBlue',#79a3f7',
-        width=fig_wh, height=fig_wh,
-    )
-    # fig.update_traces(mode='markers')
-    fig.update_xaxes(range=xr,scaleratio=1)
-    fig.update_yaxes(range=yr,scaleratio=1,autorange=False) #[False,"reversed"][session['bloch_modes']['reversed']])
+        ########################
+        #### layout
+        ########################
+        # print(session['bloch'])
+        fig.update_layout(
+            title="diffraction pattern z=%d A" %session['bloch']['thick'],
+            paper_bgcolor='LightSteelBlue',#cdcfd1',
+            # plot_bgcolor ='LightSteelBlue',#79a3f7',
+            width=fig_wh, height=fig_wh,
+        )
+        # fig.update_traces(mode='markers')
+        fig.update_xaxes(range=xr,scaleratio=1)
+        fig.update_yaxes(range=yr,scaleratio=1,autorange=False) #[False,"reversed"][session['bloch_modes']['reversed']])
     return fig.to_json()
 
 
@@ -201,7 +211,7 @@ def bloch_u():
     thicks = update_thicks(data['bloch']['thicks'])
     keV = session['bloch']['keV']
     # print(session['bloch_modes'])
-    if session['bloch_modes']['u0']=='auto':
+    if session['bloch_modes']['u0']=='auto' and session['dat']['pets']:
         keV = np.round(pets_data[session['mol']].keV) #;print('recover wavelength %.1f' %keV)
         u = pets_data[session['mol']].uvw0[data['frame']-1]
     else:
@@ -216,9 +226,9 @@ def bloch_u():
     # print(session['bloch'])
     # session['last_req'] = 'solve_bloch:%s' %(time.time())
     # print({k:type(v) for k,v in session['bloch'].items()})
-    return update_bloch()
+    return update_bloch(fig=False)
 
-def update_bloch():
+def update_bloch(fig=True):
     b_args = session['bloch']#.copy()
     # print(b_args['u'])
     # b_args['thicks']=None
@@ -229,13 +239,15 @@ def update_bloch():
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
     bloch_args=b_args.copy()
     bloch_args.update({'u':b_str(b_args['u'],4),'thicks':b_str(b_args['thicks'],0)})
-    if session['bloch']['felix']:
-        fig_data=go.Figure().to_json()
-    else:
-        fig_data = bloch_fig()
-    info = json.dumps({'fig':fig_data,'nbeams':b0.nbeams,
-        'bloch':bloch_args,'theta_phi':b_str(session['theta_phi'],4)})
-    return info
+    info = {'nbeams':b0.nbeams,'bloch':bloch_args,
+        'theta_phi':b_str(session['theta_phi'],4)}
+    if fig:
+        if session['bloch']['felix']:
+            fig_data=go.Figure().to_json()
+        else:
+            fig_data = bloch_fig()
+        info['fig'] = fig_data
+    return json.dumps(info)
 
 @bloch.route('/solve_bloch', methods=['POST'])
 def solve_bloch():

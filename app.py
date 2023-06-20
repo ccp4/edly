@@ -381,20 +381,26 @@ def init():
     init_mol()
 
     ####sanity checks
+    if not (session['dat']['exp'] or session['dat']['exp']) and session['mode']=='frames':
+        session['mode']='bloch'
+
     if session['mode']=='felix' and not session['dat']['felix']:
         session['mode'] = 'bloch'
     if session['dat']['exp'] :
         if session['frame']>session['nb_frames']:
             session['frame']=1
 
+
     ####### package info to frontend
     info=['mol','dat','frame','crys','mode','zmax','nb_frames',
         'offset','cmap','cmaps','heatmaps','nb_colors',
         'new','b0_path',]
     session_data = {k:session[k] for k in info}
-    folder=''
+    folder={}
     if session['dat']['exp']:
-        folder=session['exp']['folder']
+        folder['exp']=session['exp']['folder']
+    if session['dat']['sim']:
+        folder['sim']=session['sim']['folder']
     session_data['folder']      = folder
     session_data['builtins']    = list(builtins)
     session_data['structures']  = get_structures()
@@ -450,7 +456,7 @@ def init_structure():
         crys_dat.update(dict(zip(['a','b','c','alpha','beta','gamma'],
             b_str(crys.lattice_parameters,2).split(',') )))
         formula = re.sub("([0-9]+)", r"_{\1}", crys.chemical_formula).replace(' ','')
-        crys_dat['chemical_formula'] = formula
+        crys_dat['chemical_formula'] = formula                  #;print(formula)
         crys_dat['lattice_system']   = crys.lattice_system.name
         crys_dat['nb_atoms'] = len(crys.atoms)
         crys_dat['spg_ref']  = False
@@ -529,7 +535,7 @@ def init_mol():
 
     now = time.time()
     # session['cif_file'] = struct_file
-    session['dat'].update(dat)
+    session['dat']        = dat
     session['crys']       = crys_dat
     session['sim']        = sim
     session['exp']        = exp

@@ -109,6 +109,7 @@ angular.module('app').
   }
 
   $scope.select_mol=function(x){
+    $log.log($scope.open_mol);
     $scope.open_mol.name=x;
     $scope.structures_filtered=[];
     $scope.get_structure_info(x);
@@ -404,20 +405,21 @@ angular.module('app').
       .then(function(response){
         $scope.structures = response.data.structures//;$log.log($scope.structures)
         $scope.builtins   = response.data.builtins  //;$log.log($scope.builtins)
-        $scope.structure  = response.data.mol;
-        $scope.crys       = response.data.crys;
+        $scope.structure  = response.data.mol;      //;$log.log($scope.structure)
+        $scope.crys       = response.data.crys;     //;$log.log($scope.crys)
         $scope.cif_file   = $scope.crys.file!='?';
 
-        // $log.log($scope.crys.file,$scope.cif_file)
+
         // frames related stuffs
         $scope.dat                 = response.data.dat;
         $scope.frame               = response.data.frame;
         $scope.max_frame           = response.data.nb_frames;
-        $scope.exp_folder          = response.data.folder;
+        $scope.frame_folder        = response.data.folder;
         $scope.frames.active_frame = response.data.frame;
         $scope.frames.offset       = response.data.offset;
         $scope.frames.u            = '';
         $scope.frames.pedestal     = 0;
+        // $log.log('frames : ',  $scope.dat,$scope.max_frame)
 
         $scope.data      = {'exp':0,'sim':0};
         $scope.zmax      = response.data.zmax;
@@ -435,10 +437,11 @@ angular.module('app').
           $scope.update_link($scope.zenodo.record.files[Object.keys($scope.zenodo.record.files)[0]])
         })
 
-        $scope.get_structure_info($scope.structure )
+        update_formula($scope.crys.chemical_formula);
+        $scope.get_structure_info($scope.structure );
         // mode : frames, bloch, felix
-        $scope.mode = response.data.mode;
-        $scope.modes = response.data.modes;
+        $scope.mode  = response.data.mode           //;$log.log('mode  : ',$scope.mode)
+        $scope.modes = response.data.bloch_modes    //;$log.log('modes : ',$scope.modes)
         $scope.mode_style[$scope.mode]=sel_style;
         $rootScope.$emit('init_bloch_panel',$scope.frame,0);
     });
