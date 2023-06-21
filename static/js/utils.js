@@ -208,10 +208,13 @@ function update_formula(formula){
     MathJax.Hub.Queue(["Text",math,formula]);
   }
   else{
-    console.log('mathjax not init')    
+    console.log('mathjax not init')
   }
 }
 
+function get_elt(elt){
+  return $('#'+elt)[0];
+}
 function get_input_value(id){
   return $('#'+id)[0].value;
 }

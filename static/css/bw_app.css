@@ -307,7 +307,7 @@ img {
   background-color: #537887;
 }
 
-#search_struct {
+.search_input{
   background-image: url('/static/images/searchicon.png');
   background-position: 5px 5px;
   background-repeat: no-repeat;

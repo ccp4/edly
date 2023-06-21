@@ -36,7 +36,7 @@ def bloch_fig():
         toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
         if not xm:
             xm = b0.df_G.q.max()#;print('xm set to ',xm)
-            xr,yr=[-xm,xm],[xm,-xm]
+        xr,yr=[-xm,xm],[xm,-xm]
 
         ##########################
         #### plot simulation data

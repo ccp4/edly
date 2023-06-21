@@ -48,13 +48,19 @@ def data_path(link):
     filename=os.path.basename(link.replace('?download=1',''))
     fmt=get_compressed_fmt(filename)                            #;print('fmt:',fmt)
     #not good but should work
-    record='custom'
-    if 'zenodo.org' in link :
-        # print(link.split('record/'))
-        record=link.split('record/')[1].split('/files')[0]
+    if fmt:
+        record=''
+        if 'zenodo.org' in link :
+            # print(link.split('record/'))
+            record=link.split('record/')[1].split('/files')[0]
+        elif 'http' in link:
+            record=link.split('/')[2].replace('.','_').replace(':','_')
+        folder='%s_%s' %(record,filename)
+    else:
+        folder=filename
 
     filename=filename.replace('.%s' %fmt,'')
-    return 'static/database/%s_%s' %(record,filename)
+    return 'static/database/%s' %folder
 
 uncompress_fmts={
     'zip'       :'unzip',
@@ -75,8 +81,8 @@ def get_compressed_fmt(link):
     fmts=[fmt for fmt in compress_fmts if fmt in filename]      #;print(fmts)
     if len(fmts)==1:
         return fmts[0]
-    elif len(fmts)==2:
-        return fmts[1]
+    elif len(fmts)>1:
+        return fmts[-1]
     else:
         return ''
 

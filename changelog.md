@@ -1,5 +1,27 @@
 # Version log
 ## 0.0.7dev
+### Wed 21 Jun 14:55:31 BST 2023
+- issue#44 import info:
+  - added update zenodo functionality although does not work in headless
+  - added zenodo.py file
+  - not fully tested
+- enhancement :
+  - added search frames in local database functionality
+  - switch from local to zenodo database
+  - click to edit frames link (default non editable)
+- bug fixes :
+  - fix dl_state stall and extracting msg
+  - fix frame folders with some image formats not detected
+  - fix bug when downloading with custom link
+- refactor :
+  - changed `/import_frames` as `/check_dl_format`
+  - changed `/create_sym_link` as  `load_frames`
+  - created `download` structure in mainCtrl
+  - cosmetic html changes
+
+### Tue 20 Jun 16:06:12 BST 2023
+- bug fixes
+
 ### Tue 20 Jun 13:09:46 BST 2023
 - refactor
   - modified sim frame panel to be the same as exp

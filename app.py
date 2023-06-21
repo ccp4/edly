@@ -55,13 +55,23 @@ def upload_file():
 
 ################
 #### import frames
+@app.route('/update_zenodo', methods=['GET'])
+def update_zenodo():
+    cmd = "python3 zenodo.py"
+    out=check_output(cmd,shell=True).decode().strip();print(out)
+    with open('static/spg/records.json','r') as f:
+        records = json.load(f)
+    return json.dumps(records)
+
 @app.route('/get_dl_state', methods=['GET'])
 def get_dl_state():
     log_file="%s/dl.log" %(session['path'])
     cmd=r"grep '%%'  %s" %log_file
-    cmd+=r" | tail -n1 | sed -rE 's/([0-9]*%%)/;\1;/g' | cut -d';' -f2"
+    cmd+=r" | tail -n1 | sed -rE 's/([0-9]*%)/;\1;/g' | cut -d';' -f2"
+    # print(cmd)
     dl_state=check_output(cmd,shell=True).decode().strip()
     msg='Download state : \n%s\n' %dl_state
+    # print(dl_state)
     if dl_state=="100%":
         cmd = 'tail -n1 %s' %os.path.realpath("%s/uncompress.log" %session['path'])
         file_extract=check_output(cmd,shell=True).decode().strip()
@@ -98,10 +108,10 @@ rm {filename}
     out=check_output(cmd,shell=True).decode().strip()#;print(out)
     return out
 
-@app.route('/import_frames', methods=['POST'])
-def import_frames():
+@app.route('/check_dl_format', methods=['POST'])
+def check_dl_format():
     link=request.data.decode()
-    fmt=get_compressed_fmt(link)
+    fmt=get_compressed_fmt(link)              #;print(fmt)
     if fmt not in compress_fmts:
         msg='Compressed file should be of the following formats :\n %s' %(','.join(compress_fmts))
     else:
@@ -110,23 +120,24 @@ def import_frames():
 
 @app.route('/check_dl_frames', methods=['POST'])
 def check_dl_frames():
-    link     = request.data.decode()
+    link     = request.data.decode()          #;print(link)
     filepath = data_path(link)                #;print(filepath)
-    dl       = os.path.exists(data_path(link))
+    dl       = os.path.exists(filepath)       #;print(dl)
     folders  = []
     if dl:
-        cmd=r'cd {path};for dir in `find {folder} -type d`;do for fmt in img cbf smv tiff;do find $dir -maxdepth 1 -type f -name "*.$fmt" -not -name ".*" | head -n1;done;done'.format(
+        cmd=r'cd {path};for dir in `find {folder} -type d`;do for fmt in {formats};do find $dir -maxdepth 1 -type f -name "*.$fmt" -not -name ".*" | head -n1;done;done'.format(
             path    = 'static/database',
             folder  = os.path.basename(filepath),
+            formats = ' '.join(readers.fmts),
         )
         # print(cmd)
-        files = check_output(cmd,shell=True).decode().strip()
+        files   = check_output(cmd,shell=True).decode().strip()
         folders = [os.path.dirname(f) for f in files.split('\n')]
         # print(files,folders)
     return json.dumps({'dl':dl,'folders':folders})
 
-@app.route('/create_sym_link', methods=['POST'])
-def create_sym_link():
+@app.route('/load_frames', methods=['POST'])
+def load_frames():
     folder = request.data.decode()  #;print(folder)
     cmd='if [ -L {exp_path} ];then rm {exp_path};fi;ln -s {folder} {exp_path}'.format(
         folder   =os.path.realpath('static/database/%s' %folder),
@@ -146,7 +157,7 @@ def create_sym_link():
 @app.route('/check_dat', methods=['POST'])
 def check_dat():
     filename = request.data.decode() #;print(data)
-    new_filename = filename.strip('()').replace(' ','_')#;print(new_filename)
+    new_filename = filename.strip('()[]').replace(' ','_')#;print(new_filename)
     data_folder  = tmp_dat_folder(session)
     unzip_cmd=''
     if filename.split('.')[-1] == 'zip':
@@ -204,7 +215,7 @@ def import_cif():
     return json.dumps(crys_dat)
 
 def _import_cif(filename):
-    new_filename = filename.strip('()').replace(' ','_')#;print(new_filename)
+    new_filename = filename.strip('()[]').replace(' ','_')#;print(new_filename)
 
     cmd="rm -f {mol_path}/*.cif; mv '{filepath}' {mol_path}/{new_filename};rm -f {path}*.cif;rm -f {path}/upload/*.cif".format(
         filepath     = os.path.join(session['path'],'upload',filename),
@@ -390,7 +401,8 @@ def init():
         if session['frame']>session['nb_frames']:
             session['frame']=1
 
-
+    cmd='find static/database/ -maxdepth 1 -mindepth 1 -type  d | xargs -n1 basename'
+    local_frames=check_output(cmd,shell=True).decode().strip().split('\n')
     ####### package info to frontend
     info=['mol','dat','frame','crys','mode','zmax','nb_frames',
         'offset','cmap','cmaps','heatmaps','nb_colors',
@@ -404,6 +416,8 @@ def init():
     session_data['folder']      = folder
     session_data['builtins']    = list(builtins)
     session_data['structures']  = get_structures()
+    session_data['local_frames']  = local_frames
+
     session['init'] = True
     # print(colors.magenta+'init done : ',session['init'],colors.black)
     # session_data['gifs'] = gifs
