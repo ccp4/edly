@@ -44,3 +44,12 @@
   </form>
   <div ng-show="new_project.error" id="cif_error" style="text-align:center;margin-top:20px;" ng-style="new_project['error_color']" ng-bind="new_project.error_msg"></div>
 </div>
+
+
+<div id="dialog_delete" title="delete project" style="display:none">
+  <h3>Delete project</h3>
+  <form id="form_delete">
+    Are you sure you want to delete <span ng-style="font-weight:bold;" ng-bind="open_mol.name"/>   ?
+    <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+  </form>
+</div>

@@ -17,6 +17,14 @@ angular.module('app').
       $scope.popup[val]=false;
   };
 
+  $scope.reset_search=function(id){
+    $scope.search_name({'key':'Escape'},id)
+  }
+
+  $scope.show_search=function(id){
+    $scope.search_name({'key':''},id)
+  }
+
   $scope.search_name=function(e,id){
     var filter, a, i, txtValue,values,options;
     filter=get_input_value("search_"+id).toUpperCase();
@@ -38,7 +46,7 @@ angular.module('app').
 
     switch (id){
       case 'struct'       : $scope.structures_filtered=options;break;
-      case'frames'        : $scope.zenodo.frames_filtered=options;break;
+      case 'frames'       : $scope.zenodo.frames_filtered=options;break;
       case 'local_frames' : $scope.local_frames.filtered=options;break;
     }
     // $log.log(filter,options)
@@ -119,6 +127,15 @@ angular.module('app').
     $http.post('set_structure',JSON.stringify({'mol':mol}))
     .then(function(response){
         $scope.init();
+    })
+  }
+
+  $scope.delete_structure=function(){
+    $log.log('deleting : ',$scope.open_mol.name)
+    $http.post('delete_structure',JSON.stringify({'mol':$scope.open_mol.name}))
+    .then(function(response){
+        $scope.structures=response.data.structures;
+        $scope.open_mol.name="";//$scope.structures[0];
     })
   }
 
@@ -508,8 +525,8 @@ angular.module('app').
   $scope.zenodo={'record':'','records':''}
   $scope.local_frames={'name':'','filtered':[],'folders':[]}
   $scope.show_input_link=false;
-  $scope.import_mode='frames';
   $scope.import_style = {open_struct:'',frames:'',dat:'',cif:''};
+  $scope.import_mode  ='open_struct';
   $scope.import_style[$scope.import_mode]=sel_style;
   $scope.dat_type_files = {
       'xds'   : 'A single XDS_ASCII.HKL file ' ,

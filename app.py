@@ -233,6 +233,14 @@ def _import_cif(filename):
 ######################################################
 #### Structure related
 ######################################################
+@app.route('/delete_structure', methods=['POST'])
+def delete_structure():
+    data = json.loads(request.data.decode())#;print(data)
+    mol  =  data['mol']
+    cmd='rm -rf %s' %mol_path(mol)
+    out=check_output(cmd,shell=True).decode().strip()#;print(out)
+    return json.dumps({'msg':out,'structures':get_structures()})
+
 @app.route('/new_structure', methods=['POST'])
 def new_structure():
     data = json.loads(request.data.decode())#;print(data)
@@ -262,7 +270,7 @@ def get_structure_info():
     cif_files = glob.glob(os.path.join(mol_path(mol),'*.cif'))
     if len(cif_files):
         cif_file = os.path.basename(cif_files[0])
-    frames_folder   = get_frames_folder(mol,'exp')
+    frames_folder   = get_frames_folder(mol,'exp',full=True)
     dat_type        = get_dat_type(mol)
     # print(mol,cif_file,dat_type,frames_folder)
     return json.dumps({

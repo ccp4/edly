@@ -87,12 +87,17 @@ def get_compressed_fmt(link):
         return ''
 
 pets_data={}
-def get_frames_folder(mol,frame_type):
+def get_frames_folder(mol,frame_type,full=False):
     folder=""
     frame_path  = os.path.join(mol_path(mol),frame_type)
     if os.path.exists(frame_path):
-        cmd = "basename `readlink %s`" %frame_path
-        folder=check_output(cmd,shell=True).decode().strip()
+        if full:
+            cmd = "readlink %s" %frame_path
+            folder=check_output(cmd,shell=True).decode().strip()
+            folder=folder.replace('/data/',';').split(';')[1]
+        else:
+            cmd = "basename `readlink %s`" %frame_path
+            folder=check_output(cmd,shell=True).decode().strip()
     return folder
 
 def get_dat_types(mol):

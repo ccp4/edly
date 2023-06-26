@@ -1,12 +1,16 @@
 # Version log
 ## 0.0.7dev
+### Mon 26 Jun 10:15:37 BST 2023
+- enhancement:
+   - added create and delete structure buttons
+   - display stuff 
 ### Mon 26 Jun 08:47:56 BST 2023
 - bug fix :  
   - fixed folder name in `data_path`
 - cosmetic :
   - `fetch` flag when updating zenodo so it only does it on cloud request
   - minor display stuff
-  
+
 ### Wed 21 Jun 14:55:31 BST 2023
 - issue#44 import info:
   - added update zenodo functionality although does not work in headless

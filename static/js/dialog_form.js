@@ -61,3 +61,31 @@ function new_structure(){
 function close_dialog(){
   $( "#dialog" ).dialog( "close" );
 }
+
+
+function delete_structure(){
+  elt=$( "#dialog_delete" )[0];
+  // console.log(elt);
+  angular.element(elt).scope().delete_structure();
+  $( "#dialog_delete" ).dialog( "close" );
+}
+
+function dialog_delete(){
+  dialog = $( "#dialog_delete" ).dialog({
+    autoOpen: false,
+    height: 200,
+    width: 400,
+    modal: true,
+    buttons: {
+      "ok ": delete_structure,
+      Cancel: function() {
+        dialog.dialog( "close" );
+      },
+    },
+    close: function() {
+      $log.log('closing delete')
+    }
+  })
+
+  $( "#dialog_delete" ).dialog( "open" );
+};

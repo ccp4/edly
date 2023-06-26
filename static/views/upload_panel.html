@@ -39,31 +39,54 @@
     <!-- Open structure -->
     <!--/////////////////////////////////////  -->
     <div ng-show="import_mode=='open_struct'">
-      <div style="font-size:16px" > Open existing folder :</div>
-      <div style="margin-left:10px;margin-top:5px;">
-        <span >
-          <input  id="search_struct" class="search_input" placeholder="Search name" type="text" ng-model="open_mol.name" ng-keyup="search_name($event,'struct')" ng-key-enter="get_structure_info_e()"/>
-          <ul id="search_ul" style="overflow-y:scroll;max-height:100px">
-            <li class="li_search" ng-click="select_mol(x)" ng-repeat=" x in structures_filtered"><span ng-bind="x"/></li>
-          </ul>
-        </span>
+
+      <div>
+        <div style="font-size:16px" > Create new structure : </div>
+        <div style="display:grid;justify-content: space-around;">
+          <div style="cursor: pointer;width:200px;margin:5px;" class="btn-sm btn-primary popup" onclick="dialog_new_structure()" ng-mouseenter="showIt('new_struct')" ng-mouseleave="hideIt('new_struct')" >
+            <span style="margin-left:5px">Create</span>
+            <span class="glyphicon glyphicon-file" style="float: right;"/>
+            <span class="popuptext" ng-show="popup['new_struct']">Create a new structure</span>
+          </div>
+        </div>
       </div>
+
+      <div>
+        <div style="font-size:16px" > Open existing folder :</div>
+        <div style="margin-left:10px;margin-top:5px;">
+          <span >
+            <input  id="search_struct" autocomplete="off" class="search_input" placeholder="Search name" type="text" ng-model="open_mol.name" ng-blur="reset_search('struct')" ng-focus="show_search('struct')" ng-keyup="search_name($event,'struct')" ng-key-enter="get_structure_info_e()"/>
+            <ul id="search_ul" style="overflow-y:scroll;max-height:100px">
+              <li class="li_search" ng-mousedown="select_mol(x)" ng-repeat=" x in structures_filtered"><span ng-bind="x"/></li>
+            </ul>
+          </span>
+        </div>
+      </div>
+
       <div style="margin-top:10px;">
-        <span> Name : <span ng-bind="open_mol.name"/> </span>
-        <div style="cursor: pointer;float:right;margin-right:5px;" class="btn-sm btn-primary" ng-click="get_structure_info(open_mol.name)" >
+        <span> <span style="font-size:16px;font-weight:bold;margin-left:2px;"> Name : </span><span ng-bind="open_mol.name"/> </span>
+        <div style="cursor: pointer;float:right;margin-right:5px;" class="btn-sm btn-primary popup" ng-click="get_structure_info(open_mol.name)" ng-mouseenter="showIt('refresh_struct')" ng-mouseleave="hideIt('refresh_struct')" >
           <span class="glyphicon glyphicon-refresh"/>
+          <span class="popuptext" ng-show="popup['refresh_struct']">refresh info for this structure</span>
         </div>
       </div>
       <div style="margin-left:10px;margin-top:5px;">
-        <div> cif            : <span ng-bind="open_mol.cif" /></div>
-        <div> frames         : <span ng-bind="open_mol.exp" /></div>
-        <div> processed data : <span ng-bind="open_mol.dat" /></div>
+        <div> <span style="font-weight:bold;"> Cif            </span> : <div ng-bind="open_mol.cif" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
+        <div> <span style="font-weight:bold;"> Frames         </span> : <div ng-bind="open_mol.exp" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
+        <div> <span style="font-weight:bold;"> Processed data </span> : <div ng-bind="open_mol.dat" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
       </div>
 
+      <!-- open/delete button -->
       <div ng-show="structures.indexOf(open_mol.name)>=0" style="display:grid;justify-content: space-around;margin-top:5px;margin-bottom:10px">
-        <div style="cursor: pointer;" class="btn-sm btn-primary" ng-click="set_structure(open_mol.name)" >
-          <span style="margin-left:5px">Open structure<span/>
-          <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
+        <div>
+          <span div style="cursor: pointer;" class="btn-sm btn-primary" ng-click="set_structure(open_mol.name)" >
+            <span style="margin-left:5px">Open structure</span>
+            <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
+          </span>
+          <span style="cursor: pointer;background-color: #b71616" class="btn-sm btn-primary popup" onclick="dialog_delete()" ng-mouseenter="showIt('delete_struct')" ng-mouseleave="hideIt('delete_struct')">
+            <span class="glyphicon glyphicon-remove" />
+            <span class="popuptext" ng-show="popup['delete_struct']">delete this structure</span>
+          </span>
         </div>
       </div>
     </div>
@@ -89,14 +112,14 @@
         <!-- search input and results -->
         <div>
           <div>
-            <span><input id="search_frames" class="search_input" placeholder="Search" type="text" ng-model="zenodo.name" ng-keyup="search_name($event,'frames')" ng-focus="search_name({'key':''},'frames')" style="margin-left:20px;width:200px;"/></span>
+            <span><input id="search_frames" class="search_input" autocomplete="off" placeholder="Search" type="text" ng-model="zenodo.name" ng-keyup="search_name($event,'frames')" ng-blur="reset_search('frames')" ng-focus="show_search('frames')"  style="margin-left:20px;width:200px;"/></span>
             <span><a class="btn-sm btn-primary popup" style="float:right;margin-right:7px;margin-top:0px" ng-click="update_zenodo(true)" ng-mouseenter="showIt('update_cloud')" ng-mouseleave="hideIt('update_cloud')">
               <span class="glyphicon glyphicon-refresh" />
               <span class="popuptext" ng-show="popup['update_cloud']"> update zenodo </span>
             </a></span>
           </div>
           <ul id="search_ul" style="overflow-y:scroll;max-height:200px;margin-left:20px;width:280px;border-top:none;border-bottom:none;">
-            <li class="li_search" ng-click="select_record(x)" ng-repeat=" x in zenodo.frames_filtered"><span ng-bind="x"/></li>
+            <li class="li_search" ng-mousedown="select_record(x)" ng-repeat=" x in zenodo.frames_filtered"><span ng-bind="x"/></li>
           </ul>
         </div>
         <!-- record file table -->
@@ -121,9 +144,9 @@
           Local database :
         </div>
         <div>
-          <input id="search_local_frames" class="search_input" placeholder="Search" type="text" ng-model="local_frames.name" ng-keyup="search_name($event,'local_frames')" ng-focus="search_name({'key':''},'local_frames')" style="margin-left:20px;width:200px;"/>
+          <input id="search_local_frames" autocomplete="off" class="search_input" placeholder="Search" type="text" ng-model="local_frames.name" ng-keyup="search_name($event,'local_frames')" ng-blur="reset_search('local_frames')" ng-focus="show_search('local_frames')" style="margin-left:20px;width:200px;"/>
           <ul id="search_ul" style="overflow-y:scroll;max-height:200px;margin-left:20px;width:280px;border-top:none;border-bottom:none;">
-            <li class="li_search" ng-click="select_local_frames(x)" ng-repeat=" x in local_frames.filtered"><span ng-bind="x"/></li>
+            <li class="li_search" ng-mousedown="select_local_frames(x)" ng-repeat=" x in local_frames.filtered"><span ng-bind="x"/></li>
           </ul>
         </div>
       </div>
