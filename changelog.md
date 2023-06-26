@@ -1,9 +1,30 @@
 # Version log
 ## 0.0.7dev
+### Mon 26 Jun 20:15:58 BST 2023
+- bug fixes :
+  - do not display bloch or frames if not available
+  - do not display import options if no structure is selected
+  - update display if deleting structure was the active structure
+  - full frames folder path removing database path
+  - create database link and folder if not present
+  - added submit functions to all dialog forms
+  - fix ng-style bug on delete_dialog element
+- tests :
+  - added ids to lots of widgets
+  - failing in headless mode
+  - added `.send_keys()`/`.click()` for `focus`/`upload_file` interactions
+  - new test :  `new_structure` passing
+  - new test :  `import_cif`    passing
+  - new test :  `import_frames` passing
+  - new test :  `delete_struct` passing
+
 ### Mon 26 Jun 10:15:37 BST 2023
 - enhancement:
    - added create and delete structure buttons
-   - display stuff 
+   - display stuff
+   - full link for frames folder
+   - confirmation delete dialog
+   - ng-blur and ng-focus on search input boxes
 ### Mon 26 Jun 08:47:56 BST 2023
 - bug fix :  
   - fixed folder name in `data_path`

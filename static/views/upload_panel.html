@@ -4,7 +4,7 @@
   <!-- header -->
   <div>
     <span style="padding-left: 5px;font-size:15px" > Import menu </span>
-    <a style="float:right;bottom:0px;margin-right:5px;" class="popup" ng-click="expand['importer']=!expand['importer']" ng-mouseenter="showIt('expand_importer')" ng-mouseleave="hideIt('expand_importer')" >
+    <a id="expand_import_menu" style="float:right;bottom:0px;margin-right:5px;" class="popup" ng-click="expand['importer']=!expand['importer']" ng-mouseenter="showIt('expand_importer')" ng-mouseleave="hideIt('expand_importer')" >
       <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
         <span class="popuptext" style="" ng-show="popup['expand_importer']" ng-bind="expand_str[expand['expand_importer']]"></span>
       </span>
@@ -15,20 +15,22 @@
   <div style="margin-left:5px;margin-bottom: 5px;" ng-show="expand['importer']">
     <!-- buttons -->
     <div style="margin-bottom: 5px;" >
-      <a class="btn-lg btn-primary popup" ng-style="import_style['open_struct']" ng-click="set_import('open_struct')" ng-mouseenter="showIt('open_struct')" ng-mouseleave="hideIt('open_struct')">
+      <a id="import_menu_open_btn" class="btn-lg btn-primary popup" ng-style="import_style['open_struct']" ng-click="set_import('open_struct')" ng-mouseenter="showIt('open_struct')" ng-mouseleave="hideIt('open_struct')">
         <span class="glyphicon glyphicon-folder-open" />
-        <span class="popuptext" ng-show="popup['open_struct']"> Open an existing structure </span>
+        <span class="popuptext" ng-show="popup['open_struct']">
+          Open an existing structure </span>
       </a>
-      <a class="btn-lg btn-primary popup" ng-style="import_style['frames']" ng-click="set_import('frames')" ng-mouseenter="showIt('import_frames')" ng-mouseleave="hideIt('import_frames')">
+      <a id="import_menu_frames_btn" class="btn-lg btn-primary popup" ng-show="structure!=''" ng-style="import_style['frames']" ng-click="set_import('frames')" ng-mouseenter="showIt('import_frames')" ng-mouseleave="hideIt('import_frames')">
         <span class="glyphicon glyphicon-th" />
-        <span class="popuptext" ng-show="popup['import_frames']"> Import experimental dataset </span>
+        <span class="popuptext" ng-show="popup['import_frames']">
+          Import experimental frames </span>
       </a>
-      <a class="btn-lg btn-primary popup" ng-style="import_style['dat']" ng-click="set_import('dat')" ng-mouseenter="showIt('import_dat')" ng-mouseleave="hideIt('import_dat')">
+      <a id="import_menu_dat_btn" class="btn-lg btn-primary popup" ng-show="structure!=''" ng-style="import_style['dat']" ng-click="set_import('dat')" ng-mouseenter="showIt('import_dat')" ng-mouseleave="hideIt('import_dat')">
         <span class="glyphicon glyphicon-cog" />
         <span class="popuptext" ng-show="popup['import_dat']">
           Import processed data (pets,dials or xds ) </span>
       </a>
-      <a class="btn-lg btn-primary popup" ng-style="import_style['cif']" ng-click="set_import('cif')" ng-mouseenter="showIt('import_cif')" ng-mouseleave="hideIt('import_cif')">
+      <a id="import_menu_cif_btn" class="btn-lg btn-primary popup" ng-show="structure!=''" ng-style="import_style['cif']" ng-click="set_import('cif')" ng-mouseenter="showIt('import_cif')" ng-mouseleave="hideIt('import_cif')">
         <span class="gg-icon gg-share" style="margin-right: 10px;"/>
         <span class="popuptext" ng-show="popup['import_cif']">
           Import a cif file </span>
@@ -43,7 +45,7 @@
       <div>
         <div style="font-size:16px" > Create new structure : </div>
         <div style="display:grid;justify-content: space-around;">
-          <div style="cursor: pointer;width:200px;margin:5px;" class="btn-sm btn-primary popup" onclick="dialog_new_structure()" ng-mouseenter="showIt('new_struct')" ng-mouseleave="hideIt('new_struct')" >
+          <div id="new_struct_btn" style="cursor: pointer;width:200px;margin:5px;" class="btn-sm btn-primary popup" onclick="dialog_new_structure()" ng-mouseenter="showIt('new_struct')" ng-mouseleave="hideIt('new_struct')" >
             <span style="margin-left:5px">Create</span>
             <span class="glyphicon glyphicon-file" style="float: right;"/>
             <span class="popuptext" ng-show="popup['new_struct']">Create a new structure</span>
@@ -55,35 +57,38 @@
         <div style="font-size:16px" > Open existing folder :</div>
         <div style="margin-left:10px;margin-top:5px;">
           <span >
-            <input  id="search_struct" autocomplete="off" class="search_input" placeholder="Search name" type="text" ng-model="open_mol.name" ng-blur="reset_search('struct')" ng-focus="show_search('struct')" ng-keyup="search_name($event,'struct')" ng-key-enter="get_structure_info_e()"/>
+            <input id="search_struct" autocomplete="off" class="search_input" placeholder="Search name" type="text" ng-model="open_mol.name" ng-blur="reset_search('struct')" ng-focus="show_search('struct')" ng-keyup="search_name($event,'struct')" ng-key-enter="get_structure_info_e()"/>
             <ul id="search_ul" style="overflow-y:scroll;max-height:100px">
-              <li class="li_search" ng-mousedown="select_mol(x)" ng-repeat=" x in structures_filtered"><span ng-bind="x"/></li>
+              <li id="li_{a x a}" class="li_search" ng-mousedown="select_mol(x)" ng-repeat=" x in structures_filtered"><span ng-bind="x"/></li>
             </ul>
           </span>
         </div>
       </div>
 
       <div style="margin-top:10px;">
-        <span> <span style="font-size:16px;font-weight:bold;margin-left:2px;"> Name : </span><span ng-bind="open_mol.name"/> </span>
-        <div style="cursor: pointer;float:right;margin-right:5px;" class="btn-sm btn-primary popup" ng-click="get_structure_info(open_mol.name)" ng-mouseenter="showIt('refresh_struct')" ng-mouseleave="hideIt('refresh_struct')" >
+        <span>
+          <span style="font-size:16px;font-weight:bold;margin-left:2px;"> Name : </span>
+          <span id="info_struct_name" ng-bind="open_mol.name"/>
+        </span>
+        <div id="info_struct_refresh_btn" style="cursor: pointer;float:right;margin-right:5px;" class="btn-sm btn-primary popup" ng-click="get_structure_info(open_mol.name)" ng-mouseenter="showIt('refresh_struct')" ng-mouseleave="hideIt('refresh_struct')" >
           <span class="glyphicon glyphicon-refresh"/>
           <span class="popuptext" ng-show="popup['refresh_struct']">refresh info for this structure</span>
         </div>
       </div>
       <div style="margin-left:10px;margin-top:5px;">
-        <div> <span style="font-weight:bold;"> Cif            </span> : <div ng-bind="open_mol.cif" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
-        <div> <span style="font-weight:bold;"> Frames         </span> : <div ng-bind="open_mol.exp" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
-        <div> <span style="font-weight:bold;"> Processed data </span> : <div ng-bind="open_mol.dat" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
+        <div> <span style="font-weight:bold;"> Cif            </span> : <div id="info_struct_cif"    ng-bind="open_mol.cif" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
+        <div> <span style="font-weight:bold;"> Frames         </span> : <div id="info_struct_frames" ng-bind="open_mol.exp" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
+        <div> <span style="font-weight:bold;"> Processed data </span> : <div id="info_struct_dat"    ng-bind="open_mol.dat" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
       </div>
 
       <!-- open/delete button -->
       <div ng-show="structures.indexOf(open_mol.name)>=0" style="display:grid;justify-content: space-around;margin-top:5px;margin-bottom:10px">
         <div>
-          <span div style="cursor: pointer;" class="btn-sm btn-primary" ng-click="set_structure(open_mol.name)" >
+          <span  id="open_struct_btn"  style="cursor: pointer;" class="btn-sm btn-primary" ng-click="set_structure(open_mol.name)" >
             <span style="margin-left:5px">Open structure</span>
             <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
           </span>
-          <span style="cursor: pointer;background-color: #b71616" class="btn-sm btn-primary popup" onclick="dialog_delete()" ng-mouseenter="showIt('delete_struct')" ng-mouseleave="hideIt('delete_struct')">
+          <span  id="delete_struct_btn"  style="cursor: pointer;background-color: #b71616" class="btn-sm btn-primary popup" onclick="dialog_delete()" ng-mouseenter="showIt('delete_struct')" ng-mouseleave="hideIt('delete_struct')">
             <span class="glyphicon glyphicon-remove" />
             <span class="popuptext" ng-show="popup['delete_struct']">delete this structure</span>
           </span>
@@ -98,7 +103,7 @@
     <div ng-show="import_mode=='frames'">
       <div style="font-size:16px" >
         Import Frames :
-        <a class="btn-sm btn-primary popup" style="float:right;margin-right:7px;margin-top:-5px" ng-click="download.zenodo=!download.zenodo" ng-mouseenter="showIt('show_zenodo')" ng-mouseleave="hideIt('show_zenodo')">
+        <a id="import_frames_toggle_btn" class="btn-sm btn-primary popup" style="float:right;margin-right:7px;margin-top:-5px" ng-click="download.zenodo=!download.zenodo" ng-mouseenter="showIt('show_zenodo')" ng-mouseleave="hideIt('show_zenodo')">
           <span ng-class="{'glyphicon glyphicon-cloud':!download.zenodo,'glyphicon glyphicon-book':download.zenodo}" />
           <span class="popuptext" ng-show="popup['show_zenodo']"> toggle local/zenodo database </span>
         </a>
@@ -146,16 +151,16 @@
         <div>
           <input id="search_local_frames" autocomplete="off" class="search_input" placeholder="Search" type="text" ng-model="local_frames.name" ng-keyup="search_name($event,'local_frames')" ng-blur="reset_search('local_frames')" ng-focus="show_search('local_frames')" style="margin-left:20px;width:200px;"/>
           <ul id="search_ul" style="overflow-y:scroll;max-height:200px;margin-left:20px;width:280px;border-top:none;border-bottom:none;">
-            <li class="li_search" ng-mousedown="select_local_frames(x)" ng-repeat=" x in local_frames.filtered"><span ng-bind="x"/></li>
+            <li id="li_frames_{a x a}" class="li_search" ng-mousedown="select_local_frames(x)" ng-repeat=" x in local_frames.filtered"><span ng-bind="x"/></li>
           </ul>
         </div>
       </div>
 
       <!-- link input and download button -->
       <div>
-        <span style="cursor:pointer;" ng-click="show_input_link=!show_input_link"> Link </span> :
+        <span id="download_link_btn" style="cursor:pointer;" ng-click="show_input_link=!show_input_link"> Link </span> :
         <div style="margin-left:5px;display: flex;">
-          <span  ng-hide="show_input_link" style="width: 230px;word-wrap:break-word;font-style:italic;" ng-bind="download.link"/>
+          <span id="span_dl_link" ng-hide="show_input_link" style="width: 230px;word-wrap:break-word;font-style:italic;" ng-bind="download.link"/>
           <input ng-show="show_input_link" style="width: 230px;margin-right: 5px;" type="text" ng-model="download.link" ng-key-enter="check_dl_frames()" ng-change="check_dl_frames()">
           <a ng-hide="download.downloaded" style="margin:0px;height:30px;" class="btn-sm btn-primary popup" ng-click="download_frames()" ng-mouseenter="showIt('download_frames')" ng-mouseleave="hideIt('download_frames')">
             <span class="glyphicon glyphicon-cloud-download" />
@@ -181,7 +186,7 @@
            <tr ng-repeat="x in data_folders">
              <td style="word-wrap:break-word;"><div ng-bind="x"> </div></td>
              <td style="">
-               <a class="btn-sm btn-primary" style="cursor: pointer" ng-click="import_frames(x)" >
+               <a id="import_frames_btn_{a x a}" class="btn-sm btn-primary" style="cursor: pointer" ng-click="import_frames(x)" >
                  <span class="glyphicon glyphicon-import" />
               </a>
             </td>
@@ -265,8 +270,8 @@
         </fieldset></form>
       </div>
       <!-- import btn -->
-      <div ng-show="valid_cif" style="display:grid;justify-content: space-around;margin-top:10px;margin-bottom:5px">
-        <div style="cursor: pointer;" class="btn-sm btn-primary" ng-click="import_cif()" >
+      <div  ng-show="valid_cif" style="display:grid;justify-content: space-around;margin-top:10px;margin-bottom:5px">
+        <div id="import_cif_file_button" style="cursor: pointer;" class="btn-sm btn-primary" ng-click="import_cif()" >
           <span style="margin-left:5px">Import cif file<span/>
           <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
         </div>
@@ -279,7 +284,7 @@
 
       <div style="font-size:16px;margin-top:10px;margin-bottom:5px;" >
         Current cif file :
-        <div style="margin-left:20px" ng-bind="crys.file"></div>
+        <div id="current_cif_file_div" style="margin-left:20px" ng-bind="crys.file"></div>
       </div>
     </div>
 

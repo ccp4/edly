@@ -1,6 +1,6 @@
 // var dialog, form;
 
-$(document).ready(function(){
+// $(document).ready(function(){
 // elt=$( "#dialog" )[0]
 // console.log(elt)
 // scope=angular.element(elt).scope;
@@ -20,7 +20,7 @@ $(document).ready(function(){
 //   //   $('#cif_error').hide()
 //   //   // allFields.removeClass( "ui-state-error" );
 //   // }
-});
+// });
 
 
 
@@ -50,6 +50,12 @@ function dialog_new_structure(){
   })
 
   $( "#dialog" ).dialog( "open" );
+
+  form = dialog.find( "form" ).on( "submit", function( event ) {
+    event.preventDefault();
+    new_structure();
+  });
+
 };
 
 function new_structure(){
@@ -83,9 +89,14 @@ function dialog_delete(){
       },
     },
     close: function() {
-      $log.log('closing delete')
+      console.log('closing delete')
     }
   })
 
   $( "#dialog_delete" ).dialog( "open" );
+  form = dialog.find( "form" ).on( "submit", function( event ) {
+    event.preventDefault();
+    delete_structure();
+  });
+
 };

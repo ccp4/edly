@@ -3,10 +3,10 @@
     <div class="panel" style="background-color:#b5ccda">
 
         <div ng-include="'static/views/upload_panel.html'"></div>
-        <div ng-include="'/static/views/structure.html'"></div>
+        <div ng-show="structure!=''" ng-include="'/static/views/structure.html'"></div>
 
         <!-- solver tabs  -->
-        <div class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
+        <div ng-show="structure!=''" class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
           <a id="frames_panel" ng-show="dat['exp'] || dat['sim']" class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
             <span class="gg-stack"></span >
             <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
@@ -27,13 +27,13 @@
 
         <!-- solver panel -->
         <div class="row">
-          <div class="bloch_solver" style="margin-left:10px;margin-right:20px">
-            {a titles[mode] a}
+          <div class="bloch_solver" ng-show="mode!=''" style="margin-left:10px;margin-right:20px">
+            <span id="mode_title_panel" ng-bind="mode_titles[mode]" />
           </div>
         </div>
         <div ng-include="'static/views/frames_panel.html'"></div>
         <div ng-controller="BlochPanelCtrl"  >
-          <div ng-show="mode=='bloch'" class="panel bloch_panel">
+          <div ng-show="mode=='bloch' && cif_file==true" class="panel bloch_panel">
             <div ng-include="'static/views/bloch_panel.html'"></div>
           </div>
         </div>
@@ -56,7 +56,7 @@
         </div>
       </div>
       <div ng-controller="BlochCtrl">
-        <div class="panel" style="margin-top: 5px;" ng-show="mode=='bloch'">
+        <div class="panel" style="margin-top: 5px;" ng-show="mode=='bloch' && cif_file==true">
           <div ng-include="'static/views/bloch_viewer.html'"></div>
         </div>
       </div>

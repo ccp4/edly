@@ -135,6 +135,9 @@ angular.module('app').
     $http.post('delete_structure',JSON.stringify({'mol':$scope.open_mol.name}))
     .then(function(response){
         $scope.structures=response.data.structures;
+        if ($scope.structure==$scope.open_mol.name){
+          $scope.init();
+        }
         $scope.open_mol.name="";//$scope.structures[0];
     })
   }
@@ -203,7 +206,7 @@ angular.module('app').
   }
 
   $scope.select_local_frames=function(x){
-    $scope.download.link=x
+    $scope.download.link=x;
     $scope.local_frames.name=x
     $scope.local_frames.filtered=[];
     $scope.check_dl_frames();
@@ -254,6 +257,8 @@ angular.module('app').
       $scope.frame_folder['exp'] = response.data.folder;
       $scope.frame               = 1;
       $scope.frames.active_frame = $scope.frame;
+      $scope.set_mode('frames');
+      $scope.expand['struct']=false;
       $scope.update();
     })
   }
@@ -317,6 +322,7 @@ angular.module('app').
         $scope.cif_file  = $scope.crys.file!='?';
         // $log($scope.cif_file)
         $scope.show_structure(1)
+        $scope.set_mode('bloch')
     })
   }
 
@@ -482,7 +488,7 @@ angular.module('app').
         $scope.builtins   = response.data.builtins  //;$log.log($scope.builtins)
         $scope.structure  = response.data.mol;      //;$log.log($scope.structure)
         $scope.crys       = response.data.crys;     //;$log.log($scope.crys)
-        $scope.cif_file   = $scope.crys.file!='?';
+        $scope.cif_file   = $scope.crys.file!='?';  //;$log.log('cif present:',$scope.cif_file)
 
 
         // frames related stuffs
@@ -515,6 +521,7 @@ angular.module('app').
         $scope.modes = response.data.bloch_modes    //;$log.log('modes : ',$scope.modes)
         $scope.mode_style[$scope.mode]=sel_style;
         $rootScope.$emit('init_bloch_panel',$scope.frame,0);
+        if ($scope.structure==''){$scope.expand['importer']=true;}
     });
   }
   $rootScope.$on('update',function(event,data){
@@ -548,12 +555,12 @@ angular.module('app').
 
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true,jump_frames:10}
   $scope.expand_str={false:'expand',true:'minimize'};
-  $scope.expand={'rock_settings':true,'importer':false, 'struct':false};
+  $scope.expand={'importer':false,'struct':false,'rock_settings':true};
   $scope.popup={};
   $scope.structures_filtered=[];
 
   $scope.modes={'molecule':false};
   $scope.mode_style = {bloch:'',frames:'',felix:'',reload:''};
-  $scope.titles={'frames':'Frames Viewer','bloch':'Bloch solver','ms':'Multislice solver','felix':'Felix Solver'}
+  $scope.mode_titles={'frames':'Frames Viewer','bloch':'Bloch solver','ms':'Multislice solver','felix':'Felix Solver'}
   $scope.init();
 }]);

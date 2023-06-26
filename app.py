@@ -122,7 +122,7 @@ def check_dl_format():
 
 @app.route('/check_dl_frames', methods=['POST'])
 def check_dl_frames():
-    link     = request.data.decode()          #;print(link)
+    link     = request.data.decode()          #;print(colors.red,link,colors.black)
     filepath = data_path(link)                #;print(filepath)
     dl       = os.path.exists(filepath)       #;print(dl)
     folders  = []
@@ -239,12 +239,14 @@ def delete_structure():
     mol  =  data['mol']
     cmd='rm -rf %s' %mol_path(mol)
     out=check_output(cmd,shell=True).decode().strip()#;print(out)
+    if session['mol']==mol:
+        session['mol'] = ''
     return json.dumps({'msg':out,'structures':get_structures()})
 
 @app.route('/new_structure', methods=['POST'])
 def new_structure():
     data = json.loads(request.data.decode())#;print(data)
-    mol  =  data['name']
+    mol  =  data['name']                    #;print(mol)
     msg  = ''
 
     if not mol=='' : #or mol=="new":
@@ -402,14 +404,21 @@ def init():
     init_mol()
 
     ####sanity checks
-    if not (session['dat']['exp'] or session['dat']['exp']) and session['mode']=='frames':
-        session['mode']='bloch'
+    modes={'':True,
+        'frames' : session['dat']['exp']  or session['dat']['sim'],
+        'bloch'  : not session['crys']['file']=='?',
+        'felix'  : session['dat']['felix'],
+    }
+    available_modes=[k for k,v in modes.items() if v]
+    if not modes[session['mode']] or not session['mode']:
+        print('mode {mode} not available. Choosing mode {new_mode}'.format(
+            mode=session['mode'],
+            new_mode=available_modes[-1]))
+        session['mode'] = available_modes[-1]
 
-    if session['mode']=='felix' and not session['dat']['felix']:
-        session['mode'] = 'bloch'
-    if session['dat']['exp'] :
-        if session['frame']>session['nb_frames']:
-            session['frame']=1
+    if session['mode']=='frames':
+        if session['frame']>session['nb_frames']:session['frame']=1
+
 
     cmd='find static/database/ -maxdepth 1 -mindepth 1 -type  d | xargs -n1 basename'
     local_frames=check_output(cmd,shell=True).decode().strip().split('\n')
@@ -442,7 +451,7 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol']  = 'GaAs'
+    session['mol']  = 'test'
     session['mode'] = 'bloch'
     session['viewer_molecule'] = False;
 
@@ -460,11 +469,7 @@ def init_session():
 
 def init_structure():
     struct_file = get_structure_file()
-    crys_dat=dict(zip(
-    ['file','a','b','c','alpha','beta','gamma','a1', 'a2', 'a3','chemical_formula',
-        'nb_atoms','lattice_system'],
-    ['?']*13))
-    crys_dat['spg_ref']=False
+    crys_dat = dummy_crys
     if struct_file:
         try:
             b0=bloch.Bloch(struct_file,path=session['path'],init=False,name='b',solve=False,Nmax=1)

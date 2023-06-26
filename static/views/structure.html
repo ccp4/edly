@@ -8,8 +8,8 @@
     </a>
   </div> -->
   <div >
-    <span style="font-size:25px" ng-bind="structure"/>
-    <a class="popup" ng-click="show_structure()" ng-mouseenter="showIt('expand_struct')" ng-mouseleave="hideIt('expand_struct')" style="float:right;bottom:5px">
+    <span id="structure_panel_name" style="font-size:25px" ng-bind="structure"/>
+    <a id="expand_structure_panel" class="popup" ng-click="show_structure()" ng-mouseenter="showIt('expand_struct')" ng-mouseleave="hideIt('expand_struct')" style="float:right;bottom:5px">
       <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
         <span class="popuptext" style="" ng-show="popup['expand_struct']" ng-bind="expand_str[expand['struct']]"></span>
       </span>

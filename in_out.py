@@ -22,6 +22,11 @@ proc_dat_files  = {
     'pets' : ['*.pts','*.rpl','*.xyz','*.cor','*.hkl','*.cenloc','*.cif_pets','*_dyn.cif_pets','*.cif'],
     'dials': ['*.expt', '*.refl','reflections.txt'],
     }
+
+if not os.path.exists('static/database'):
+    database_path=check_output("mkdir database;cd static; ln -s ../database .",shell=True).decode().strip()
+database_path=check_output("readlink static/database",shell=True).decode().strip()
+
 def check_proc_data(path):
     missing_files='?'
     dtype='unknown'
@@ -94,7 +99,8 @@ def get_frames_folder(mol,frame_type,full=False):
         if full:
             cmd = "readlink %s" %frame_path
             folder=check_output(cmd,shell=True).decode().strip()
-            folder=folder.replace('/data/',';').split(';')[1]
+            # ;print('folder : ' ,folder)
+            folder=folder.replace('%s/' %database_path,'')#.split(';')[1]
         else:
             cmd = "basename `readlink %s`" %frame_path
             folder=check_output(cmd,shell=True).decode().strip()
@@ -162,6 +168,13 @@ def get_structures():
 builtins = crystals.Crystal.builtins
 gifs = {os.path.basename(s)[:-4]:s for s in glob.glob("static/gifs/*")}
 fig_wh=725
+
+dummy_crys = dict(zip(
+['file','a','b','c','alpha','beta','gamma','a1', 'a2', 'a3','chemical_formula',
+    'nb_atoms','lattice_system'],
+['?']*13))
+dummy_crys['spg_ref']=False
+
 
 def b_str(x,i):
     if i:
