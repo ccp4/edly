@@ -55,10 +55,12 @@ def upload_file():
 
 ################
 #### import frames
-@app.route('/update_zenodo', methods=['GET'])
+@app.route('/update_zenodo', methods=['POST'])
 def update_zenodo():
-    cmd = "python3 zenodo.py"
-    out=check_output(cmd,shell=True).decode().strip();print(out)
+    fetch = json.loads(request.data.decode())['fetch']
+    if fetch:
+        cmd = "python3 zenodo.py"
+        out=check_output(cmd,shell=True).decode().strip();print(out)
     with open('static/spg/records.json','r') as f:
         records = json.load(f)
     return json.dumps(records)

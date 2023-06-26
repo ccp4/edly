@@ -298,7 +298,8 @@ img {
 }
 .btn_u {
   padding-top: 15px;
-  margin-right: 4px
+  margin-right: 4px;
+  cursor: pointer;
 }
 .frame_viewer{
   margin-top:20px;

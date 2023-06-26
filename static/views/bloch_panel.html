@@ -121,18 +121,18 @@ Parameters Panel
 
       <!-- buttons -->
       <div class="row" style="margin-bottom:10px;margin-left:-5px;margin-top:5px">
-        <a id="u_single" class="btn-sm btn-primary btn_u" ng-style="u_style['single']" ng-click="set_mode('u','single')" ng-mouseenter="showIt('show_u_single')" ng-mouseleave="hideIt('show_u_single')" >
+        <span id="u_single" class="btn-sm btn-primary btn_u" ng-style="u_style['single']" ng-click="set_mode('u','single')" ng-mouseenter="showIt('show_u_single')" ng-mouseleave="hideIt('show_u_single')" >
           <span class="gg-icon gg-arrow-down"></span >
           <span class="popuptext" ng-show="popup['show_u_single']"> Set single mode for u </span>
-        </a>
-        <a id="u_rock" class="btn-sm btn-primary btn_u" ng-style="u_style['rock']" ng-click="set_mode('u','rock')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
+        </span>
+        <span id="u_rock" class="btn-sm btn-primary btn_u" ng-style="u_style['rock']" ng-click="set_mode('u','rock')" ng-mouseenter="showIt('u_rock')" ng-mouseleave="hideIt('u_rock')">
           <span class="gg-icon gg-spectrum"></span>
           <span class="popuptext" ng-show="popup['u_rock']"> Set rocking curve for u </span>
-        </a>
-        <a id="u_lacbed" class="btn-sm btn-primary btn_u" ng-style="u_style['lacbed']" ng-click="set_mode('u','lacbed')" ng-mouseenter="showIt('u_lacbed')" ng-mouseleave="hideIt('u_lacbed')">
+        </span>
+        <span id="u_lacbed" class="btn-sm btn-primary btn_u" ng-style="u_style['lacbed']" ng-click="set_mode('u','lacbed')" ng-mouseenter="showIt('u_lacbed')" ng-mouseleave="hideIt('u_lacbed')">
           <span class="gg-icon gg-shape-circle" style="border:solid 8px;"></span>
           <span class="popuptext" ng-show="popup['u_lacbed']"> Set lacbed pattern for u </span>
-        </a>
+        </span>
         <!-- <a class="btn-sm btn-primary popup" ng-click="show_u()" ng-mouseenter="showIt('u_show')" ng-mouseleave="hideIt('u_show')" style="float:right;right:15px;" >
           <span class="glyphicon glyphicon-eye-open" />
           <span class="popuptext" style="" ng-show="popup['u_show']"> Show u orientation  </span>
@@ -205,7 +205,7 @@ Parameters Panel
       <div ng-show="info.modes['u']=='rock'" class="">
         <div>
           <span> Rocking curve mode </span>
-          <span id="showl_load_rock" class="popup glyphicon"  ng-class="{'glyphicon-arrow-down':!expand['load_rock'],'glyphicon-arrow-up':expand['load_rock']}" ng-click="expand['load_rock']=!expand['load_rock']" ng-mouseenter="popup['show_load_rocks']=true" ng-mouseleave="popup['show_load_rocks']=false" >
+          <span id="show_load_rock" class="popup glyphicon"  ng-class="{'glyphicon-arrow-down':!expand['load_rock'],'glyphicon-arrow-up':expand['load_rock']}" ng-click="expand['load_rock']=!expand['load_rock']" ng-mouseenter="popup['show_load_rocks']=true" ng-mouseleave="popup['show_load_rocks']=false" >
             <span class="popuptext" ng-show="popup['show_load_rocks']">Load previously <br> simulated data.</span>
           </span>
         </div>
@@ -223,7 +223,7 @@ Parameters Panel
         <!-- rock settings -->
         <div style="font-size:14px;margin-top:7px;margin-left:5%;">
           <span> Settings : </span>
-          <span class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!expand['rock_settings'],'glyphicon-minus-sign':expand['rock_settings']}" ng-click="expand['rock_settings']=!expand['rock_settings']" ng-mouseenter="popup['rock_settings']=true" ng-mouseleave="popup['rock_settings']=false" >
+          <span id="rock_settings_btn" class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!expand['rock_settings'],'glyphicon-minus-sign':expand['rock_settings']}" ng-click="expand['rock_settings']=!expand['rock_settings']" ng-mouseenter="popup['rock_settings']=true" ng-mouseleave="popup['rock_settings']=false" >
             <span class="popuptext" ng-show="popup['rock_settings']">
             <div> Rocking curve settings  :
               <br> &nbsp u0   : initial orientation
@@ -236,8 +236,8 @@ Parameters Panel
           <table style="margin-left: 20px;">
             <tr><td class="td-in"> Name </td><td class="td-in"> :</td>
               <td>
-                <span ng-show="!show_rock_name_select" ng-bind="rocks.name" ng-click="show_rock_name_select=true" style="cursor: pointer;"/>
-                <input ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="show_rock_name_select=false" class="long_input" id="rock_name" type="text">
+                <span ng-show="!show_rock_name_select" ng-bind="rocks.name" ng-click="show_rock_name_select=true" id="rock_name" style="cursor: pointer;"/>
+                <input ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="show_rock_name_select=false" class="long_input" id="input_rock_name" type="text">
               </td>
               <td class="td-in">
                 <a id="rock_name_popup" class="popup">

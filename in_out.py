@@ -46,7 +46,7 @@ sim_path   = lambda mol:os.path.join(mol_path(mol),'rocks')
 
 def data_path(link):
     filename=os.path.basename(link.replace('?download=1',''))
-    fmt=get_compressed_fmt(filename)                            #;print('fmt:',fmt)
+    fmt=get_compressed_fmt(filename)                         #;print('fmt:',fmt)
     #not good but should work
     if fmt:
         record=''
@@ -59,7 +59,7 @@ def data_path(link):
     else:
         folder=filename
 
-    filename=filename.replace('.%s' %fmt,'')
+    folder=folder.replace('.%s' %fmt,'')
     return 'static/database/%s' %folder
 
 uncompress_fmts={

@@ -150,10 +150,10 @@ angular.module('app').
   ////////////////////////////////////////
   // import Frames
   ////////////////////////////////////////
-  $scope.update_zenodo=function(){
+  $scope.update_zenodo=function(fetch=false){
 
     // $http.get('/static/spg/records.json')
-    $http.get('/update_zenodo')
+    $http.post('/update_zenodo',JSON.stringify({'fetch':fetch}))
     .then(function(response){
       $scope.zenodo.records = response.data;
       $scope.zenodo.record  = $scope.zenodo.records[Object.keys($scope.zenodo.records)[0]];
@@ -531,7 +531,7 @@ angular.module('app').
 
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true,jump_frames:10}
   $scope.expand_str={false:'expand',true:'minimize'};
-  $scope.expand={'rock_settings':true,'importer':true, 'struct':false};
+  $scope.expand={'rock_settings':true,'importer':false, 'struct':false};
   $scope.popup={};
   $scope.structures_filtered=[];
 
