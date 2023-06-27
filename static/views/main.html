@@ -7,11 +7,11 @@
 
         <!-- solver tabs  -->
         <div ng-show="structure!=''" class="" ng-hide="modes['molecule']" style="margin: 0px;margin-left: 9px;margin-bottom:-5px;">
-          <a id="frames_panel" ng-show="dat['exp'] || dat['sim']" class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
+          <a id="frames_tab" ng-show="dat['exp'] || dat['sim']" class="btn btn-primary popup tab_btn" ng-style="mode_style['frames']" ng-click="set_mode('frames')" ng-mouseenter="showIt('frames')" ng-mouseleave="hideIt('frames')">
             <span class="gg-stack"></span >
             <span class="popuptext" ng-show="popup['frames']"> Frames mode </span>
           </a>
-          <a id="bloch_panel" ng-show="cif_file" class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
+          <a id="bloch_tab" ng-show="cif_file" class="btn btn-primary popup tab_btn" ng-style="mode_style['bloch']" ng-click="set_mode('bloch')" ng-mouseenter="showIt('bloch_solver')" ng-mouseleave="hideIt('bloch_solver')">
             <span class="gg-edit-unmask"></span >
             <span class="popuptext" ng-show="popup['bloch_solver']"> Bloch solver </span>
           </a>

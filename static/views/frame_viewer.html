@@ -6,10 +6,13 @@
     <div style="display:grid;justify-content: space-around">
       <table style="" ><tbody>
         <tr><td>
-          <span style="float:left" ng-bind="frame_folder['exp']"/>
-          <span style="float:right">Brightness:
-            <input type="number" ng-model="zmax['exp']" ng-keypress="update_zmax($event,'exp')" style="width: 70px;"/>
+          <div style="display: flex;justify-content: space-between;">
+          <span ng-bind="frame_folder['exp']"/>
+          <span > Frame : <span id="frame_nb_span" ng-bind="frame"/> </span>
+          <span > Brightness:
+            <input id="exp_brightness_input" type="number" ng-model="zmax['exp']" ng-keypress="update_zmax($event,'exp')" style="width: 70px;"/>
           </span>
+          </div>
         </td></tr>
         <tr class="frame" ><td>
           <!-- style="text-align:center;margin-bottom:20px;"> -->

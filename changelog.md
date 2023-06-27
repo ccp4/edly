@@ -1,5 +1,22 @@
 # Version log
 ## 0.0.7dev
+### Tue 27 Jun 21:11:03 BST 2023
+- bug fixes :
+  - check pets key before loading it
+  - check `df_G` in dict for `beam_vs_thick`
+  - update `session['crys']` when importing `cif_file`
+  - fix popup not showing for some buttons
+  - increased popup timer to allow smooth button selection
+- tests :
+  - added lots of ids
+  - added selenium_utils files for function callbacks
+  - new passing test :  `import dat`,
+  - new passing test `frames_mode`(click_nav, key_nav, input_nav, br, heat)
+  - new passing test `bloch_mode` (single,thick,thicks,rock_solve,save, rock_curves, integrate)
+- note :
+  - app does not display fine in offline mode
+  - version : electron-diffraction commit : exp 347da7c
+
 ### Mon 26 Jun 20:15:58 BST 2023
 - bug fixes :
   - do not display bloch or frames if not available

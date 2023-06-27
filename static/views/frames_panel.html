@@ -24,7 +24,7 @@
 
     <!-- Frames selection input -->
     <div style="margin-top:10px">
-      <span ng-click="frames.manual=!frames.manual" style="cursor:pointer;" > No: </span>
+      <span id="frame_mode_select_btn" ng-click="frames.manual=!frames.manual" style="cursor:pointer;" > No: </span>
       <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['move_frame']=true" ng-mouseleave="popup['move_frame']=false" style="top:-10px;">
         <span ng-show="popup['move_frame']" class="popuptext" style=";width:270px;text-align:left;font-size:14px" >
           <b>Click on 'No' to toggle between frame selection modes.</b><br>
@@ -45,20 +45,21 @@
         </span>
       </span>
       <span>
-        <span  ng-hide="frames.manual" tabindex="1"  ng-bind="frames.active_frame" style="cursor:pointer;" class="btn-sm btn-primary" ng-keydown="update_frame_event($event)"  ng-dblclick="frames.manual=true" />
-        <input ng-show="frames.manual" ng-model="frames.active_frame" min="1" max="max_frame" ng-key-enter="update_frame()" style="width:30px;">
+        <span  id="frame_select_span"  ng-hide="frames.manual" tabindex="1"  ng-bind="frames.active_frame" style="cursor:pointer;" class="btn-sm btn-primary" ng-keydown="update_frame_event($event)"/>
+        <input id="frame_select_input" ng-show="frames.manual" ng-model="frames.active_frame" min="1" max="max_frame" ng-key-enter="update_frame()" style="width:30px;">
       </span>
-      <span> / <span ng-bind="max_frame"/></span>
-      <span class="btn-sm btn-primary btn-rock" style="cursor:pointer;" ng-click="set_frame('i');">
+      <span> / <span id="max_frame_span" ng-bind="max_frame"/></span>
+      <!-- navigation -->
+      <span id="frames_fast_backward_btn" class="btn-sm btn-primary btn-rock" style="cursor:pointer;" ng-click="set_frame('i');">
         <span class="glyphicon glyphicon-fast-backward"></span >
       </span>
-      <span class="btn-sm btn-primary" style="cursor:pointer;" ng-click="set_frame('-')">
+      <span id="frames_backward_btn" class="btn-sm btn-primary" style="cursor:pointer;" ng-click="set_frame('-')">
         <span class="glyphicon glyphicon-step-backward"></span >
       </span>
-      <span class="btn-sm btn-primary" style="cursor:pointer;" ng-click="set_frame('+')">
+      <span id="frames_forward_btn" class="btn-sm btn-primary" style="cursor:pointer;" ng-click="set_frame('+')">
         <span class="glyphicon glyphicon-step-forward"></span >
       </span>
-      <span class="btn-sm btn-primary btn-rock" style="cursor:pointer;" ng-click="set_frame('f')">
+      <span id="frames_fast_forward_btn" class="btn-sm btn-primary btn-rock" style="cursor:pointer;" ng-click="set_frame('f')">
         <span class="glyphicon glyphicon-fast-forward"></span >
       </span>
     </div>
@@ -66,9 +67,9 @@
     <!-- colormap -->
     <div ng-show="mode=='frames'" style="padding-top:10px" >
       color map :
-      <select ng-model="caxis.cmap" ng-options="x for x in cmaps" ng-change="change_heatmap()"></select>
+      <select id="heatmap_select" ng-model="caxis.cmap" ng-options="x for x in cmaps" ng-change="change_heatmap()"></select>
     </div>
-    
+
     <!-- u frame (shown in bloch mode)-->
     <div ng-show="mode=='bloch' && dat['pets']">
       <div style="padding:10px;">

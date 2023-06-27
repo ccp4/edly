@@ -25,7 +25,7 @@ def bloch_fig():
     is_dat = session['dat']['pets']
     is_px = session['bloch_modes']['is_px'] and is_dat
     if is_dat:
-        pets = pets_data[session['mol']]
+        pets = load_pets()
     xm = session['max_res']
 
     fig=go.Figure()
@@ -622,32 +622,35 @@ def update_refl():
 
 @bloch.route('/beam_vs_thick', methods=['POST'])
 def beam_vs_thick():
-    data=json.loads(request.data.decode())
-    thicks = update_thicks(data['thicks'])
-    refl = data['refl']
+    data    = json.loads(request.data.decode())
+    thicks  = update_thicks(data['thicks'])
+    refl    = data['refl']
 
     b0  = load_b0()
-    idx = b0.get_beam(refl=refl)
-    b0._set_beams_vs_thickness(thicks=thicks)
-    Iz  = b0.get_beams_vs_thickness(idx=idx,dict_opt=True)
-    # b0.save(get_pkl(session['id']))
-    b0.save()
+    if 'df_G' in b0.__dict__:
+        idx = b0.get_beam(refl=refl)
+        b0._set_beams_vs_thickness(thicks=thicks)
+        Iz  = b0.get_beams_vs_thickness(idx=idx,dict_opt=True)
+        # b0.save(get_pkl(session['id']))
+        b0.save()
 
-    df = pd.DataFrame(columns=['z','I','hkl'])
-    for hkl,I in Iz.items():
-        df_hkl = pd.DataFrame(np.array([b0.z,I]).T,columns=['z','I'])
-        df_hkl['hkl'] = hkl
-        df = pd.concat([df,df_hkl])
-    ### the figure
-    fig = px.line(df, x='z', y='I', color='hkl',markers=True)
-    fig.update_layout(
-        title="thickness dependent intensities",
-        hovermode='closest',
-        paper_bgcolor="LightSteelBlue",
-        width=fig_wh, height=fig_wh,
-        xaxis_title='thickness(A)',yaxis_title='intensity',
-    )
-    session['graph']='thick'
+        df = pd.DataFrame(columns=['z','I','hkl'])
+        for hkl,I in Iz.items():
+            df_hkl = pd.DataFrame(np.array([b0.z,I]).T,columns=['z','I'])
+            df_hkl['hkl'] = hkl
+            df = pd.concat([df,df_hkl])
+        ### the figure
+        fig = px.line(df, x='z', y='I', color='hkl',markers=True)
+        fig.update_layout(
+            title="thickness dependent intensities",
+            hovermode='closest',
+            paper_bgcolor="LightSteelBlue",
+            width=fig_wh, height=fig_wh,
+            xaxis_title='thickness(A)',yaxis_title='intensity',
+        )
+        session['graph']='thick'
+    else :
+        fig=go.Figure()
     return fig.to_json()
 
 @bloch.route('/to_shelx', methods=['POST'])
@@ -869,4 +872,7 @@ def load_rock():
         return ut.load_pkl(file=file)
 
 def load_pets():
-    return pets_data[session['mol']]
+    mol=session['mol']
+    if not mol in pets_data.keys():
+        update_exp_data(mol)
+    return pets_data[mol]

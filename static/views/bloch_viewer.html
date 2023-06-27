@@ -19,7 +19,7 @@
     <td ng-hide="info.modes.single">
       <span>
         <span>graph : </span>
-        <select ng-model="info.graph" ng-options="x for (x,y) in info.graphs" ng-change="update_graph()"></select>
+        <select id="graph_select" ng-model="info.graph" ng-options="x for (x,y) in info.graphs" ng-change="update_graph()"></select>
       </span>
       <span ng-if="dat['rock']" ng-show="info.graph=='rock'" style="margin-left:10px">
           <span > exp rock : </span>

@@ -9,12 +9,13 @@ angular.module('app').
   $scope.showIt = function (val) {
       timer = $timeout(function () {
           $scope.popup[val] = true;
-      }, 500);
+      }, 750);
+      $scope.popup[val] = false;
   };
   // mouseleave event
   $scope.hideIt = function (val) {
-      $timeout.cancel(timer);
-      $scope.popup[val]=false;
+    $timeout.cancel(timer);
+    $scope.popup[val]=false;
   };
 
   $scope.reset_search=function(id){
@@ -556,7 +557,7 @@ angular.module('app').
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true,jump_frames:10}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={'importer':false,'struct':false,'rock_settings':true};
-  $scope.popup={};
+  $scope.popup={};//{'u_edit':true};//,'rot_help':true};
   $scope.structures_filtered=[];
 
   $scope.modes={'molecule':false};

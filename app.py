@@ -214,6 +214,7 @@ def import_cif():
     filename = request.data.decode() #;print(data)
     _import_cif(filename)
     crys_dat = init_structure()
+    session['crys']=crys_dat
     return json.dumps(crys_dat)
 
 def _import_cif(filename):

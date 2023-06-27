@@ -326,7 +326,7 @@ angular.module('app')
 
   $scope.set_u_mode=function(val){
     $scope.u_style = {'single':'','rock':'','lacbed':''};
-    $scope.u_style[val]={"border-style":'solid'};
+    $scope.u_style[val]=sel_style;
     $scope.bloch_solve_reset();
     switch (val){
       case 'single':
@@ -352,7 +352,7 @@ angular.module('app')
 
   $scope.set_u0_mode=function(val){
     $scope.u0_style = {'edit':'','move':'','auto':''};
-    $scope.u0_style[val]={"border-style":'solid'};
+    $scope.u0_style[val]=sel_style;
     $scope.bloch_solve_reset();
     switch (val){
       case 'edit':
@@ -891,8 +891,8 @@ angular.module('app')
         if (!($scope.rocks.name in $scope.rock_names)){
           $scope.rocks.select = $scope.rock_names[0];
         }
-        $scope.u_style[$scope.info.modes['u']] ={"border-style":'solid'};
-        $scope.u0_style[$scope.info.modes['u0']]={"border-style":'solid'};
+        $scope.u_style[$scope.info.modes['u']]   = sel_style;
+        $scope.u0_style[$scope.info.modes['u0']] = sel_style;
         $scope.dmin_str=String($scope.bloch['dmin']).slice(0,4)
         $scope.init_bloch_done=true;
         $scope.bloch_solve_reset();
@@ -903,13 +903,14 @@ angular.module('app')
     })
 
   $scope.info=bloch_shared;
+  var sel_style={"border-style":'solid','background-color':'#1e5483','border-color':'#1c1c9d'};
   var changed=true;
   $scope.frame  = 1;
   $scope.nbeams = 0;
   $scope.show_buttons=false;
   $scope.dtheta_phi=0.1;
   $scope.dthick=5;
-  $scope.popup={}
+  // $scope.popup={'u_edit': true}
   $scope.sim_rock = 1;
   $scope.rock_sim = 1;
   $scope.show_rock_name_select=false;

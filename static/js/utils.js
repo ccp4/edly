@@ -226,9 +226,11 @@ function clear_files(id){
 }
 
 function show_popup(elt){
+
   popup=document.getElementById(elt)
   popup.style.display="block";
   window.setTimeout(function(){
+
     popup.style.display = "none";
   }, 2000);
 }
