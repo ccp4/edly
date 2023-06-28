@@ -26,7 +26,7 @@ ln -s ../bower_components .
 
 ###
 if [ $2 -eq test ];then
-  pip install selenium==4.9.1
+  pip install selenium==4.9.1 pytest-html
   if [ $(chromium.chromedriver --version | cut -d" " -f2) == "114.0.5735.106"];then
     echo ok
   fi

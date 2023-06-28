@@ -100,7 +100,7 @@ def get_frames_folder(mol,frame_type,full=False):
             cmd = "readlink %s" %frame_path
             folder=check_output(cmd,shell=True).decode().strip()
             # ;print('folder : ' ,folder)
-            folder=folder.replace('%s/' %database_path,'')#.split(';')[1]
+            folder=folder.replace('%s' %database_path,'')#.split(';')[1]
         else:
             cmd = "basename `readlink %s`" %frame_path
             folder=check_output(cmd,shell=True).decode().strip()

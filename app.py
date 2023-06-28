@@ -472,13 +472,9 @@ def init_structure():
     struct_file = get_structure_file()
     crys_dat = dummy_crys
     if struct_file:
-        try:
-            b0=bloch.Bloch(struct_file,path=session['path'],init=False,name='b',solve=False,Nmax=1)
-            print('saving bloch object')
-            b0.save()
-            # b0=ut.load_pkl(session['b0_path'])
-        except:
-            return crys_dat
+        print(colors.green+'reading cif file'+colors.black)
+        b0=bloch.Bloch(struct_file,path=session['path'],init=False,name='b',solve=False,Nmax=1)
+        b0.save()
 
         crys,cif_file = b0.crys,b0.cif_file
         crys_dat = {'file':os.path.basename(cif_file),'cif_file':cif_file}

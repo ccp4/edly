@@ -19,6 +19,7 @@ static/data
 static/database
 test/dat
 test/*
+tests/report*
 
 # Distribution / packaging
 .Python

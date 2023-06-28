@@ -1,5 +1,14 @@
 # Version log
 ## 0.0.7dev
+### Wed 28 Jun 16:34:17 BST 2023
+- bug fixes :
+  - remove try except `init_structure()`
+  - removed trailing '/' in replace database_path 
+- tests:
+  - run_test uses getopts with simplified flag options
+  - added report,dev,lvl flags to run_tests
+  - added level markers to tests
+
 ### Tue 27 Jun 21:11:03 BST 2023
 - bug fixes :
   - check pets key before loading it

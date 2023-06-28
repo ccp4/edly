@@ -64,7 +64,7 @@ def test_login(chrome_driver,sec):
 ### import/upload menu
 ################################################################################
 ################################################################################
-# @pytest.mark.lvl2
+@pytest.mark.lvl1
 def test_new_structure(chrome_driver,sec):
     print(colors.green+"\nCreating structure %s" %struct_test+colors.black,end="")
     sec=0
@@ -79,7 +79,7 @@ def test_new_structure(chrome_driver,sec):
     sleep(1)
     print(colors.green+",done"+colors.black)
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_import_cif(chrome_driver,sec):
     cif_file = 'alpha_glycine.cif'
     cif_path = os.path.join(dat_folder,cif_file)
@@ -99,7 +99,7 @@ def test_import_cif(chrome_driver,sec):
     print(colors.green+"done"+colors.black)
     click(chrome_driver,'expand_import_menu',sec)
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_import_frames(chrome_driver,sec):
     frame='localhost_8020_test'
     print(colors.green+"\nImport frames "+colors.yellow+frame+colors.black,end="")
@@ -125,7 +125,7 @@ def test_import_frames(chrome_driver,sec):
     print(colors.green+",done"+colors.black)
     click(chrome_driver,'expand_import_menu',sec)
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_import_dat(chrome_driver,sec):
     dat_files={
         'xds':'XDS_ASCII.HKL',
@@ -162,13 +162,13 @@ def test_import_dat(chrome_driver,sec):
 ### frames
 ################################################################################
 ################################################################################
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_frame_mode(chrome_driver,sec):
     print(colors.green+"\nTesting frames mode"+colors.black,end="")
     click(chrome_driver,'frames_tab',sec)
     check_text(chrome_driver,'mode_title_panel','Frames Viewer')
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_frame_click_nav(chrome_driver,sec):
     print(colors.green+", click nav"+colors.black,end="")
     max_frame = int(chrome_driver.find_element('id','max_frame_span').text)
@@ -178,7 +178,7 @@ def test_frame_click_nav(chrome_driver,sec):
         click(chrome_driver,'frames_%s_btn' %nav,sec)
         check_text(chrome_driver,'frame_nb_span',str(frame))
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_frame_key_nav(chrome_driver,sec):
     print(colors.green+", key nav"+colors.black,end="")
     keys=[('d',11),('w',12),('s',11),('a',1),('e',1),('d',21),(Keys.BACKSPACE,21),('a',11)]
@@ -188,7 +188,7 @@ def test_frame_key_nav(chrome_driver,sec):
         check_text(chrome_driver,'frame_nb_span',str(frame))
     click(chrome_driver,'frame_mode_select_btn',sec)
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_frame_input_nav(chrome_driver,sec):
     print(colors.green+", input nav"+colors.black,end="")
     frame='12'
@@ -196,14 +196,14 @@ def test_frame_input_nav(chrome_driver,sec):
     write(chrome_driver,'frame_select_input',Keys.ENTER,sec)
     check_text(chrome_driver,'frame_nb_span',frame)
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_frame_brightness(chrome_driver,sec):
     print(colors.green+", brightness"+colors.black,end="")
     write(chrome_driver,'exp_brightness_input','200',0,clear=True)
     write(chrome_driver,'exp_brightness_input',Keys.ENTER,sec)
 
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_frame_heatmap(chrome_driver,sec):
     print(colors.green+", heatmap"+colors.black,end="")
     select_by_text(chrome_driver,'heatmap_select','Greys_r',sec)
@@ -215,13 +215,13 @@ def test_frame_heatmap(chrome_driver,sec):
 ### bloch
 ################################################################################
 ################################################################################
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_bloch_mode(chrome_driver,sec):
     print(colors.green+"\nTesting bloch mode"+colors.black,end="")
     click(chrome_driver,'bloch_tab',sec)
     check_text(chrome_driver,'mode_title_panel','Bloch solver')
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_bloch_single(chrome_driver,sec):
     print(colors.blue+", bloch single "+colors.black,end="")
     click(chrome_driver,'u_single',sec)
@@ -253,7 +253,7 @@ def test_bloch_single(chrome_driver,sec):
     print(colors.blue+", done"+colors.black)
     sleep(sec)
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_solve_rock(chrome_driver,sec):
     print(colors.green+"\nTesting solve rock mode"+colors.black,end="")
     click(chrome_driver,'u_rock',sec)
@@ -276,7 +276,7 @@ def test_solve_rock(chrome_driver,sec):
     click(chrome_driver,'rock_save_btn',sec)
 
 
-# @pytest.mark.lvl2
+@pytest.mark.lvl2
 def test_rock_features(chrome_driver,sec):
     print(colors.green+"\nTesting rock features"+colors.black,end="")
     click(chrome_driver,'u_rock',sec)
@@ -316,7 +316,7 @@ def test_rock_features(chrome_driver,sec):
 ### clear
 ################################################################################
 ################################################################################
-# @pytest.mark.lvl2
+@pytest.mark.lvl1
 def test_delete_struct(chrome_driver,sec):
     print(colors.green+"\nDeleting structure %s" %struct_test+colors.black,end="")
     if not chrome_driver.find_element("id", "import_menu_open_btn").is_displayed():
