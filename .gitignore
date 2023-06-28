@@ -16,6 +16,7 @@ dat/*
 **/png
 **/tiff
 static/data
+static/database
 test/dat
 test/*
 
