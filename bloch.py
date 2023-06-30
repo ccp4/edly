@@ -22,7 +22,7 @@ bloch = Blueprint('bloch', __name__)
 #### functions
 ########################
 def bloch_fig():
-    is_dat = session['dat']['pets']
+    is_dat = session['dat']['pets']         #;print(is_dat,session['dat'])
     is_px = session['bloch_modes']['is_px'] and is_dat
     if is_dat:
         pets = load_pets()
@@ -69,6 +69,7 @@ def bloch_fig():
                 hovertemplate='<b>%{hovertext}</b><br><br>rpx=%{x:.3f}<br>rpy=%{y:.3f}<br>value=%{customdata[0]:.2e}<br>miller indices=%{customdata[1]}<extra></extra>',
                 mode='markers',
             ))
+
 
     ########################
     #### add exp data
@@ -315,7 +316,7 @@ def load_rock_data():
     nbs = '%d-%d' %(rock.df.nbeams.min(),rock.df.nbeams.max())
 
     return json.dumps({'rock':get_session_data('rock'),'nbeams':nbs,
-        'modes':session['bloch_modes']})
+        'modes':session['bloch_modes'],'exp_refl':session['dat']['pets']})
 
 @bloch.route('/save_rock', methods=['POST'])
 def save_rock_data():
@@ -474,7 +475,7 @@ def show_rock():
     if rock:
         rock_x = data['rock_x']
         rock = load_rock()
-        update_rock_thickness()
+        # update_rock_thickness()
         df = pd.DataFrame()
         rock_frames=session['rock_frames']
         # print(rock_frames)
@@ -511,7 +512,17 @@ def show_rock():
 @bloch.route('/update_rock_thickness', methods=['POST'])
 def update_rock_thickness():
     rock = load_rock()
-    rock.do('set_thickness',thick=session['bloch']['thick'])
+    print(colors.blue+'...updating rock intensities...'+colors.black,end="")
+    rock.do('set_thickness',verbose=False,thick=session['bloch']['thick'],v=False)
+    print(colors.green+',done'+colors.black)
+
+def update_rock_thicknesses():
+    rock = load_rock()
+    print(colors.blue+'...updating rock thicknesses...'+colors.black,end="")
+    rock.do('_set_beams_vs_thickness',verbose=False,thicks=session['bloch']['thicks'])
+    print(colors.green+',done'+colors.black)
+
+
 
 @bloch.route('/show_integrated', methods=['POST'])
 def show_integrated():
@@ -534,10 +545,11 @@ def show_integrated():
 
 @bloch.route('/integrate_rock', methods=['POST'])
 def integrate_rock():
+    # print(session['bloch_modes'])
+    # print('integrated : ', session['bloch_modes']['integrated'])
     if not session['bloch_modes']['integrated']:
         rock = load_rock()
         thicks=session['bloch']['thicks']
-        rock.set_beams_vs_thickness(thicks)
         rock.integrate();
         if session['dat']['pets']:
             rock.Rfactor(load_pets().hkl);
@@ -575,16 +587,32 @@ def show_FovsFc(thick):
     z0 = rock.df_int.columns[abs(rock.z-thick).argmin()]        #;print(z0)
     refl = rock.df_int.loc[rock.df_int.index.isin(df_exp.index)].index
 
-    I_exp = df_exp.loc[refl,'I'].values
-    I_sim = rock.df_int.loc[refl,z0].values
-    # print(I_sim.shape,I_exp.shape)
-    fig = px.scatter(I_sim,I_exp)#,markers=True)
+    I_exp = df_exp.loc[refl,'I'].values     #;print(I_exp[0])
+    I_sim = rock.df_int.loc[refl,z0].values #;print(I_sim[0])
+    # print(I_sim.mean())
+    # df=pd.DataFrame(index=refl)
+    # df['I_exp'] = I_exp
+    # df['I_sim'] = I_sim
+    # customdata=np.array([toplot[k].values, refl.index.to_numpy()]).T
+    customdata=np.array([[0]*refl.shape[0],refl.to_numpy()]).T
+
+    fig=go.Figure()
+    fig.add_trace(go.Scatter(
+        # x=df['I_exp'],y=df['I_sim'],#marker_size=pt_plot['Ix'],
+        x=I_exp,y=I_sim,
+        hovertext=['refl']*refl.shape[0],
+        marker_symbol='circle',marker_color='blue',
+        customdata=customdata,
+        hovertemplate='<b>%{hovertext}</b><br><br>Iobs=%{x:.1f}<br>Icalc=%{y:.3f}<br>miller indices=%{customdata[1]}<extra></extra>',
+        mode='markers',
+        ))
+
 
     fig.update_layout(
         title="Iobserved vs Icalc at z=%s" %z0 ,
         hovermode='closest',
         paper_bgcolor="LightSteelBlue",
-        xaxis_title='I_calc',yaxis_title='I_obs',
+        xaxis_title='I_obs',yaxis_title='I_calc',
         width=fig_wh, height=fig_wh,
     )
     return fig
@@ -599,8 +627,22 @@ def update_thickness():
     b0.set_thickness(thick=thick)
     b0.save(session['b0_path'])
     session['bloch']['thick'] = thick
+    if session['bloch_modes']['u']=='rock':
+        update_rock_thickness()
     session['now'] = time.time()
     return bloch_fig()
+
+@bloch.route('/update_thicks', methods=['POST'])
+def update_thicknesses():
+    thicks = json.loads(request.data.decode())['thicks']
+    update_thicks(thicks)
+    if session['bloch_modes']['u']=='rock':
+        update_rock_thicknesses()
+        bmodes=session['bloch_modes'].copy()
+        bmodes['integrated']=False
+        session['bloch_modes']=bmodes
+    return 'ok'
+
 
 def update_thicks(thicks):
     thicks = tuple(np.array(b_arr(thicks,(0,100,100)),dtype=int).tolist())
@@ -819,6 +861,8 @@ def init_bloch_panel():
     if session['bloch_modes']['exp_rock'] and not session['dat']['rock']:
         session['bloch_modes']['exp_rock'] = False
 
+
+    # print(session['dat'],session['bloch_modes']['integrated'])
 
     now = time.time()
     # session['vis']       = vis

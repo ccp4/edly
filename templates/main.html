@@ -57,19 +57,19 @@
       <div style="font-size:30px;text-align:center;padding-top: 10px;"> Electron diffraction dashboard </div>
       <!-- Menu -->
       <div class="menu">
-       <div class="dropdown">
-        <button class="dropbtn">File</button>
+       <!-- <div class="dropdown"> -->
+        <!-- <button class="dropbtn">File</button>
         <div class="dropdown-content">
-          <a href="" onclick="dialog_new_structure()">New</a>
+          <a href="" onclick="dialog_new_structure()">New</a> -->
           <!-- <a href="" >Open structure -->
             <!-- <div class="dropdown-content"> -->
-              {% for x in structures %}
+              <!-- {% for x in structures %}
                 <a href="" id="struct_{{x}}" onclick="set_structure('{{x}}')">{{ x }}</a>
-              {% endfor %}
+              {% endfor %} -->
             <!-- </div> -->
           <!-- </a> -->
-        </div>
-       </div>
+        <!-- </div> -->
+       <!-- </div> -->
        <div class="dropdown">
         <button class="dropbtn">Links</button>
         <div class="dropdown-content">
@@ -77,7 +77,8 @@
           <a href="" onclick="open_link('https://github.com/ronandrevon/edly/issues')">Bug report</a>
           <a href="" onclick="open_link('https://www.ccp4.ac.uk/ccp4-ed/projects/edly/')">Changelog</a>
           <a href="" onclick="open_link('https://debloch.readthedocs.io/en/latest/reference/debloch.bloch.Bloch.html')">Documentation</a>
-          <a href="" onclick="open_link('http://ccp4serv6.rc-harwell.ac.uk:8010/blochwave/report/report.html')">Tests</a>
+          <a href="" onclick="open_link('http://ccp4serv6.rc-harwell.ac.uk:8010/blochwave/report/report.html')">ED Tests</a>
+          <a href="" onclick="open_link('/static/tests_report/report.html')">Edly tests</a>
         </div>
        </div>
        <div class="dropdown">

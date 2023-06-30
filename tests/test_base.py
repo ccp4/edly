@@ -305,7 +305,7 @@ def test_rock_features(chrome_driver,sec):
     check_plotly_elt_text(chrome_driver,'fig2','gtitle','Integrated intensities')
     # select_by_text(chrome_driver,'graph_select','R factor',sec)
     # check_plotly_elt_text(chrome_driver,'fig2','gtitle','R factor')
-    # select_by_text(chrome_driver,'graph_select','Fo vs Fc',sec)
+    # select_by_text(chrome_driver,'graph_select','Io vs Ic',sec)
     # check_plotly_elt_text(chrome_driver,'fig2','gtitle','Iobserved vs Icalc at z=%s')
 
     # print(colors.blue+", navigate frames"+colors.black,end="")
@@ -337,6 +337,12 @@ def test_delete_struct(chrome_driver,sec):
     print(colors.green+", done"+colors.black,end="")
     click(chrome_driver,'expand_import_menu',sec)
     sleep(2)
+
+@pytest.mark.opt
+def test_kill(chrome_driver):
+    print(colors.green+"\nKilling the server."+colors.black)
+    # chrome_driver.get('%s/kill_server' %address)
+
 
 def test_close(chrome_driver):
     print(colors.green+"\nclosing browser. Good bye"+colors.black)

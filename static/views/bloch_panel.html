@@ -391,10 +391,10 @@ Parameters Panel
           <span class="popuptext" ng-show="popup['thicks']"> Thickness range for beam vs thickness (t0,t1,npts)  </span>
         </td>
         <td class="td-in">
-          <input id="bloch_thicks_input" ng-key-enter="beam_vs_thickness()" type="text" ng-model="bloch['thicks']"  class="mid_input">
+          <input id="bloch_thicks_input" ng-key-enter="update_thicks()" type="text" ng-model="bloch['thicks']"  class="mid_input">
         </td>
         <td>
-          <a class="btn btn-primary myBtn-sm" style="border-width:2px;" ng-click="beam_vs_thickness()">
+          <a class="btn btn-primary myBtn-sm" style="border-width:2px;" ng-click="update_thicks()">
             <img style="width: 90%;" src="/static/images/beam_vs_thick.png"/>
           </a>
           <span class="popup glyphicon glyphicon-question-sign" ng-mouseenter="popup['beams_thick']=true" ng-mouseleave="popup['beams_thick']=false" style="top:-10px;">

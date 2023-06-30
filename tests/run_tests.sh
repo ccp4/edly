@@ -12,20 +12,24 @@ function usage(){
       - p : port number (default 8020)
       - i : ip address (default localhost)
       - a : full address which prevails over ip,port(default 0)
-      - R : report
+      - R : tests report
+      - C : code coverage report
       - H : headless mode (default False)
     "
   exit 1;
 }
 
 
-dir=`dirname $0`
+dir=$(realpath `dirname $0`)
+env_bin=$(realpath $dir/../.env/bin)
+
 args=
 lvl=2
 address=
 do_report=0
+do_coverage=0
 report_dir='report'
-while getopts ":l:a:p:s:rdHRh" arg; do
+while getopts ":l:a:p:s:rdHRCh" arg; do
   case $arg in
     h) usage;;
     l)
@@ -62,6 +66,9 @@ while getopts ":l:a:p:s:rdHRh" arg; do
     R)
       do_report=1
       ;;
+    C)
+      do_coverage=1
+      ;;
   esac
 done
 
@@ -74,7 +81,25 @@ if [ $do_report -eq 1 ];then
   args+="--html=$dir/$report_dir/report.html --self-contained-html"
 fi
 
+
+if [ $do_coverage -eq 1 ];then
+  echo 'launching server for code coverage'
+  cd $dir/..
+  $env_bin/coverage run --data-file=$dir/report/.coverage serve.py &> $dir/report/server.log &
+  pid_cov=$!
+fi
+
+
 # cmd="$dir/../.env/bin/pytest -s  $dir/test_base.py --lvl=$lvl ${args[@]}"
-cmd="$dir/../.env/bin/pytest -s  $dir/test_base.py $args"
+cd $dir
+cmd="$env_bin/pytest -s  $dir/test_base.py $args"
 echo $cmd
 $cmd
+
+
+if [ $do_coverage -eq 1 ];then
+  echo 'coverage analysis'
+  # kill $pid_cov
+  cd $dir/report
+  $env_bin/coverage html -i -d coverage_html
+fi

@@ -15,6 +15,12 @@ app.directive('linePlot', function () {
             document.getElementById(element[0].id).on('plotly_click', scope.addRow_tagTable);
             document.getElementById(element[0].id).on('plotly_legendclick', scope.leg_click);
         }
+        else if(element[0].id=='fig2'){
+          elt = document.getElementById(element[0].id)
+          if (elt.layout.title.text.includes('Iobserved vs Icalc')){            
+            document.getElementById(element[0].id).on('plotly_click', scope.addRow_tagTable);
+          }
+        }
       }, true);
   }
   return {

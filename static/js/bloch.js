@@ -498,6 +498,7 @@ angular.module('app')
       // $log.log(response.data);
       $scope.rock=response.data.rock;
       $scope.info.modes  = response.data.modes;
+      $scope.exp_refl    = response.data.exp_refl;
       $scope.nbeams      = response.data.nbeams;
       $scope.rock_state  = 'done';
       $scope.rocks.saved = $scope.rock_names.includes($scope.rocks.name);
@@ -523,10 +524,11 @@ angular.module('app')
   }
 
   $scope.set_rock_graphs=function(init=0){
+    // $log.log($scope.info.modes['integrated'],$scope.exp_refl)
     $scope.set_available_graphs('rock',$scope.rock_state=='done' || $scope.exp_rock);
     $scope.set_available_graphs('int',$scope.info.modes['integrated']);
-    $scope.set_available_graphs('Rfactor',$scope.info.modes['integrated'] && $scope.info.modes['pets']);
-    $scope.set_available_graphs('FovsFc',$scope.info.modes['integrated'] && $scope.info.modes['pets']);
+    $scope.set_available_graphs('Rfactor',$scope.info.modes['integrated'] && $scope.exp_refl);
+    $scope.set_available_graphs('FovsFc',$scope.info.modes['integrated'] && $scope.exp_refl);
     if (!(all_graphs[$scope.info.graph] in $scope.info.graphs)){
       $log.log('graph ',$scope.info.graph,' not available')
       $scope.info.graph='thick';
@@ -632,17 +634,29 @@ angular.module('app')
           break;
     }
     if (updated){
-      $http.post('update_thickness',JSON.stringify({'thick':$scope.bloch['thick']}))
-      .then(function(response){
-        // $scope.fig1 = response.data;
-        $rootScope.$emit('load_fig1',response.data)
-        if ($scope.info.modes['u']=='rock'){
-          $scope.show_rock();
-        }
-      });
+      if ($scope.info.modes['u']=='rock' && $scope.info.graph=='FovsFc'){
+        $scope.update_graph_fig('FovsFc');
+      }
+      else{
+        $http.post('update_thickness',JSON.stringify({'thick':$scope.bloch['thick']}))
+        .then(function(response){
+          $rootScope.$emit('load_fig1',response.data)
+          if ($scope.info.modes['u']=='rock'){
+            // if ($scope.info.modes['u']=='rock' && ['rock','FovsFc'].indexOf($scope.info.graph)>=0 ){
+              // $scope.update_graph();
+              $scope.show_rock();
+            }
+        });
+      }
     }
   }
 
+  $scope.update_thicks=function(){
+    $http.post('update_thicks',JSON.stringify({'thicks':$scope.bloch['thicks']}))
+    .then(function(response){
+      scope.update_graph();
+    })
+  }
 
 
 
@@ -733,7 +747,6 @@ angular.module('app')
         $rootScope.$emit('load_fig2',response.data)
         // $scope.fig2 = response.data;
     });
-
   }
 
   $scope.update_graph=function(){
@@ -921,7 +934,7 @@ angular.module('app')
   var bloch_colors={'reset':'#337ab7','blue':'#337ab7','red':'#ff0000','green':'#107014'}
   var all_graphs={'thick':'thickness','u3d':'3d view','scat':'scattering factors',
     'rock':'rocking curve','int':'integrated curve',
-    'Rfactor':'R factor','FovsFc':'Fo vs Fc',
+    'Rfactor':'R factor','FovsFc':'Io vs Ic',
     }
   $scope.info.graphs = {'thickness':'thick','3d view':'u3d','scattering factors':'scat',};
   $scope.show={}
