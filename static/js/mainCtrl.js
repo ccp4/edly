@@ -71,6 +71,17 @@ angular.module('app').
       });
   }
 
+  $scope.toggle_sync_frames=function(){
+    // $log.log('sync frames')
+    $scope.sync_frame=!$scope.sync_frame;
+    $scope.styles['sync_frame']='';
+    if ($scope.sync_frame){
+      $scope.styles['sync_frame']=sel_style;
+    }
+    $rootScope.$emit('toggle_sync_frames');
+
+  }
+
   $scope.update = function(init=0){
     switch ($scope.mode){
       case 'bloch':
@@ -525,8 +536,13 @@ angular.module('app').
         if ($scope.structure==''){$scope.expand['importer']=true;}
     });
   }
-  $rootScope.$on('update',function(event,data){
-      $scope.update();
+  $rootScope.$on('update',function(event,data={}){
+    // $log.log(data)
+    if ('frame' in data){
+      $scope.frame=data.frame;
+      $scope.frames.active_frame=$scope.frame;
+    }
+    $scope.update();
   })
   $scope.changed=true;
   $scope.download={'zenodo':true,'link':'','info':'done','downloaded':false};
@@ -545,6 +561,7 @@ angular.module('app').
   $scope.dat_valid = false;
   $scope.valid_cif = false;
   $scope.cif_imported=true;
+  $scope.sync_frames=false;
   $scope.dat_info={'dat_type':'unknown','missing_files':'?'};
   // $scope.frame_offset_on=false;
 
@@ -556,12 +573,18 @@ angular.module('app').
 
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true,jump_frames:10}
   $scope.expand_str={false:'expand',true:'minimize'};
-  $scope.expand={'importer':false,'struct':false,'rock_settings':true};
+  $scope.expand={
+      'importer':false,'struct':false,
+      'rock_settings':true,'load_rock':true,
+    };
+
   $scope.popup={};//{'u_edit':true};//,'rot_help':true};
   $scope.structures_filtered=[];
 
   $scope.modes={'molecule':false};
   $scope.mode_style = {bloch:'',frames:'',felix:'',reload:''};
   $scope.mode_titles={'frames':'Frames Viewer','bloch':'Bloch solver','ms':'Multislice solver','felix':'Felix Solver'}
+  $scope.sync_frame=true;
+  $scope.styles={'sync_frame':sel_style};
   $scope.init();
 }]);

@@ -205,7 +205,7 @@ Parameters Panel
       <!-- rock mode -->
       <div ng-show="info.modes['u']=='rock'" class="">
         <div>
-          <span> Rocking curve mode </span>
+          <span> Rocking curve mode : </span>
           <span id="expand_load_rock"  class="popup glyphicon"  ng-class="{'glyphicon-arrow-down':!expand['load_rock'],'glyphicon-arrow-up':expand['load_rock']}" ng-click="expand['load_rock']=!expand['load_rock']" ng-mouseenter="popup['show_load_rocks']=true" ng-mouseleave="popup['show_load_rocks']=false" >
             <span class="popuptext" ng-show="popup['show_load_rocks']">Load previously <br> simulated data.</span>
           </span>
@@ -215,11 +215,19 @@ Parameters Panel
           <div style="margin-left:5%" >
             <span> Database :</span>
             <select id="load_rock_select" style="width:50%" ng-model="rocks.select" ng-options="x for x in rock_names" ng-change=""></select>
-            <a id="load_rock_btn" class="btn btn-primary btn-sm popup" style="margin-bottom:10px;width:30pxpx;height:30px;"  ng-click="load_rock()" ng-mouseenter="popup['show_load_rock']=true" ng-mouseleave="popup['show_load_rock']=false">
+            <a id="load_rock_btn" class="btn btn-primary btn-sm popup" style="margin-bottom:10px;width:30pxpx;height:30px;"  ng-click="load_rock()" ng-mouseenter="showIt('show_load_rock')" ng-mouseleave="hideIt('show_load_rock')">
               <span class="glyphicon glyphicon-open" style="margin-left:-2px;"></span >
                 <span class="popuptext" ng-show="popup['show_load_rock']">Load </span>
             </a>
           </div>
+        </div>
+        <div style="margin-left:5%;padding-top: 5px;padding-bottom: 5px;"> Name :
+            <span  id="rock_name_span"  ng-show="!show_rock_name_select" ng-bind="rocks.name" ng-click="show_rock_name_select=true" style="cursor: pointer;font-weight:bold;"/>
+            <input id="rock_name_input" ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="show_rock_name_select=false" class="long_input"  type="text">
+            <a id="rock_name_popup" class="popup" style="display:none;">
+              <span class="glyphicon glyphicon-exclamation-sign"/>
+              <span class="popuptext" style="color:#8d1010;"> Change rock name as <br> {a rocks.name a} is already in database. </span>
+            </a>
         </div>
         <!-- rock settings -->
         <div style="font-size:14px;margin-top:7px;margin-left:5%;">
@@ -235,7 +243,7 @@ Parameters Panel
         </div>
         <div ng-show="expand['rock_settings']">
           <table style="margin-left: 20px;">
-            <tr><td class="td-in"> Name </td><td class="td-in"> :</td>
+            <!-- <tr><td class="td-in"> Name </td><td class="td-in"> :</td>
               <td>
                 <span  id="rock_name_span"  ng-show="!show_rock_name_select" ng-bind="rocks.name" ng-click="show_rock_name_select=true" style="cursor: pointer;"/>
                 <input id="rock_name_input" ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="show_rock_name_select=false" class="long_input"  type="text">
@@ -246,7 +254,7 @@ Parameters Panel
                   <span class="popuptext" style="color:#8d1010;"> Change rock name as <br> {a rocks.name a} is already in database. </span>
                 </a>
               </td>
-            </tr>
+            </tr> -->
             <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
               <td> <input id="rock_u0_input" class="long_input" ng-change="rock_reset()" ng-model="rock['u0']"  ></td>
               <td class="td-in" ng-show="dat['pets']">
@@ -279,7 +287,9 @@ Parameters Panel
         <!-- Simulated rocking curve frames -->
         <div ng-show="rock_state=='done'">
           <div class="" style="margin-left:5%">
-          <span> Simu nb :</span>
+          <span style="cursor:pointer;"ng-click="input['rock_sim']=!input['rock_sim']">
+            Simu nb :
+          </span>
           <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('i');">
             <span class="glyphicon glyphicon-fast-backward"></span >
           </a>
@@ -287,8 +297,9 @@ Parameters Panel
             <span class="glyphicon glyphicon-step-backward"></span >
           </a>
           <span style="margin-left:5px" >
-            <span  tabindex="1" class="btn-sm btn-primary" ng-keydown="update_rock_sim($event)" ng-hide="input['rock_sim']" ng-bind="sim_rock" ng-dblclick="input['rock_sim']=true" ></span>
-            <input ng-show="input['rock_sim']" ng-model="sim_rock" ng-key-enter="set_input('rock_sim','rock')" style="width:30px;">
+            <span  ng-hide="input['rock_sim']" ng-bind="rock_sim" tabindex="1" class="btn-sm btn-primary"  ng-keydown="update_rock_sim($event)" style="cursor:pointer;"></span>
+            <input ng-show="input['rock_sim']" ng-model="rocks.rock_sim" type="number" ng-key-enter="enter_rock_sim()" style="width:40px;">
+            <!-- ng-change="show_rock_sim()"  -->
           </span>
           <a class="btn-sm btn-primary btn-rock" ng-click="set_rock_sim('+')">
             <span class="glyphicon glyphicon-step-forward"></span >
@@ -300,14 +311,14 @@ Parameters Panel
           <!--  Integration -->
           <div style="margin-top:5px;margin-left:5%"">
             <span> Integrate : </span>
-            <a id="rock_int_btn" class="btn btn-primary btn-sm popup" style="width:30px;height:30px;"  ng-click="integrate_rock()" ng-mouseenter="popup['rock_int']=true" ng-mouseleave="popup['rock_int']=false">
+            <a id="rock_int_btn" class="btn btn-primary btn-sm popup" style="width:30px;height:30px;"  ng-click="integrate_rock()" ng-mouseenter="showIt('rock_int')" ng-mouseleave="hideIt('rock_int')">
               <span class="gg-icon gg-stack" style="margin-left:-5px;margin-top:5px;"></span >
               <span class="popuptext" ng-show="popup['rock_int']">
                 Integrate rocking curve <br>
                 at all thicknesses
               </span>
             </a>
-            <a id="rock_export_hkl_btn" class="btn btn-primary btn-sm popup" style="width:30px;height:30px;"  ng-click="download_hkl()" ng-mouseenter="popup['show_download_hkl']=true" ng-mouseleave="popup['show_download_hkl']=false">
+            <a id="rock_export_hkl_btn" class="btn btn-primary btn-sm popup" style="width:30px;height:30px;"  ng-click="download_hkl()" ng-mouseenter="showIt('show_download_hkl')" ng-mouseleave="hideIt('show_download_hkl')">
               <span class="glyphicon glyphicon-export" style="margin-bottom:-5px;margin-left:-4px;"></span >
               <!-- <span class="gg-icon gg-software-download" style="margin-bottom:-5px;margin-left:-4px;"></span > -->
                 <span class="popuptext" ng-show="popup['show_download_hkl']">
@@ -316,8 +327,8 @@ Parameters Panel
                   at current thickness
                 </span>
               </a>
-              <a id="rock_save_btn" class="btn btn-primary btn-sm popup" style="width:30px;height:30px;"  ng-click="save_rock()" ng-mouseenter="popup['show_save_rock']=true" ng-mouseleave="popup['show_save_rock']=false">
-                <span ng-class="{'glyphicon glyphicon-save':!rocks.saved,'glyphicon glyphicon-saved':rocks.saved}" style=""></span >
+              <a id="rock_save_btn" ng-style="styles['rock_saved']" class="btn btn-primary btn-sm popup" style="width:30px;height:30px;"  ng-click="save_rock()" ng-mouseenter="showIt('show_save_rock')" ng-mouseleave="hideIt('show_save_rock')">
+                <span ng-class="{'glyphicon glyphicon-save':!rocks.saved,'glyphicon glyphicon-saved':rocks.saved}" ></span >
                   <span class="popuptext" ng-show="popup['show_save_rock']">
                     Save simulated data<br>
                   </span>
@@ -439,7 +450,7 @@ Parameters Panel
         </table>
       </div>
       <div class="col-sm-2" style="padding-left:5px">
-        <a class="btn-sm btn-primary popup" ng-style="auto_refresh_style" ng-click="set_auto()" ng-mouseenter="showIt('auto_refresh')" ng-mouseleave="hideIt('auto_refresh')">
+        <a class="btn-sm btn-primary popup" ng-style="styles['auto_refresh']" ng-click="set_auto()" ng-mouseenter="showIt('auto_refresh')" ng-mouseleave="hideIt('auto_refresh')">
           <span class="glyphicon glyphicon-refresh" />
           <span class="popuptext" style="" ng-show="pop['auto_refresh']">Auto refresh  </span>
         </a>

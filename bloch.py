@@ -115,11 +115,14 @@ def bloch_fig():
             ct,st = np.cos(t),np.sin(t)
             rx = lambda r:r*ct; ry=lambda r:r*st
             if is_px:
-                # cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
-                if is_sim:
-                    cx,cy = toplot.loc[str((0,0,0)),['px','py']]
+                if session['dat']['dat_type']=='pets':
+                    #seems unecessary as toplot contains this
+                    cx,cy = pets.cen.loc[session['frame']-1, ['px','py']]
                 else:
-                    cx,cy=np.array(pets.nxy)/2
+                    if is_sim:
+                        cx,cy = toplot.loc[str((0,0,0)),['px','py']]
+                    else:
+                        cx,cy=np.array(pets.nxy)/2
                 qr = qs/(pets.aper*np.sqrt(2))
                 rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
 
@@ -401,6 +404,7 @@ def set_rock_frame():
             # e0/=np.linalg.norm(e0)
             # e1/=np.linalg.norm(e1)
 
+
         session['frame'] = frame
         # print(session['rock_frames'])
         session['rock'].update({'u0':e0.tolist(),'u1':e1.tolist()})
@@ -440,6 +444,13 @@ def solve_rock():
     rock = bl.Bloch_cont(path=session['path'],tag='',uvw=uvw,Sargs=Sargs)
     session['rock_state'] = 'done'
     nbs = '%d-%d' %(rock.df.nbeams.min(),rock.df.nbeams.max())
+
+    rock_frames=[0,rock.n_simus]
+    if sum(session['rock_frames'])>0:
+        rock_frames=session['rock_frames']
+    rock.rock_frames=rock_frames
+    rock.save()
+
     return json.dumps({'nbeams':nbs})
 
 @bloch.route('/overlay_rock', methods=['POST'])
@@ -472,29 +483,53 @@ def show_rock():
     tle = "Rocking curves "
     rock=load_rock()
     fig=go.Figure()
+    cs = (np.array(dsp.getCs('jet',len(refl)))*255).astype(int)
+    colors = {h:'rgb%s' %(str(tuple(c))) for h,c in zip(refl,cs)}
+    fig=go.Figure()
+    rock_x = data['rock_x']
+    if session['bloch_modes']['exp_rock'] : rock_x='F'
     if rock:
-        rock_x = data['rock_x']
         rock = load_rock()
         # update_rock_thickness()
         df = pd.DataFrame()
-        rock_frames=session['rock_frames']
-        # print(rock_frames)
+        rock_frames = rock.rock_frames
         for i in range(rock.n_simus):
             b0       = rock.load(i)
             df0      = b0.df_G.loc[b0.df_G.index.isin(refl), ['Sw','I']].copy()
             df0['i'] = i
-            df0['F'] = rock_frames[0] + (rock_frames[1] -rock_frames[0])*i/(rock.n_simus-1)
+            df0['F'] = rock_frames[0] + (rock_frames[1] -rock_frames[0])*i/(rock.n_simus)+1
             df=pd.concat([df,df0])
+
         df['hkl']=df.index
-        fig = px.line(df,x=rock_x,y='I',color='hkl',markers=True)
+        for h,c in zip(refl,colors):
+            df_h=df.loc[df.hkl==h,[rock_x,'I']]
+            fig.add_trace(go.Scatter(
+                x=df_h[rock_x].values,y=df_h.I.values,name="%s" %h,
+                line=dict(color=colors[h],width=2)
+            ))
+
+        # fig = px.line(df,x=rock_x,y='I',color='hkl',markers=True,
+        #     color_discrete_sequence=list(colors.values()),
+        #     )
         tle+="(simu at z=%d A)" %session['bloch']['thick']
 
     if session['bloch_modes']['exp_rock'] :
-        rock_x='F'
-        df = load_pets().rpl[['hkl','F','I']]
-        df = df.loc[df.hkl.isin(refl)]
-        fig = px.line(df,x='F',y='I',color='hkl',markers=True)
-
+        df_exp = load_pets().rpl[['hkl','F','I']]
+        df_exp = df_exp.loc[df_exp.hkl.isin(refl)]
+        exp_refl = df_exp.hkl.unique()
+        scale=1
+        if rock:
+            df_sim = df.loc[df.hkl.isin(exp_refl)]
+            h0 = df_sim.iloc[df_sim.I.argmax()].hkl
+            df_exp = df_exp.loc[(df_exp.F>=rock_frames[0]) & (df_exp.F<=rock_frames[1])]
+            scale  = df.loc[h0,'I'].max()/df_exp.loc[df_exp.hkl==h0,'I'].max()
+        for h in exp_refl:
+            df_h = df_exp.loc[df_exp.hkl==h]
+            # print(h,df_h)
+            fig.add_trace(go.Scatter(
+                x=df_h.F.values,y=df_h.I.values*scale,name="%s_exp" %h,
+                line=dict(color=colors[h],width=2, dash='dot')
+            ))
 
     x_axis = {'Sw':'Excitation Error Sw(A^-1)','F':'Frame','i':'rock simulation index'}
     fig.update_layout(
@@ -552,8 +587,18 @@ def integrate_rock():
         thicks=session['bloch']['thicks']
         rock.integrate();
         if session['dat']['pets']:
-            rock.Rfactor(load_pets().hkl);
-        session['bloch_modes']['integrated']=True
+            # df_exp = load_pets().hkl
+            df_exp = load_pets().rpl
+            rock_frames=np.array(rock.rock_frames)+1
+            df_exp = df_exp.loc[(df_exp.F>=rock_frames[0]) & (df_exp.F<=rock_frames[1])]
+            df_exp = df_exp[['hkl','I']].groupby('hkl').sum()
+            rock.Rfactor(df_exp);
+
+        modes = session['bloch_modes'].copy()
+        modes['integrated']=True
+        session['bloch_modes']=modes
+        print('integration completed')
+        # print(session['bloch_modes']['integrated'])
     return 'done'
 
 @bloch.route('/show_graph', methods=['POST'])
@@ -581,15 +626,19 @@ def show_Rfactor():
     return fig
 
 def show_FovsFc(thick):
-    df_exp = load_pets().hkl
+    # df_exp = load_pets().hkl
+    df0 = load_pets().rpl
+    df_exp = df0[['hkl','I']].groupby('hkl').sum()
+    # df_exp.index
+
     rock = load_rock()
 
     z0 = rock.df_int.columns[abs(rock.z-thick).argmin()]        #;print(z0)
     refl = rock.df_int.loc[rock.df_int.index.isin(df_exp.index)].index
 
+    # print(rock.df_int.index)#refl,df_exp.loc[refl].index)
     I_exp = df_exp.loc[refl,'I'].values     #;print(I_exp[0])
     I_sim = rock.df_int.loc[refl,z0].values #;print(I_sim[0])
-    # print(I_sim.mean())
     # df=pd.DataFrame(index=refl)
     # df['I_exp'] = I_exp
     # df['I_sim'] = I_sim
@@ -656,9 +705,15 @@ def update_refl():
     session['refl']=data['refl']
     ###get valid reflections
     if not data['clear']:
-        b0 = load_b0()
-        idx = b0.get_beam(refl=session['refl'])#;print(session['refl'])
-        refl = b0.df_G.iloc[idx].index.tolist()#;print(refl)
+        # print(session['bloch_modes']['integrated'])
+        if session['bloch_modes']['u'] == 'rock' and session['bloch_modes']['integrated']:
+            r = load_rock()
+            refl =  r.df_int.loc[r.df_int.index.isin(session['refl'])].index.tolist()
+            # print('up refl:',session['refl'],refl)
+        else:
+            b0 = load_b0()
+            idx = b0.get_beam(refl=session['refl'])#;print(session['refl'])
+            refl = b0.df_G.iloc[idx].index.tolist()#;print(refl)
         session['refl'] = refl
     return json.dumps({'refl':session['refl']})
 
@@ -862,7 +917,7 @@ def init_bloch_panel():
         session['bloch_modes']['exp_rock'] = False
 
 
-    # print(session['dat'],session['bloch_modes']['integrated'])
+    # print(session['rock_name'])
 
     now = time.time()
     # session['vis']       = vis

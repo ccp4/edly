@@ -176,6 +176,11 @@ angular.module('app')
   }
 
 
+  $rootScope.$on('toggle_sync_frames',function(event){
+    $scope.sync_frame=!$scope.sync_frame;
+    $log.log('sync frames : ',$scope.sync_frame);
+  })
+
   $rootScope.$on('update_frame',function(event,frame,init){
       //
       $scope.frame=frame;
@@ -193,10 +198,19 @@ angular.module('app')
   })
 
   $scope.update_frame=function(){
-    $http.post('update_bloch_frame',JSON.stringify({'frame':$scope.frame}))
-    .then(function(response){
-      $rootScope.$emit('load_fig1',response.data)
-    });
+    if ($scope.sync_frame){
+      if ($scope.info.modes['u']=='rock'){
+        $scope.rock_sim=$scope.frame;
+        $scope.get_rock_sim();
+      }
+    }
+    else{
+      $http.post('update_bloch_frame',JSON.stringify({'frame':$scope.frame}))
+      .then(function(response){
+        $rootScope.$emit('load_fig1',response.data)
+      });
+    }
+
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -422,6 +436,7 @@ angular.module('app')
           $scope.set_rock_sim(1);
           $scope.get_rock_state();
           $scope.rocks.saved=false;
+          $scope.set_rock_saved();
         })
       })
   }
@@ -441,7 +456,8 @@ angular.module('app')
   }
 
   $scope.update_rock_sim=function(e){
-    s=''
+    var s=''
+    // console.log(s)
     switch (e.keyCode){
       case 37: s='-';break;
       case 39: s='+';break;
@@ -450,7 +466,8 @@ angular.module('app')
     }
     if (s){
       // $log.log(s);
-      $scope.set_rock_sim(s);}
+      $scope.set_rock_sim(s);
+    }
   }
 
   $scope.set_rock_sim=function(s){
@@ -459,18 +476,46 @@ angular.module('app')
       case '-':$scope.rock_sim -= 1;break;
       case '+':$scope.rock_sim += 1;break;
       case 'f':$scope.rock_sim  = 100;break;
+      default : break;
     }
-    $scope.get_rock_sim();
+    if ($scope.sync_frame){
+      // $log.log()
+      $scope.frame=$scope.rock_sim;
+      $rootScope.$emit('update',{'frame':$scope.frame});
+    }
+    else{
+      $scope.get_rock_sim();
+    }
+  }
+
+  $scope.show_rock_sim=function(){
+    // $log.log($scope.rocks.rock_sim)
+    // if ($scope.rocks.rock_sim){
+    //   $scope.rock_sim=$scope.rocks.rock_sim;
+    // }
+  }
+
+  $scope.enter_rock_sim=function(){
+    // $log.log($scope.rocks.rock_sim)
+    if ($scope.rocks.rock_sim){
+      $scope.rock_sim=$scope.rocks.rock_sim;
+      $scope.set_rock_sim('');
+    }
+    else{
+      $scope.rocks.rock_sim=$scope.rock_sim;
+    }
   }
 
   $scope.get_rock_sim=function(){
+    // $log.log('rock_sim:',$scope.rock_sim)
     $http.post('get_rock_sim',JSON.stringify({'sim':Number($scope.rock_sim),'frame':$scope.frame}))
       .then(function(response){
         $rootScope.$emit('load_fig1',JSON.parse(response.data.fig))
         // $scope.fig1 = JSON.parse(response.data.fig);
         $scope.bloch['u'] = response.data.u;
         $scope.rock_sim  = response.data.sim;
-        $scope.sim_rock  = $scope.rock_sim;
+        $scope.rocks.rock_sim=$scope.rock_sim;
+        // $scope.sim_rock  = $scope.rock_sim;
 
         $scope.update_graph();
     });
@@ -480,7 +525,7 @@ angular.module('app')
     .then(function(response){
       $rootScope.$emit('load_fig1',response.data)
       // $scope.fig1 = response.data;
-      $scope.sim_rock = 'all';
+      // $scope.sim_rock = 'all';
     });
   }
 
@@ -507,6 +552,17 @@ angular.module('app')
       $scope.get_rock_sim(1);
     });
   }
+
+  $scope.set_rock_saved=function(){
+    // $log.log('rock saved:',$scope.rocks.saved)
+    if ($scope.rocks.saved){
+      $scope.styles['rock_saved']={'background-color':'green'}
+    }
+    else{
+      $scope.styles['rock_saved']='';
+    }
+  }
+
   $scope.save_rock=function(){
     if (!$scope.rock_names.includes($scope.rocks.name)){
       $http.post('save_rock',JSON.stringify({'rock_name':$scope.rocks.name}))
@@ -515,6 +571,7 @@ angular.module('app')
         $scope.rock_names = response.data.rock_names;
         $scope.rocks.saved = $scope.rock_names.includes($scope.rocks.name);
         $scope.rocks.select = $scope.rocks.name;
+        $scope.set_rock_saved();
       });
     }
     else{
@@ -654,7 +711,7 @@ angular.module('app')
   $scope.update_thicks=function(){
     $http.post('update_thicks',JSON.stringify({'thicks':$scope.bloch['thicks']}))
     .then(function(response){
-      scope.update_graph();
+      $scope.update_graph();
     })
   }
 
@@ -805,10 +862,10 @@ angular.module('app')
   //// reflections stuffs
   ////////////////////////////////////////////////////////
   $scope.set_auto=function(){
-    $scope.auto_refresh_style='';
+    $scope.styles['auto_refresh']='';
     $scope.auto_refresh=!$scope.auto_refresh;
     if ($scope.auto_refresh){
-      $scope.auto_refresh_style={"border-style":'solid'};
+      $scope.styles['auto_refresh']=sel_style;//{"border-style":'solid'};
     }
   }
   $scope.add_refl=function(){
@@ -896,12 +953,14 @@ angular.module('app')
         $scope.info.rock_axis = response.data.rock_axis;
         $scope.rock_names  = response.data.rock_names;
         $scope.rocks={
-            'name'  : response.data.rock_name,
-            'saved' : $scope.rock_names.includes(response.data.rock_name),
-            'select': response.data.rock_name,
+            'name'    : response.data.rock_name,
+            'saved'   : $scope.rock_names.includes(response.data.rock_name),
+            'select'  : response.data.rock_name,
+            'rock_sim': $scope.rock_sim,
         }
+        $scope.set_rock_saved();
         //
-        if (!($scope.rocks.name in $scope.rock_names)){
+        if (!$scope.rock_names.includes($scope.rocks.name) ){
           $scope.rocks.select = $scope.rock_names[0];
         }
         $scope.u_style[$scope.info.modes['u']]   = sel_style;
@@ -911,22 +970,26 @@ angular.module('app')
         $scope.bloch_solve_reset();
         $scope.set_rock_graphs(1)
         $log.log('bloch init done');
+        if ($scope.info.modes['u']=='rock' && $scope.rocks.saved){
+          $scope.load_rock();
+        }
         $rootScope.$emit('update');
       });
     })
 
   $scope.info=bloch_shared;
-  var sel_style={"border-style":'solid','background-color':'#1e5483','border-color':'#1c1c9d'};
-  var changed=true;
-  $scope.frame  = 1;
+  const sel_style={"border-style":'solid','background-color':'#1e5483','border-color':'#1c1c9d'};
+  var changed = true;
+  $scope.frame = 1;
   $scope.nbeams = 0;
   $scope.show_buttons=false;
   $scope.dtheta_phi=0.1;
   $scope.dthick=5;
   // $scope.popup={'u_edit': true}
-  $scope.sim_rock = 1;
+  // $scope.sim_rock = 1;
   $scope.rock_sim = 1;
   $scope.show_rock_name_select=false;
+  // $scope.expand={'rock_settings':true,'load_rock':true};
 
   $scope.u_style  = {'single':'','rock':'','lacbed':''};
   $scope.u0_style = {'auto':'','edit':'','move':''};
@@ -938,8 +1001,12 @@ angular.module('app')
     }
   $scope.info.graphs = {'thickness':'thick','3d view':'u3d','scattering factors':'scat',};
   $scope.show={}
-  $scope.auto_refresh=true;
-  $scope.auto_refresh_style='';
+  $scope.auto_refresh = true;
+  $scope.sync_frame   = true;
+  $scope.styles={'auto_refresh':sel_style,'rock_saved':''};
+
+  // $scope.auto_refresh_style=sel_style;
+  // $scope.sync_frame_style=sel_style;
   // $scope.init();
 
 }]);

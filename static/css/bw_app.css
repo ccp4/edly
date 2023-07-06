@@ -25,6 +25,7 @@
 }
 .btn-rock{
   padding: 3px;
+  cursor: pointer;
 }
 .btn-delete{
   padding: 3px;

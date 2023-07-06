@@ -72,11 +72,18 @@
 
     <!-- u frame (shown in bloch mode)-->
     <div ng-show="mode=='bloch' && dat['pets']">
-      <div style="padding:10px;">
+      <div style="padding:10px 0px 10px 5px;">
         $\mathbf u_{frame}$ =
          <span ng-bind="frames.u"></span>
          <span class="popup glyphicon glyphicon-question-sign bloch_info" ng-mouseenter="popup['u_frame']=true" ng-mouseleave="popup['u_frame']=false">
            <span class="popuptext" ng-show="popup['u_frame']"> Beam orientation based on experimental frames.</span>
+         </span>
+         <!-- sync -->
+         <span style="float:right;" class="btn-sm btn-primary btn-rock popup" ng-style="styles['sync_frame']" ng-click="toggle_sync_frames()" ng-mouseenter="showIt('show_sync_frames')" ng-mouseleave="hideIt('show_sync_frames')">
+           <span class="glyphicon glyphicon-refresh"></span >
+           <span class="popuptext" ng-show="popup['show_sync_frames']">
+             Sync experimental frames to simulated frames
+           </span>
          </span>
       </div>
     </div>

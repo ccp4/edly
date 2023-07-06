@@ -9,16 +9,20 @@ app.config(['$interpolateProvider', function($interpolateProvider) {
 app.directive('linePlot', function () {
   function linkFunc(scope, element, attrs) {
       scope.$watch(attrs.fig, function (new_fig,fig) {
+        if (new_fig.data){
           Plotly.newPlot(element[0].id, new_fig.data, new_fig.layout);
           if (element[0].id=='fig1'){
             scope.initPlotly=true
             document.getElementById(element[0].id).on('plotly_click', scope.addRow_tagTable);
             document.getElementById(element[0].id).on('plotly_legendclick', scope.leg_click);
-        }
-        else if(element[0].id=='fig2'){
-          elt = document.getElementById(element[0].id)
-          if (elt.layout.title.text.includes('Iobserved vs Icalc')){            
-            document.getElementById(element[0].id).on('plotly_click', scope.addRow_tagTable);
+          }
+          else if(element[0].id=='fig2'){
+            elt = document.getElementById(element[0].id)
+            if (elt.layout.title){              
+              if (elt.layout.title.text.includes('Iobserved vs Icalc')){
+                document.getElementById(element[0].id).on('plotly_click', scope.addRow_tagTable);
+              }
+            }
           }
         }
       }, true);

@@ -1,9 +1,30 @@
 # Version log
 ## 0.0.7dev
+### Thu  6 Jul 09:08:32 BST 2023
+- issue#51
+  - enter simu number messes up the frame number
+  - full rock reflection selection in Io vs Ic
+  - `show_rock` display both exp and simu rocking curve
+  - changed exp integration to only cover simulated frames
+  - save `rock_frames` info into `Rock` object to retrieve at anytime
+  - fixed automatic rock_name selection at startup
+  - button sync frame and simu nb
+  - green saved button
+### Fri 30 Jun 17:50:41 BST 2023
+- issue#49 : rock curves and IovsIc bugs
+  - fix update rock curves bug when in IovsIc mode
+  - properly update IovsIc curve when changing thickness
+  - reflections index shown on IovsIc
+  - clickable reflections on IovsIc graph
+  - fix available  graphs bugs at refresh
+- removed structure links in navigation
+- tests :
+  - added code coverage support
+
 ### Wed 28 Jun 16:34:17 BST 2023
 - bug fixes :
   - remove try except `init_structure()`
-  - removed trailing '/' in replace database_path 
+  - removed trailing '/' in replace database_path
 - tests:
   - run_test uses getopts with simplified flag options
   - added report,dev,lvl flags to run_tests
