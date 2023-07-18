@@ -1,5 +1,11 @@
 # Version log
 ## 0.0.7dev
+### Tue 18 Jul 17:56:01 BST 2023
+- rocking curve :
+  - delete option
+  - get info on load change
+  - new_rock
+
 ### Tue 18 Jul 14:09:27 BST 2023
 - issue#52 : fix pets import
 - added rock_frames to old simus

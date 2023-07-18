@@ -82,7 +82,7 @@ angular.module('app').
 
   }
 
-  $scope.update = function(init=0){
+  $scope.update=function(init=0){
     switch ($scope.mode){
       case 'bloch':
           $rootScope.$emit('update_frame',$scope.frame,init);
@@ -575,7 +575,7 @@ angular.module('app').
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={
       'importer':false,'struct':false,
-      'rock_settings':true,'load_rock':true,
+      //'rock_settings':true,'load_rock':true,
     };
 
   $scope.popup={};//{'u_edit':true};//,'rot_help':true};

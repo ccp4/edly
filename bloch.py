@@ -309,6 +309,28 @@ def get_bloch_sim():
 ##############################
 #### Rocking curve stuffs
 ##############################
+@bloch.route('/get_rock_info', methods=['POST'])
+def get_rock_info():
+    data        = json.loads(request.data.decode())#;print(data)
+    rock_name   = data['rock_name'];print(rock_name)
+    rock        = load_rock(rock_name)
+    # print(rock)
+    info = [[0,0,1],[0,1,0],3]
+    if rock:
+        info = [rock.df.u[0].tolist(),rock.df.u[-1].tolist(),rock.df.shape[0]]
+    return json.dumps({'u0':b_str(info[0],4),'u1':b_str(info[1],4),'nframes':info[2]})
+
+@bloch.route('/delete_rock', methods=['POST'])
+def delete_rock():
+    data       = json.loads(request.data.decode())#;print(data)
+    rock_name  = data['rock_name']
+    folder     ='static/data/%s/rocks/%s' %(session['mol'],rock_name);print(folder)
+    check_output("rm -rf %s" %folder,shell=True,).decode()
+    rock_names = [os.path.basename(s) for s in glob.glob(os.path.join(sim_path(session['mol']),'*'))]
+    # print(rock_names)
+    return json.dumps({'rock_names':rock_names})
+
+
 @bloch.route('/load_rock', methods=['POST'])
 def load_rock_data():
     data = json.loads(request.data.decode())#;print(data)
@@ -323,7 +345,9 @@ def load_rock_data():
         rock.save()
 
     return json.dumps({'rock':get_session_data('rock'),'nbeams':nbs,
-        'modes':session['bloch_modes'],'exp_refl':session['dat']['pets']})
+        'modes':session['bloch_modes'],'exp_refl':session['dat']['pets'],
+        'rock_frames':rock.rock_frames,
+        })
 
 @bloch.route('/save_rock', methods=['POST'])
 def save_rock_data():
@@ -897,7 +921,8 @@ def init_bloch_panel():
     #reinit on refresh
     expand_bloch = {
         'struct':False,'thick':False,
-        'refl':True,'sim':False,'u':True,'load_rock':False}
+        'refl':True,'sim':False,'u':True,'load_rock':False,
+        'rock_settings':True,'load_rock':True}
     # vis = {'I':True,
     #     'Vga':'legendonly','Sw':'legendonly','I_pets':True,
     #     'rings':True}
@@ -967,12 +992,15 @@ def load_b0():
 
     return b0
 
-def load_rock():
-    file='static/data/%s/rocks/%s/rock_.pkl' %(session['mol'],session['rock_name'])
+def load_rock(rock_name=''):
+    if not rock_name:
+        rock_name=session['rock_name']
+    file='static/data/%s/rocks/%s/rock_.pkl' %(session['mol'],rock_name)
     if not os.path.exists(file):
         file = rock_path(session['id'])
     if os.path.exists(file):
         return ut.load_pkl(file=file)
+
 
 def load_pets():
     mol=session['mol']

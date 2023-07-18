@@ -4,13 +4,13 @@ Parameters Panel
 <!-- Simulation Parameters  -->
 <div class="row" >
   <div class="theta_phi" >
-    <a class="popup" ng-click="expand['sim']=!expand['sim']" ng-mouseenter="showIt('expand_sim')" ng-mouseleave="hideIt('expand_sim')" style="float:right;bottom:5px">
-      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['sim'],'glyphicon glyphicon-chevron-up':expand['sim']}">
-        <span class="popuptext" style="" ng-show="popup['expand_sim']" ng-bind="expand_str[expand['sim']]"></span>
+    <a class="popup" ng-click="expand_bloch['sim']=!expand_bloch['sim']" ng-mouseenter="showIt('expand_sim')" ng-mouseleave="hideIt('expand_sim')" style="float:right;bottom:5px">
+      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand_bloch['sim'],'glyphicon glyphicon-chevron-up':expand_bloch['sim']}">
+        <span class="popuptext" style="" ng-show="popup['expand_sim']" ng-bind="expand_str[expand_bloch['sim']]"></span>
       </span>
     </a>
     <div style="font-size:14px;margin-bottom:5px;">Simulation parameters :</div>
-    <table style="margin-left: 10px;" ng-show="expand['sim']">
+    <table style="margin-left: 10px;" ng-show="expand_bloch['sim']">
     <tr><td>
     <table>
       <!-- keV -->
@@ -101,13 +101,13 @@ Parameters Panel
 <!-- Orientation u -->
 <div class="row">
   <div class="theta_phi">
-    <a class="popup" ng-click="expand['u']=!expand['u']" ng-mouseenter="showIt('expand_u')" ng-mouseleave="hideIt('expand_u')" style="float:right;bottom:5px">
-      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['u'],'glyphicon glyphicon-chevron-up':expand['u']}">
-        <span class="popuptext" style="" ng-show="popup['expand_u']" ng-bind="expand_str[expand['u']]"></span>
+    <a class="popup" ng-click="expand_bloch['u']=!expand_bloch['u']" ng-mouseenter="showIt('expand_u')" ng-mouseleave="hideIt('expand_u')" style="float:right;bottom:5px">
+      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand_bloch['u'],'glyphicon glyphicon-chevron-up':expand_bloch['u']}">
+        <span class="popuptext" style="" ng-show="popup['expand_u']" ng-bind="expand_str[expand_bloch['u']]"></span>
       </span>
     </a>
     <div style="font-size:14px;margin-bottom:5px;">Beam orientation :</div>
-    <div ng-show="expand['u']">
+    <div ng-show="expand_bloch['u']">
 
       <!-- orientation  -->
       <div style="padding-bottom:5px;" >
@@ -206,24 +206,32 @@ Parameters Panel
       <div ng-show="info.modes['u']=='rock'" class="">
         <div>
           <span> Rocking curve mode : </span>
-          <span id="expand_load_rock"  class="popup glyphicon"  ng-class="{'glyphicon-arrow-down':!expand['load_rock'],'glyphicon-arrow-up':expand['load_rock']}" ng-click="expand['load_rock']=!expand['load_rock']" ng-mouseenter="popup['show_load_rocks']=true" ng-mouseleave="popup['show_load_rocks']=false" >
+          <span id="new_rock_btn"  class="popup glyphicon glyphicon-file" ng-click="new_rock(true)" ng-mouseenter="showIt('show_new_rock')" ng-mouseleave="hideIt('show_new_rock')" >
+            <span class="popuptext" ng-show="popup['show_new_rock']">new rock</span>
+          </span>
+          <span id="expand_load_rock"  class="popup glyphicon glyphicon"  ng-class="{'glyphicon-folder-open':!expand_bloch['load_rock'],'glyphicon-minus-sign':expand_bloch['load_rock']}" ng-click="expand_bloch['load_rock']=!expand_bloch['load_rock']" ng-mouseenter="showIt('show_load_rocks')" ng-mouseleave="hideIt('show_load_rocks')" >
             <span class="popuptext" ng-show="popup['show_load_rocks']">Load previously <br> simulated data.</span>
           </span>
         </div>
         <!-- load rock -->
-        <div ng-show="expand['load_rock']">
+        <div ng-show="expand_bloch['load_rock']">
           <div style="margin-left:5%" >
-            <span> Database :</span>
-            <select id="load_rock_select" style="width:50%" ng-model="rocks.select" ng-options="x for x in rock_names" ng-change=""></select>
-            <a id="load_rock_btn" class="btn btn-primary btn-sm popup" style="margin-bottom:10px;width:30pxpx;height:30px;"  ng-click="load_rock()" ng-mouseenter="showIt('show_load_rock')" ng-mouseleave="hideIt('show_load_rock')">
+            <span> load :</span>
+            <select id="load_rock_select" style="width:100px" ng-model="rocks.select" ng-options="x for x in rock_names" ng-change="show_rock_info(rocks.select)" ng-blur="restore_rock()"></select>
+            <span id="load_rock_btn" class="btn_rock btn btn-primary btn-sm popup"   ng-click="load_rock()" ng-mouseenter="showIt('show_load_rock')" ng-mouseleave="hideIt('show_load_rock')">
               <span class="glyphicon glyphicon-open" style="margin-left:-2px;"></span >
                 <span class="popuptext" ng-show="popup['show_load_rock']">Load </span>
-            </a>
+            </span>
+            <span id="rock_delete_btn" class="btn_rock  btn btn-primary btn-sm popup" style="background-color:#d14242" ng-click="delete_rock()" ng-mouseenter="showIt('show_delete_rock')" ng-mouseleave="hideIt('show_delete_rock')">
+              <span class="glyphicon glyphicon-remove" />
+              <span class="popuptext" style="" ng-show="popup['show_delete_rock']"> delete rock  </span>
+            </span>
           </div>
         </div>
+        <!-- rock name -->
         <div style="margin-left:5%;padding-top: 5px;padding-bottom: 5px;"> Name :
-            <span  id="rock_name_span"  ng-show="!show_rock_name_select" ng-bind="rocks.name" ng-click="show_rock_name_select=true" style="cursor: pointer;font-weight:bold;"/>
-            <input id="rock_name_input" ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="show_rock_name_select=false" class="long_input"  type="text">
+            <span  id="rock_name_span"  ng-show="!show_rock_name_select" ng-bind="rocks.active" ng-click="new_rock(true)" style="cursor: pointer;font-weight:bold;"/>
+            <input id="rock_name_input" ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="save_rock_name()" ng-blur="save_rock_name()" class="long_input"  type="text">
             <a id="rock_name_popup" class="popup" style="display:none;">
               <span class="glyphicon glyphicon-exclamation-sign"/>
               <span class="popuptext" style="color:#8d1010;"> Change rock name as <br> {a rocks.name a} is already in database. </span>
@@ -232,29 +240,23 @@ Parameters Panel
         <!-- rock settings -->
         <div style="font-size:14px;margin-top:7px;margin-left:5%;">
           <span> Settings : </span>
-          <span id="expand_rock_settings_btn" class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!expand['rock_settings'],'glyphicon-minus-sign':expand['rock_settings']}" ng-click="expand['rock_settings']=!expand['rock_settings']" ng-mouseenter="popup['rock_settings']=true" ng-mouseleave="popup['rock_settings']=false" >
+          <span id="expand_rock_settings_btn" class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!expand_bloch['rock_settings'],'glyphicon-minus-sign':expand_bloch['rock_settings']}" ng-click="expand_bloch['rock_settings']=!expand_bloch['rock_settings']" ng-mouseenter="popup['rock_settings']=true" ng-mouseleave="popup['rock_settings']=false" >
             <span class="popuptext" ng-show="popup['rock_settings']">
-            <div> Rocking curve settings  :
+            <div style="text-align:left">
+              Rocking curve settings  :
               <br> &nbsp u0   : initial orientation
               <br> &nbsp u1   : last orientation
               <br> &nbsp npts : number of orientation vectors
             </div>
           </span>
         </div>
-        <div ng-show="expand['rock_settings']">
-          <table style="margin-left: 20px;">
-            <!-- <tr><td class="td-in"> Name </td><td class="td-in"> :</td>
-              <td>
-                <span  id="rock_name_span"  ng-show="!show_rock_name_select" ng-bind="rocks.name" ng-click="show_rock_name_select=true" style="cursor: pointer;"/>
-                <input id="rock_name_input" ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="show_rock_name_select=false" class="long_input"  type="text">
-              </td>
-              <td class="td-in">
-                <a id="rock_name_popup" class="popup" style="display:none;">
-                  <span class="glyphicon glyphicon-exclamation-sign"/>
-                  <span class="popuptext" style="color:#8d1010;"> Change rock name as <br> {a rocks.name a} is already in database. </span>
-                </a>
-              </td>
-            </tr> -->
+        <div ng-show="expand_bloch['rock_settings']">
+          <table ng-show="rocks.show_info || rocks.saved" style="margin-left: 20px;">
+            <tr><td class="td-in"> u0   </td><td class="td-in"> = </td><td><span ng-bind="rock['u0']"     /></td>
+            <tr><td class="td-in"> u1   </td><td class="td-in"> = </td><td><span ng-bind="rock['u1']"     /></td>
+            <tr><td class="td-in"> npts </td><td class="td-in"> = </td><td><span ng-bind="rock['nframes']"/></td>
+          </table>
+          <table ng-hide="rocks.show_info || rocks.saved" style="margin-left: 20px;">
             <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
               <td> <input id="rock_u0_input" class="long_input" ng-change="rock_reset()" ng-model="rock['u0']"  ></td>
               <td class="td-in" ng-show="dat['pets']">
@@ -337,7 +339,7 @@ Parameters Panel
         </div><!-- done buttons -->
       </div><!-- rock mode -->
 
-    </div><!-- expand['u'] -->
+    </div><!-- expand_bloch['u'] -->
   </div><!-- theta_phi -->
 </div><!-- u -->
 
@@ -363,13 +365,13 @@ Parameters Panel
 <!-- thickness dependence-->
 <div class="row" >
   <div class="theta_phi">
-    <a id="expand_bloch_thick_panel" class="popup" ng-click="expand['thick']=!expand['thick']" ng-mouseenter="showIt('expand_thick')" ng-mouseleave="hideIt('expand_thick')" style="float:right;bottom:5px">
-      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['thick'],'glyphicon glyphicon-chevron-up':expand['thick']}">
-        <span class="popuptext" style="" ng-show="popup['expand_thick']" ng-bind="expand_str[expand['thick']]"></span>
+    <a id="expand_bloch_thick_panel" class="popup" ng-click="expand_bloch['thick']=!expand_bloch['thick']" ng-mouseenter="showIt('expand_thick')" ng-mouseleave="hideIt('expand_thick')" style="float:right;bottom:5px">
+      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand_bloch['thick'],'glyphicon glyphicon-chevron-up':expand_bloch['thick']}">
+        <span class="popuptext" style="" ng-show="popup['expand_thick']" ng-bind="expand_str[expand_bloch['thick']]"></span>
       </span>
     </a>
     <div style="font-size:14px;margin-bottom:5px;">Thickness parameters :</div>
-    <table style="margin-left: 10px;" ng-show="expand['thick']">
+    <table style="margin-left: 10px;" ng-show="expand_bloch['thick']">
       <tr>
         <td class="td-in popup" ng-mouseenter="popup['thick']=true" ng-mouseleave="popup['thick']=false">
           Thickness
@@ -419,9 +421,9 @@ Parameters Panel
 <!-- miller indices table -->
 <div class="row">
   <div class="theta_phi">
-    <a class="popup" ng-click="expand['refl']=!expand['refl']" ng-mouseenter="showIt('expand_refl')" ng-mouseleave="hideIt('expand_refl')" style="float:right;bottom:5px">
-      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['refl'],'glyphicon glyphicon-chevron-up':expand['refl']}" >
-        <span class="popuptext" style="" ng-show="popup['expand_refl']" ng-bind="expand_str[expand['refl']]"></span>
+    <a class="popup" ng-click="expand_bloch['refl']=!expand_bloch['refl']" ng-mouseenter="showIt('expand_refl')" ng-mouseleave="hideIt('expand_refl')" style="float:right;bottom:5px">
+      <span ng-class="{'glyphicon glyphicon-chevron-down':!expand_bloch['refl'],'glyphicon glyphicon-chevron-up':expand_bloch['refl']}" >
+        <span class="popuptext" style="" ng-show="popup['expand_refl']" ng-bind="expand_str[expand_bloch['refl']]"></span>
       </span>
     </a>
     <div style="font-size:14px;margin-bottom:5px;">Selected reflections
@@ -435,7 +437,7 @@ Parameters Panel
         </span>
       </span>
     </div>
-    <div class="row" ng-show="expand['refl']">
+    <div class="row" ng-show="expand_bloch['refl']">
       <div class="col-sm-9" id='table_miller' >
         <table  id="table_Miller_indices"  border="1" cellpadding="2">
           <tr>

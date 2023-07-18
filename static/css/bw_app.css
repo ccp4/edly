@@ -349,4 +349,10 @@ img {
   background-color: #eee;
 }
 
+.btn_rock{
+  margin-bottom:10px;
+  width:30px;
+  height:30px;
+}
+
 </style>

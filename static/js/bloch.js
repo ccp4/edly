@@ -199,7 +199,7 @@ angular.module('app')
 
   $scope.update_frame=function(){
     if ($scope.sync_frame){
-      if ($scope.info.modes['u']=='rock'){
+      if ($scope.info.modes['u']=='rock' && $scope.rock_names.includes($scope.rocks.name)){
         $scope.rock_sim=$scope.frame;
         $scope.get_rock_sim();
       }
@@ -531,8 +531,56 @@ angular.module('app')
 
   $scope.rock_reset=function(){
     $scope.bloch_solve_set('Solve rock','blue');
+    $scope.set_rock_saved()
     // $log.log($scope.rock);
     $scope.set_rock_frame(-1);
+    $scope.set_available_graphs('rock',$scope.rock_state=='done');
+  }
+
+  $scope.show_rock_info=function(rock_name){
+    // $log.log(rock_name)
+    $http.post('get_rock_info',JSON.stringify({'rock_name':rock_name}))
+    .then(function(response){
+      $scope.rocks.show_info = true;
+      $scope.rock         = response.data;
+      $scope.rocks.active = rock_name;
+      $scope.expand['rock_settings']=true;
+    })
+  }
+  $scope.restore_rock=function(){
+    $scope.rocks.show_info=false;
+    $scope.show_rock_info($scope.rocks.name)
+    $scope.rocks.active = $scope.rocks.name;
+    // $log.log('locked_rock : ' ,$scope.rocks.show_info || $scope.rocks.saved )
+  }
+
+  $scope.save_rock_name=function(){
+    $scope.show_rock_name_select = false;
+    $scope.rocks.active = $scope.rocks.name;
+  }
+
+  $scope.new_rock=function(new_name=false){
+    $scope.rocks.saved     = false;
+    $scope.rocks.show_info = false;
+    $scope.rock_state = 'init';
+    if (new_name){
+      $scope.show_rock_name_select = true;
+      $scope.rock = {'u0':'0,0,1','u1':'0,0.1,1.1','nframes':3};
+    }
+    $scope.rock_reset();
+  }
+
+  $scope.delete_rock=function(){
+    $http.post('delete_rock',JSON.stringify({'rock_name':$scope.rocks.select}))
+    .then(function(response){
+      $scope.rock_names  = response.data.rocks_name
+      if ($scope.rocks.name==$scope.rocks.select){
+        if (!$scope.rock_names.includes($scope.rocks.name) ){
+          $scope.rocks.select = $scope.rock_names[0];
+        }
+        $scope.new_rock();
+      }
+    });
   }
 
   $scope.load_rock=function(){
@@ -942,7 +990,7 @@ angular.module('app')
         $scope.exp_rock     = response.data.exp_rock;
         $scope.exp_refl     = response.data.exp_refl;
         $scope.rock_state   = response.data.rock_state;
-        $scope.expand       = response.data.expand;
+        $scope.expand_bloch = response.data.expand;
         $scope.refl         = response.data.refl;
         $scope.info.modes   = response.data.bloch_modes;
         $scope.info.max_res = response.data.max_res;
@@ -953,10 +1001,12 @@ angular.module('app')
         $scope.info.rock_axis = response.data.rock_axis;
         $scope.rock_names  = response.data.rock_names;
         $scope.rocks={
-            'name'    : response.data.rock_name,
-            'saved'   : $scope.rock_names.includes(response.data.rock_name),
-            'select'  : response.data.rock_name,
-            'rock_sim': $scope.rock_sim,
+            'name'     : response.data.rock_name,
+            'saved'    : $scope.rock_names.includes(response.data.rock_name),
+            'select'   : response.data.rock_name,
+            'active'   : response.data.rock_name,
+            'rock_sim' : $scope.rock_sim,
+            'show_info': false,
         }
         $scope.set_rock_saved();
         //

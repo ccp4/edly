@@ -423,6 +423,7 @@ def init():
 
     cmd='find static/database/ -maxdepth 1 -mindepth 1 -type  d | xargs -n1 basename'
     local_frames=check_output(cmd,shell=True).decode().strip().split('\n')
+    # print(local_frames)
     ####### package info to frontend
     info=['mol','dat','frame','crys','mode','zmax','nb_frames',
         'offset','cmap','cmaps','heatmaps','nb_colors',
