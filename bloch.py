@@ -317,6 +317,10 @@ def load_rock_data():
     session['rock'] = {'u0':rock.df.u[0].tolist(),'u1':rock.df.u[-1].tolist(),'nframes':rock.df.shape[0]}
     session['bloch_modes']['integrated']='df_int' in rock.__dict__
     nbs = '%d-%d' %(rock.df.nbeams.min(),rock.df.nbeams.max())
+    # if old rock curves do not contain rock_frames (should not happen though)
+    if session['dat']['pets'] and not 'rock_frames' in rock.__dict__:
+        rock.rock_frames=[1,rock.n_simus]
+        rock.save()
 
     return json.dumps({'rock':get_session_data('rock'),'nbeams':nbs,
         'modes':session['bloch_modes'],'exp_refl':session['dat']['pets']})

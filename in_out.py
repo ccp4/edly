@@ -12,7 +12,7 @@ chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol
 get_path   = lambda mol,key,frame_str:os.path.join(mol_path(mol),key,frame_str)
 #data processing paths
-pets_path  = lambda mol:os.path.join(mol_path(mol),'pets','%s.pts' %mol)
+pets_path  = lambda mol:os.path.join(mol_path(mol),'pets')#,'%s.pts' %mol)
 dials_path = lambda mol:os.path.join(mol_path(mol),'dials')
 xds_path   = lambda mol:os.path.join(mol_path(mol),'xds','XDS_ASCII.HKL')
 dat_path   = lambda mol:os.path.join(mol_path(mol),'dat')
@@ -116,7 +116,7 @@ def load_dat_type(mol):
     if dat_type=='dials':
         pets_data[mol]=dials.Dials(dials_path(mol))
     elif dat_type=='pets':
-        pets_data[mol]=pets.Pets(pets_path(mol),gen=False,dyn=0)
+        pets_data[mol]=pets.Pets(path=pets_path(mol),gen=False,dyn=0)
     elif dat_type=='xds':
         pets_data[mol]=xds.XDS(xds_path(mol))
     # print(list(pets_data.keys()))

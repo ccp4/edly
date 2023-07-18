@@ -1,5 +1,10 @@
 # Version log
 ## 0.0.7dev
+### Tue 18 Jul 14:09:27 BST 2023
+- issue#52 : fix pets import
+- added rock_frames to old simus
+- ED version : exp 7759eca
+
 ### Thu  6 Jul 09:08:32 BST 2023
 - issue#51
   - enter simu number messes up the frame number

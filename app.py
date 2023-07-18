@@ -26,7 +26,7 @@ def login_required(f):
             # flash("You need to login first")
             return redirect(url_for('login'))
 # records=ut.load_pkl('static/spg/records.pkl')
-
+days=7
 
 
 @app.route('/set_mode', methods=['POST'])
@@ -390,7 +390,7 @@ def get_frame_img(frame,key):
 def init():
     now = time.time()
     print('username : ' ,session['username'])
-    days = 7
+
     if session.get('id') and os.path.exists(session.get('path')):
         session['new'] = False
         if (now-session.get('last_time'))>days*24*3600:
