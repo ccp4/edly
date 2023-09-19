@@ -1,5 +1,9 @@
 # Version log
 ## 0.0.7dev
+### Tue 19 Sep 17:39:04 BST 2023
+- issue#55 :
+  - fixed create new project errors 
+
 ### Tue 18 Jul 17:56:01 BST 2023
 - rocking curve :
   - delete option

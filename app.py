@@ -218,8 +218,8 @@ def import_cif():
     return json.dumps(crys_dat)
 
 def _import_cif(filename):
+    '''copies the cif file in the tmp/upload directory to the <mol> directory '''
     new_filename = filename.strip('()[]').replace(' ','_')#;print(new_filename)
-
     cmd="rm -f {mol_path}/*.cif; mv '{filepath}' {mol_path}/{new_filename};rm -f {path}*.cif;rm -f {path}/upload/*.cif".format(
         filepath     = os.path.join(session['path'],'upload',filename),
         mol_path     = mol_path(session['mol']),
@@ -257,7 +257,16 @@ def new_structure():
             out=check_output(cmd,shell=True).decode().strip()#;print(out)
             # if a structure is provided
             if data['is_struct']:
-                msg=import_structure_file(data)
+                try:
+                    old_mol=session['mol']
+                    session['mol']=mol
+                    msg=import_structure_file(data)
+                except Exception as e:
+                    session['mol']=old_mol
+                    cmd='rm -rf %s' %new_mol_path
+                    out=check_output(cmd,shell=True).decode().strip();print(out)
+                    raise Exception(e)
+
         else:
             msg='folder %s already exists' %mol
     else:
@@ -291,9 +300,10 @@ def set_structure():
     return 'ok'
 
 def import_structure_file(data):
-    msg = 'cif file issue'
     val = data['struct_type']
-    cif_file=os.path.join(path,data[val])
+    # print(data)
+    msg=''
+    cif_file=os.path.join(session['path'],data[val])
 
     try:
         if val=='builtin' :
@@ -306,12 +316,11 @@ def import_structure_file(data):
             cmd = 'mv pdb%s.ent %s.pdb' %(data['pdb'],data['pdb'])
             check_output(cmd,shell=True).decode().strip()
         elif val=='cif':
-            _import_cif(data['cif_file'])
+            _import_cif(data['cif'])
 
     except Exception as e:
-        raise Exception(e)
-        msg=e.__str__()
-    print(msg)
+        # raise Exception(e)
+        msg=e.__str__();print(msg)
     return msg
 
 def get_structure_file():
@@ -354,10 +363,11 @@ def update_keyval():
     return json.dumps({'key':form['key'],'val':session[form['key']]})
 
 def get_frame_img(frame,key):
-    offset = ''
+    # offset = ''
     if key=='sim':
-        frame=min(max(0,frame-session['offset']),session['sim']['nb_frames']-1)
-        offset='(%d frames offset )' %session['offset']
+        frame=min(max(0,frame-(session['offset']-1)),session['sim']['nb_frames']-1)
+        # offset='(%d frames offset )' %session['offset']
+        # print('sim frame :',frame,session['sim']['nb_frames'])
     else:
         frame=min(max(0,frame),session['exp']['nb_frames']-1)
     # frame_str=str(frame+session[key]['min_frame']).zfill(session[key]['pad'])

@@ -110,12 +110,13 @@ angular.module('app').
   $scope.new_structure=function(){
     $http.post('new_structure',JSON.stringify($scope.new_project))
     .then(function(response){
-      // $log.log(response.data);
+      $log.log('new_structure response : ',response.data);
       if(response.data.msg){
         $scope.new_project.error = true;
         $scope.show_error(response.data.msg,1)
       }
       else{
+        $log.log('ok')
         $scope.structures=response.data.structures;
         close_dialog();
         $scope.set_structure($scope.new_project.name)
@@ -567,7 +568,7 @@ angular.module('app').
 
   $scope.new_project={'name':'',
     'is_struct':false,'struct_type':'cif',
-    'builtin':'Ac','pdb':'',
+    'builtin':'Ac','pdb':'','cif':'',
     'error':false,'error_color':{'color':'green'},'error_msg':''};
 
 

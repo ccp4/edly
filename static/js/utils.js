@@ -164,6 +164,7 @@ function upload_file(file_type){
          success: function(data){
            if (file_type=='cif'){
              scope.show_error(data,data!='ok')
+             scope.new_project['cif']=file.name;
            }
            else if (file_type =='dat'){
              scope.check_dat();

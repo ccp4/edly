@@ -995,11 +995,15 @@ def load_b0():
 def load_rock(rock_name=''):
     if not rock_name:
         rock_name=session['rock_name']
-    file='static/data/%s/rocks/%s/rock_.pkl' %(session['mol'],rock_name)
+    path = 'static/data/%s/rocks/%s/' %(session['mol'],rock_name)
+    file = path+'rock_.pkl'
     if not os.path.exists(file):
         file = rock_path(session['id'])
     if os.path.exists(file):
-        return ut.load_pkl(file=file)
+        rock=ut.load_pkl(file=file)
+        if not rock.path==path:
+            rock.change_path(path)
+        return rock
 
 
 def load_pets():
