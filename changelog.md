@@ -1,8 +1,12 @@
 # Version log
 ## 0.0.7dev
+### Mon 25 Sep 17:07:56 BST 2023
+- issue#61 :
+  - fix empty database error at init
+
 ### Tue 19 Sep 17:39:04 BST 2023
 - issue#55 :
-  - fixed create new project errors 
+  - fixed create new project errors
 
 ### Tue 18 Jul 17:56:01 BST 2023
 - rocking curve :

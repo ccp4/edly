@@ -430,10 +430,8 @@ def init():
     if session['mode']=='frames':
         if session['frame']>session['nb_frames']:session['frame']=1
 
+    local_frames=get_local_frames();
 
-    cmd='find static/database/ -maxdepth 1 -mindepth 1 -type  d | xargs -n1 basename'
-    local_frames=check_output(cmd,shell=True).decode().strip().split('\n')
-    # print(local_frames)
     ####### package info to frontend
     info=['mol','dat','frame','crys','mode','zmax','nb_frames',
         'offset','cmap','cmaps','heatmaps','nb_colors',
@@ -579,6 +577,26 @@ def init_mol():
     session['nb_frames']  = nb_frames
     session['last_time']  = now
     session['time']       = now
+
+def get_local_frames():
+    #print(colors.red,'LOCAL FRAMES INIT',colors.black)
+    cmd='if [ "$(ls -A {database})" ];then \
+    find {database}/ -mindepth 1 -maxdepth 1 -type  d | xargs -n1 basename;\
+    fi'.format(database=local_frames_path)  #;print(colors.purple,cmd,colors.black)
+    base_folders=check_output(cmd,shell=True).decode().strip().split('\n')   #;print(base_folders)
+    #### checks if there are any actual frames in the folders
+    local_frames=[]
+    for dir in base_folders:
+        cmd='find {database}/{d}/ -type  d '.format(database=local_frames_path,d=dir)
+        # print(colors.blue,dir,colors.black)
+        frames_folders=check_output(cmd,shell=True).decode().strip().split('\n')
+        for f in frames_folders:
+            fmt = get_frames_fmt(f)
+            if fmt :
+                local_frames.append(dir)        #;print('%s : %s' %(f,fmt))
+                break
+    # print(colors.blue,'LOCAL FRAMES : ',colors.black);print(local_frames)
+    return local_frames
 
 def init_frames(mol,frame_type):
     frame_path  = os.path.join(mol_path(mol),frame_type)

@@ -7,6 +7,7 @@ from EDutils import felix as fe        #;imp.reload(fe)
 from EDutils import pets               #;imp.reload(pets)
 from EDutils import dials_utils as dials#;imp.reload(dials)
 from EDutils import xds                 #;imp.reload(xds)
+from EDutils import readers
 
 chars = ascii_letters+digits
 mol_path=lambda mol:'static/data/%s' %mol
@@ -23,9 +24,27 @@ proc_dat_files  = {
     'dials': ['*.expt', '*.refl','reflections.txt'],
     }
 
-if not os.path.exists('static/database'):
-    database_path=check_output("mkdir database;cd static; ln -s ../database .",shell=True).decode().strip()
-database_path=check_output("readlink static/database",shell=True).decode().strip()
+
+def get_frames_fmt(path):
+    '''return the type of frames in the folder if any '''
+    fmts = readers.fmts
+    files = glob.glob(os.path.join(path,'*.*'))
+    if not len(files):return ''
+    #detect format
+    fmt,i = '',0
+    while fmt not in fmts and i<len(files):
+        fmt = files[i].split('.')[-1]
+        i+=1
+    if fmt not in fmts:fmt =""
+    return fmt
+
+def get_local_frames_folder():
+    local_frames_link='static/database'
+    if not os.path.exists(local_frames_link):
+        check_output("mkdir database;cd static; ln -s ../database .",shell=True).decode().strip()
+    local_frames_path=check_output("realpath $(readlink %s)" %local_frames_link,shell=True).decode().strip()
+    return local_frames_path
+local_frames_path = get_local_frames_folder()
 
 def check_proc_data(path):
     missing_files='?'
@@ -93,6 +112,11 @@ def get_compressed_fmt(link):
 
 pets_data={}
 def get_frames_folder(mol,frame_type,full=False):
+    '''get the actual name of the frames folder as defined in the database
+    - full :
+        True  : returns the whole path from the database root folder
+        False : returns the basename of the folder only
+    '''
     folder=""
     frame_path  = os.path.join(mol_path(mol),frame_type)
     if os.path.exists(frame_path):
@@ -100,7 +124,7 @@ def get_frames_folder(mol,frame_type,full=False):
             cmd = "readlink %s" %frame_path
             folder=check_output(cmd,shell=True).decode().strip()
             # ;print('folder : ' ,folder)
-            folder=folder.replace('%s' %database_path,'')#.split(';')[1]
+            folder=folder.replace('%s' %local_frames_path,'')#.split(';')[1]
         else:
             cmd = "basename `readlink %s`" %frame_path
             folder=check_output(cmd,shell=True).decode().strip()
