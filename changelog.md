@@ -3,6 +3,7 @@
 ### Mon 25 Sep 17:07:56 BST 2023
 - issue#61 :
   - fix empty database error at init
+- ccp4ED version : `exp 7759eca`
 
 ### Tue 19 Sep 17:39:04 BST 2023
 - issue#55 :

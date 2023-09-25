@@ -41,7 +41,9 @@ def get_frames_fmt(path):
 def get_local_frames_folder():
     local_frames_link='static/database'
     if not os.path.exists(local_frames_link):
-        check_output("mkdir database;cd static; ln -s ../database .",shell=True).decode().strip()
+        print(colors.red,'Creating database folder for storing experimental data frames.',colors.black)
+        cmd="mkdir database; ln -s $(realpath database) {dest}".format(dest=local_frames_link)
+        check_output(cmd,shell=True).decode().strip()
     local_frames_path=check_output("realpath $(readlink %s)" %local_frames_link,shell=True).decode().strip()
     return local_frames_path
 local_frames_path = get_local_frames_folder()
