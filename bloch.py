@@ -340,7 +340,8 @@ def load_rock_data():
     session['bloch_modes']['integrated']='df_int' in rock.__dict__
     nbs = '%d-%d' %(rock.df.nbeams.min(),rock.df.nbeams.max())
     # if old rock curves do not contain rock_frames (should not happen though)
-    if session['dat']['pets'] and not 'rock_frames' in rock.__dict__:
+    # if session['dat']['pets'] and not 'rock_frames' in rock.__dict__:
+    if 'rock_frames' not in rock.__dict__:
         rock.rock_frames=[1,rock.n_simus]
         rock.save()
 

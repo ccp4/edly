@@ -101,7 +101,7 @@ def test_import_cif(chrome_driver,sec):
 
 @pytest.mark.lvl2
 def test_import_frames(chrome_driver,sec):
-    frame='localhost_8020_test'
+    frame='frames_test'
     print(colors.green+"\nImport frames "+colors.yellow+frame+colors.black,end="")
     click(chrome_driver,'expand_import_menu',sec)
     click(chrome_driver,'import_menu_frames_btn',sec)

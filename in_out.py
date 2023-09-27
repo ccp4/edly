@@ -45,6 +45,11 @@ def get_local_frames_folder():
         cmd="mkdir database; ln -s $(realpath database) {dest}".format(dest=local_frames_link)
         check_output(cmd,shell=True).decode().strip()
     local_frames_path=check_output("realpath $(readlink %s)" %local_frames_link,shell=True).decode().strip()
+    if not os.path.exists(os.path.join(local_frames_path,'frames_test')):
+        cmd="cp static/spg/frames_test.zip {path}/; cd {path}; unzip frames_test.zip -d frames_test;rm frames_test.zip ".format(path=local_frames_path)
+        o=check_output(cmd,shell=True).decode()
+        print(colors.red,'Created frames_test folder in database.',colors.black)
+
     return local_frames_path
 local_frames_path = get_local_frames_folder()
 

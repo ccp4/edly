@@ -1,5 +1,8 @@
 # Version log
 ## 0.0.7dev
+### Wed 27 Sep 13:31:28 BST 2023
+- added test_frames to automatically test frame import and navigation 
+
 ### Mon 25 Sep 17:07:56 BST 2023
 - issue#61 :
   - fix empty database error at init
