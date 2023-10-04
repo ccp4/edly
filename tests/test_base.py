@@ -43,6 +43,7 @@ def sec(pytestconfig):
     sleep=int(pytestconfig.getoption('sleep'))
     if pytestconfig.getoption('headless'):
         sleep=0
+    print(sleep)
     return sleep
 
 
@@ -53,10 +54,11 @@ def sec(pytestconfig):
 ################################################################################
 def test_login(chrome_driver,sec):
     print(colors.green+"\nLogin : "+colors.black,end="")
-    chrome_driver.find_element("tag name", "input").send_keys('test_bot')
-    chrome_driver.find_element("tag name", "form").submit()
+    sleep(sec)
+    chrome_driver.find_element("tag name", "input").send_keys('test_bot')   ;sleep(sec)
+    chrome_driver.find_element("tag name", "form").submit()                 ;sleep(sec)
     WebDriverWait(chrome_driver, timeout=10).until(lambda d:d.find_element("id", "expand_import_menu"))
-    sleep(1)
+    sleep(sec)
     print(colors.green+",done"+colors.black)
 
 ################################################################################
@@ -67,7 +69,6 @@ def test_login(chrome_driver,sec):
 @pytest.mark.lvl1
 def test_new_structure(chrome_driver,sec):
     print(colors.green+"\nCreating structure %s" %struct_test+colors.black,end="")
-    sec=0
     click(chrome_driver,'expand_import_menu',sec)
     click(chrome_driver,'import_menu_open_btn',sec)
     click(chrome_driver,'new_struct_btn',sec)
