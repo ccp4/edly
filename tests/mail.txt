@@ -1,0 +1,5 @@
+# If using gmail an app password must be set by the sender
+# This is done in the browser directly from the gmail account
+sender_email    = <your_email>
+password        = <your_api_key>
+receiver_email  = tarik.drevon@stfc.ac.uk
