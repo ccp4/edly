@@ -1,7 +1,17 @@
 # Version log
 ## 0.0.7dev
+
+### Mon  9 Oct 20:45:54 BST 2023
+- added test option to run only specific files as `run_tests.sh -m 'frames'`
+- login and close are run no matter what
+- browser creation is a global fixture defined in *conftest.py*
+- removed *test_base.py*
+
+### Thu  5 Oct 17:26:24 BST2023
+- reports of tests sent by email
+
 ### Wed 27 Sep 13:31:28 BST 2023
-- added test_frames to automatically test frame import and navigation 
+- added test_frames to automatically test frame import and navigation
 
 ### Mon 25 Sep 17:07:56 BST 2023
 - issue#61 :

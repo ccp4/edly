@@ -1,4 +1,7 @@
 import pytest
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
 def pytest_addoption(parser):
 
     ##
@@ -53,3 +56,41 @@ def pytest_collection_modifyitems(config, items):
                 reason="test level marked as lvl{test_level}>{lvl}".format(test_level=i,lvl=lvl)
                 item.add_marker(pytest.mark.skipif(lvl<i, reason=reason))
                 break
+
+
+
+
+
+
+
+
+
+@pytest.fixture(scope="package")
+def chrome_driver(pytestconfig):
+    options = webdriver.ChromeOptions()
+    if pytestconfig.getoption('headless'):
+        # options.add_argument("--window-size=1920,1080")
+        # options.add_argument("--start-maximized")
+        options.add_argument('--headless')
+
+    if pytestconfig.getoption('address'):
+        address=pytestconfig.getoption('address')
+    else:
+        port = pytestconfig.getoption('port')
+        ip   = pytestconfig.getoption('ip')
+        address = 'http://%s:%s' %(ip,port)
+    chrome_driver = webdriver.Chrome(options=options)
+    # chrome_driver.set_network_conditions(offline=True,latency=5,throughput=500*1024)
+    # print(address)
+    chrome_driver.get(address)
+    chrome_driver.maximize_window()
+
+    return chrome_driver
+
+@pytest.fixture(scope="package")
+def sec(pytestconfig):
+    sleep=int(pytestconfig.getoption('sleep'))
+    if pytestconfig.getoption('headless'):
+        sleep=0
+    print(sleep)
+    return sleep

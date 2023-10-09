@@ -1,7 +1,7 @@
 #!/bin/bash
 function usage(){
   echo "Usage:
-  run_tests.sh [-h] [-r] [-R] [-e] [-l <lvl>] [-p <port>] [-i <ip>] [-a<address>] [-s <sec>] [-H]
+  run_tests.sh [-h] [-r] [-R] [-e] [-l <lvl>] [-m \"<selected_tests>\"] [-p <port>] [-i <ip>] [-a<address>] [-s <sec>] [-H]
 
   OPTIONS
   -------
@@ -9,6 +9,8 @@ function usage(){
       - H : headless mode (default False)
       - s : seconds to sleep between widget manipulations
       - l : marker lvl (default 2)
+      - m : run selected tests, see examples (if not specified runs all tests)
+            Note that login and close are added automatically
     ---- address related
       - p : port number (default 8020)
       - i : ip address (default localhost)
@@ -24,11 +26,14 @@ function usage(){
 
 Examples:
 --------
-run_tests.sh -a http://192.168.0.21:8000
+./run_tests.sh -a http://192.168.0.21:8000
   Runs tests for server at address http://192.168.0.21:8000
 
-run_tests.sh -l0 -R -e
+./run_tests.sh -l0 -R -e
   Runs only lvl0 tests, generate a report and send it by mail
+
+./run_tests.sh -l1 -m 'frames'
+  Runs only tests in test_frames.py with level not more than level 1
 "
   exit 1;
 }
@@ -48,8 +53,10 @@ do_coverage=0
 send_email=0
 port=8020
 port_report=8001
+markers="all"
+all_markers='login frames bloch rock close'
 report_dir='report'
-while getopts ":l:a:p:s:rdHReCh" arg; do
+while getopts ":l:a:p:s:m:rdHReCh" arg; do
   case $arg in
     h) usage;;
     l)
@@ -61,6 +68,9 @@ while getopts ":l:a:p:s:rdHReCh" arg; do
       ;;
     p)
       port=$OPTARG
+      ;;
+    m)
+      markers="login $OPTARG close" #;echo "$markers"
       ;;
     i)
       report_dir='report_custom'
@@ -164,8 +174,18 @@ fi
 args+="--port=$port"
 if [ $address ];then args+=" --address=$address ";fi
 args+=" --lvl=$lvl "
+#### tried to use pytest markers originally but this fails due to some weird behaviour
+# of the pytest expression interpreter clashing with double quote characters
+#echo "markers : $markers";
+# pycmd="print( ' or '.join('$markers'.strip().split(' ')))  "
+# markers_expr=$(python3 -c "$pycmd"  )
+# args=" $markers_expr\" $args"
+if [[ $markers == "all" ]];then markers=$all_markers;fi
+files=
 cd $dir
-cmd="$env_bin/pytest -s  $html $dir/test_base.py $args"
+# for f in $markers;do files+=" $dir/test_$f.py";done
+for f in $markers;do files+=" test_$f.py";done
+cmd="$env_bin/pytest   $html $args -v -s $files"
 if [ $do_report -eq 1 ];then
   echo "Runnning pytest" >> $report_log; tail -n1 $report_log
   echo $cmd              >> $report_log; tail -n1 $report_log

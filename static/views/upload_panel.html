@@ -3,7 +3,7 @@
 
   <!-- header -->
   <div>
-    <span style="padding-left: 5px;font-size:15px" > Import menu </span>
+    <span id="span_expand_import_menu" style="padding-left: 5px;font-size:15px" > Import menu </span>
     <a id="expand_import_menu" style="float:right;bottom:0px;margin-right:5px;" class="popup" ng-click="expand['importer']=!expand['importer']" ng-mouseenter="showIt('expand_importer')" ng-mouseleave="hideIt('expand_importer')" >
       <span ng-class="{'glyphicon glyphicon-chevron-down':!expand['struct'],'glyphicon glyphicon-chevron-up':expand['struct']}">
         <span class="popuptext" style="" ng-show="popup['expand_importer']" ng-bind="expand_str[expand['expand_importer']]"></span>

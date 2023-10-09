@@ -1,8 +1,25 @@
+import os,datetime
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from time import sleep
+
+d = datetime.datetime.today()
+str_date = d.strftime("%d-%m-%y_%H-%M-%S")
+struct_test='bot_test_%s' %str_date
+dat_folder=os.path.realpath(os.path.join(os.path.dirname(__file__),
+    '../static/spg/'))
+rock_name='test_5'
+frame='frames_test'
+cif_file = 'alpha_glycine.cif'
+cif_path = os.path.join(dat_folder,cif_file)
+dat_files={
+    'xds':'XDS_ASCII.HKL',
+    'dials':'dials.zip',
+    # 'pets':'pets.zip',
+}
+# fails=['fail_pets.zip','fail_dials.zip']
 
 def click(d,id,sec,exec=True):
     elt = WebDriverWait(d, timeout=3).until(lambda d:d.find_element("id", id))
@@ -30,6 +47,8 @@ def write(d,id,s,sec,clear=False):
 
 def check_text(d,id,s):
     WebDriverWait(d, timeout=3).until(lambda d:d.find_element("id", id).text==s)
+def print_text(d,id):
+    print(d.find_element("id", id).text)
 
 def check_plotly_elt_text(d,id,classname,s):
     # print(d.find_element('id',id).find_element("class name", classname).text)
