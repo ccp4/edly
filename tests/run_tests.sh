@@ -129,8 +129,8 @@ if [ $do_report -eq 1 ];then
   ##check the port is correct
   log_port=0
   i=0
-  # If the server takes more than 15 seconds to lauch,increase this
-  wait_for_server=15
+  # If the server takes more than 60 seconds to lauch,increase this
+  wait_for_server=60
   while [[ ! "$log_port" -eq "$port_report" && $i -lt $wait_for_server ]] ;do
     running_line=$( grep "Running on http" $server_log  | sed 's/[^0-9.:]//g')
     ip_address=$(echo $running_line | cut -d":" -f2)

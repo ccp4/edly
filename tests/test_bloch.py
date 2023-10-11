@@ -57,7 +57,7 @@ def test_bloch_mode(chrome_driver,sec):
     click(chrome_driver,'bloch_tab',sec)
     check_text(chrome_driver,'mode_title_panel','Bloch solver')
 
-@pytest.mark.lvl2
+@pytest.mark.lvl1
 def test_bloch_single(chrome_driver,sec):
     print(colors.blue+", bloch single "+colors.black,end="")
     click(chrome_driver,'u_single',sec)

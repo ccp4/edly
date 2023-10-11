@@ -4,6 +4,7 @@ from utils import glob_colors as colors
 from selenium.webdriver.common.keys import Keys
 from selenium_utils import*
 
+@pytest.mark.new
 def test_login(chrome_driver,sec):
     print(colors.green+"\nLogin : "+colors.black,end="")
     sleep(sec)
@@ -13,7 +14,7 @@ def test_login(chrome_driver,sec):
     check_text(chrome_driver,'span_expand_import_menu','Import menu')
     print(colors.green+",done"+colors.black)
 
-
+# @pytest.mark.new
 @pytest.mark.lvl1
 def test_new_structure(chrome_driver,sec):
     print(colors.green+"\nCreating structure %s" %struct_test+colors.black,end="")

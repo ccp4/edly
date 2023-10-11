@@ -1,6 +1,16 @@
 # Version log
 ## 0.0.7dev
 
+### Wed 11 Oct 19:06:36 BST 2023
+- issue#63 : cancel download
+  - added ids to relevant html DOM
+  - link is updated only when clicking back on the set_link button
+  - added `download.downloading` in *mainCtrl.js*
+  - download jobs have an ID
+- test :
+  - added download/cancel download and manipulate zenodo entries
+- update README
+
 ### Mon  9 Oct 20:45:54 BST 2023
 - added test option to run only specific files as `run_tests.sh -m 'frames'`
 - login and close are run no matter what

@@ -4,6 +4,7 @@ from utils import glob_colors as colors
 from selenium.webdriver.common.keys import Keys
 from selenium_utils import*
 
+# @pytest.mark.new
 @pytest.mark.lvl1
 def test_delete_struct(chrome_driver,sec):
     print(colors.green+"\nDeleting structure %s" %struct_test+colors.black,end="")
@@ -26,6 +27,7 @@ def test_delete_struct(chrome_driver,sec):
     click(chrome_driver,'expand_import_menu',sec)
     sleep(2)
 
+@pytest.mark.new
 def test_close(chrome_driver):
     print(colors.green+"\nclosing browser. Good bye"+colors.black)
     chrome_driver.close()

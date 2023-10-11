@@ -239,27 +239,40 @@ angular.module('app').
     $scope.download.info='done';
   }
 
+  var interval_dl;
   $scope.download_frames=function(){
     $http.post('check_dl_format',$scope.download.link)
     .then(function(response){
       $scope.download.info=response.data.msg;
-
-      // $log.log($scope.download.info,$scope.download.info=='ready to download' )
       if ($scope.download.info=='ready to download'){
-        var interval = $interval(function () {
-          $http.get('get_dl_state')
+        interval_dl = $interval(function () {
+          $http.post('get_dl_state',$scope.download.link)
           .then(function(response) {
             $scope.download.info=response.data;
+            if(response.data.includes('done')){
+              $scope.download.info='done';
+              $scope.download.downloading=false;
+              $interval.cancel(interval_dl);
+              if (response.data.split(':')[1]=='0'){
+                $log.log('download success')
+                $scope.check_dl_frames();
+              }
+            }
           })
-        },500);
+        },200);
+
+        $scope.download.downloading=true;
         $http.post('download_frames',$scope.download.link)
         .then(function(response){
-          $interval.cancel(interval);
-          $scope.download.info='done';
-          $scope.check_dl_frames();
+          $log.log('download_frames request complete')
         })
       }
     })
+  }
+
+  $scope.cancel_download=function(){
+    $log.log('cancelling download')
+    $http.post('cancel_download',$scope.download.link)
   }
 
   $scope.import_frames=function(folder){
@@ -490,6 +503,16 @@ angular.module('app').
     update_formula($scope.crys.chemical_formula);
   }
 
+
+  //////////////////////////////////////////////////////////////////////////////
+  // misc
+  //////////////////////////////////////////////////////////////////////////////
+  $scope.change_show_input_link = function(){
+  $scope.show_input_link=!$scope.show_input_link
+  if (!$scope.show_input_link){
+    $scope.check_dl_frames();
+    }
+  }
   //////////////////////////////////////////////////////////////////////////////
   // init stuffs
   //////////////////////////////////////////////////////////////////////////////
@@ -546,12 +569,12 @@ angular.module('app').
     $scope.update();
   })
   $scope.changed=true;
-  $scope.download={'zenodo':true,'link':'','info':'done','downloaded':false};
+  $scope.download={'zenodo':true,'link':'','info':'done','downloaded':false, 'downloading':false};
   $scope.zenodo={'record':'','records':''}
   $scope.local_frames={'name':'','filtered':[],'folders':[]}
   $scope.show_input_link=false;
   $scope.import_style = {open_struct:'',frames:'',dat:'',cif:''};
-  $scope.import_mode  ='open_struct';
+  $scope.import_mode  ='frames';
   $scope.import_style[$scope.import_mode]=sel_style;
   $scope.dat_type_files = {
       'xds'   : 'A single XDS_ASCII.HKL file ' ,
@@ -575,7 +598,7 @@ angular.module('app').
   $scope.frames = {offset:0,active_frame:0,reload:true,manual:true,jump_frames:10}
   $scope.expand_str={false:'expand',true:'minimize'};
   $scope.expand={
-      'importer':false,'struct':false,
+      'importer':true,'struct':false,
       //'rock_settings':true,'load_rock':true,
     };
 

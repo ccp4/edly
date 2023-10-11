@@ -2,7 +2,7 @@ import importlib as imp
 from subprocess import check_output,Popen,PIPE
 import json,os,sys,glob,time,datetime,crystals,re #,base64,hashlib
 import tifffile,mrcfile,cbf
-from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template
+from flask import Flask,Blueprint,request,url_for,redirect,jsonify,session,render_template,send_file
 from functools import wraps
 import numpy as np,pandas as pd
 from EDutils import utilities as ut                 #;imp.reload(ut)
@@ -27,7 +27,7 @@ def login_required(f):
             return redirect(url_for('login'))
 # records=ut.load_pkl('static/spg/records.pkl')
 days=7
-
+dl_jobs={}
 
 @app.route('/set_mode', methods=['POST'])
 def set_mode():
@@ -55,6 +55,11 @@ def upload_file():
 
 ################
 #### import frames
+@app.route('/frames_test.zip', methods=['GET'])
+def get_test_frames():
+    time.sleep(2)
+    return send_file('static/spg/frames_test.zip')
+
 @app.route('/update_zenodo', methods=['POST'])
 def update_zenodo():
     fetch = json.loads(request.data.decode())['fetch']
@@ -65,7 +70,7 @@ def update_zenodo():
         records = json.load(f)
     return json.dumps(records)
 
-@app.route('/get_dl_state', methods=['GET'])
+@app.route('/get_dl_state', methods=['POST'])
 def get_dl_state():
     log_file="%s/dl.log" %(session['path'])
     cmd=r"grep '%%'  %s" %log_file
@@ -78,7 +83,29 @@ def get_dl_state():
         cmd = 'tail -n1 %s' %os.path.realpath("%s/uncompress.log" %session['path'])
         file_extract=check_output(cmd,shell=True).decode().strip()
         msg='Extracting : \n%s\n' %file_extract
+
+    link = request.data.decode()
+    job_id=short_hash(link)
+    print(dl_jobs)
+    p = dl_jobs[job_id]
+    poll=p.poll()
+    if isinstance(poll,int):
+        msg = 'done:%d' %p.poll()
+    # print(msg)
     return msg
+
+@app.route('/cancel_download', methods=['POST'])
+def cancel_download():
+    link = request.data.decode()
+    job_id=short_hash(link)
+    p = dl_jobs[job_id]
+    # print(p.communicate())
+    p.kill()
+    print('cancelling job %s : %s. Status : ' %(job_id,p.args),p.poll())
+    cmd="if [ -d {filepath} ];then rm -rf {filepath};fi".format(
+        filepath = os.path.realpath(data_path(link)))
+    out=check_output(cmd,shell=True).decode().strip()
+    return 'cancelled'
 
 @app.route('/download_frames', methods=['POST'])
 def download_frames():
@@ -102,12 +129,19 @@ rm {filename}
         cmd_log         = os.path.realpath("%s/uncompress.log" %session['path']),
     )#;print(job)
 
-    job_file="%s/dl.sh" %(session['path'])      #;print(job_file)
+    job_id=short_hash(link)
+
+    job_file="%s/dl_%s.sh" %(session['path'],job_id)      #;print(job_file)
     with open(job_file,'w') as f :
         f.write(job)
 
     cmd = 'bash %s' %job_file
-    out=check_output(cmd,shell=True).decode().strip()#;print(out)
+    p=p_open(cmd)
+    dl_jobs[job_id]=p
+    # p.wait()
+    # out=str(p.poll())
+    # print('job done with status : %s'%out)
+    out='ok'
     return out
 
 @app.route('/check_dl_format', methods=['POST'])
@@ -123,7 +157,7 @@ def check_dl_format():
 @app.route('/check_dl_frames', methods=['POST'])
 def check_dl_frames():
     link     = request.data.decode()          #;print(colors.red,link,colors.black)
-    filepath = data_path(link)                #;print(filepath)
+    filepath = data_path(link)                #;print(filepath)    
     dl       = os.path.exists(filepath)       #;print(dl)
     folders  = []
     if dl:

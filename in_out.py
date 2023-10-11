@@ -1,6 +1,6 @@
 from string import ascii_letters,digits
-import os,glob,crystals,numpy as np
-from subprocess import check_output
+import os,glob,crystals,hashlib,numpy as np
+from subprocess import check_output,Popen,PIPE
 from crystals import Crystal as Crys
 from utils import glob_colors as colors
 from EDutils import felix as fe        #;imp.reload(fe)
@@ -24,6 +24,8 @@ proc_dat_files  = {
     'dials': ['*.expt', '*.refl','reflections.txt'],
     }
 
+p_open=lambda cmd:Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
+short_hash=lambda s:hashlib.shake_256(s.encode('utf-8')).hexdigest(5)
 
 def get_frames_fmt(path):
     '''return the type of frames in the folder if any '''

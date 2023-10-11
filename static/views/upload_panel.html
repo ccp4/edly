@@ -124,7 +124,7 @@
             </a></span>
           </div>
           <ul id="search_ul" style="overflow-y:scroll;max-height:200px;margin-left:20px;width:280px;border-top:none;border-bottom:none;">
-            <li class="li_search" ng-mousedown="select_record(x)" ng-repeat=" x in zenodo.frames_filtered"><span ng-bind="x"/></li>
+            <li id="li_zenodo_{a x a}" class="li_search" ng-mousedown="select_record(x)" ng-repeat=" x in zenodo.frames_filtered"><span ng-bind="x"/></li>
           </ul>
         </div>
         <!-- record file table -->
@@ -134,7 +134,7 @@
             <tbody>
               <tr ng-repeat="(name,x) in zenodo.record.files">
                 <td style="word-wrap:break-word;">
-                  <div style="cursor: pointer" ng-click="update_link(x)" ng-bind="name"> </div>
+                  <div id="td_record{a name a}" style="cursor: pointer" ng-click="update_link(x)" ng-bind="name"> </div>
                 </td>
                 <td style=""><span ng-bind="x.size"/></td>
               </tr>
@@ -158,15 +158,26 @@
 
       <!-- link input and download button -->
       <div>
-        <span id="download_link_btn" style="cursor:pointer;" ng-click="show_input_link=!show_input_link"> Link </span> :
+        <span id="download_link_btn" class="popup" style="cursor:pointer;" ng-click="change_show_input_link()" ng-mouseenter="showIt('edit_link')" ng-mouseleave="hideIt('edit_link')">
+          Link :
+          <span class="popuptext" ng-show="popup['edit_link']"> Enter a link manually (as it would be fetched with wget).<br> Click again to actually update the link</span>
+        </span>
         <div style="margin-left:5px;display: flex;">
-          <span id="span_dl_link" ng-hide="show_input_link" style="width: 230px;word-wrap:break-word;font-style:italic;" ng-bind="download.link"/>
-          <input ng-show="show_input_link" style="width: 230px;margin-right: 5px;" type="text" ng-model="download.link" ng-key-enter="check_dl_frames()" ng-change="check_dl_frames()">
-          <a ng-hide="download.downloaded" style="margin:0px;height:30px;" class="btn-sm btn-primary popup" ng-click="download_frames()" ng-mouseenter="showIt('download_frames')" ng-mouseleave="hideIt('download_frames')">
-            <span class="glyphicon glyphicon-cloud-download" />
-            <span class="popuptext" ng-show="popup['download_frames']"> Download frames from cloud to server </span>
-          </a>
-          <span ng-show="download.downloaded" style="color:green;margin-left:5px;">
+          <span id="span_dl_link" ng-hide="show_input_link" style="width: 230px;word-wrap:break-word;font-style:italic;" ng-bind="download.link" />
+          <input id="input_download_link" ng-show="show_input_link"  style="width: 230px;margin-right: 5px;" type="text" ng-model="download.link" ng-key-enter="check_dl_frames()">
+          <span ng-hide="download.downloaded || show_input_link" >
+            <!-- Download btn -->
+            <a id="btn_download" ng-hide="download.downloading" style="margin:0px;height:30px;" class="btn-sm btn-primary popup" ng-click="download_frames()" ng-mouseenter="showIt('download_frames')" ng-mouseleave="hideIt('download_frames')">
+              <span class="glyphicon glyphicon-cloud-download" />
+              <span class="popuptext" ng-show="popup['download_frames']"> Download frames from cloud to server </span>
+            </a>
+            <!-- cancel btn -->
+            <a id="btn_cancel_download" ng-show="download.downloading" style="margin:0px;height:30px;" class="btn-sm btn-primary popup" ng-click="cancel_download()" ng-mouseenter="showIt('cancel_download')" ng-mouseleave="hideIt('cancel_download')">
+              <span class="glyphicon glyphicon-remove" />
+              <span class="popuptext" ng-show="popup['cancel_download']"> cancel download </span>
+            </a>
+          </span>
+          <span ng-show="download.downloaded && !show_input_link" style="color:green;margin-left:5px;">
             <span class="glyphicon glyphicon-saved" />
           </span>
         </div>
@@ -184,7 +195,7 @@
          <thead><tr style="width:80%"><th> datasets </th><th style="width:20%">import</th></tr>
          <tbody>
            <tr ng-repeat="x in data_folders">
-             <td style="word-wrap:break-word;"><div ng-bind="x"> </div></td>
+             <td id="td_frames_folder_{a x a}" style="word-wrap:break-word;"><div ng-bind="x"> </div></td>
              <td style="">
                <a id="import_frames_btn_{a x a}" class="btn-sm btn-primary" style="cursor: pointer" ng-click="import_frames(x)" >
                  <span class="glyphicon glyphicon-import" />
