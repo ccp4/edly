@@ -72,11 +72,13 @@ def update_zenodo():
 
 @app.route('/get_dl_state', methods=['POST'])
 def get_dl_state():
+    link = request.data.decode()
+    job_id=short_hash(link)         #;print(dl_jobs)
+    # log_file="%s/dl_%s.log" %(session['path'],job_id)
     log_file="%s/dl.log" %(session['path'])
     cmd=r"grep '%%'  %s" %log_file
-    cmd+=r" | tail -n1 | sed -rE 's/([0-9]*%)/;\1;/g' | cut -d';' -f2"
-    # print(cmd)
-    dl_state=check_output(cmd,shell=True).decode().strip()
+    cmd+=r" | tail -n1 | sed -rE 's/([0-9]*%)/;\1;/g' | cut -d';' -f2"  #;print(cmd)
+    dl_state=check_output(cmd,shell=True).decode().strip()              #;print(dl_state)
     msg='Download state : \n%s\n' %dl_state
     # print(dl_state)
     if dl_state=="100%":
@@ -84,14 +86,11 @@ def get_dl_state():
         file_extract=check_output(cmd,shell=True).decode().strip()
         msg='Extracting : \n%s\n' %file_extract
 
-    link = request.data.decode()
-    job_id=short_hash(link)
-    print(dl_jobs)
     p = dl_jobs[job_id]
     poll=p.poll()
     if isinstance(poll,int):
         msg = 'done:%d' %p.poll()
-    # print(msg)
+    #print(msg)
     return msg
 
 @app.route('/cancel_download', methods=['POST'])
@@ -157,7 +156,7 @@ def check_dl_format():
 @app.route('/check_dl_frames', methods=['POST'])
 def check_dl_frames():
     link     = request.data.decode()          #;print(colors.red,link,colors.black)
-    filepath = data_path(link)                #;print(filepath)    
+    filepath = data_path(link)                #;print(filepath)
     dl       = os.path.exists(filepath)       #;print(dl)
     folders  = []
     if dl:
