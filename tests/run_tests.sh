@@ -1,14 +1,16 @@
 #!/bin/bash
 function usage(){
   echo "Usage:
-  run_tests.sh [-h] [-r] [-R] [-e] [-l <lvl>] [-m \"<selected_tests>\"] [-p <port>] [-i <ip>] [-a<address>] [-s <sec>] [-H]
+  run_tests.sh [-h] [-r] [-R] [-e] [-l <lvl>] [-A \"<args>\"] [-m \"<selected_tests>\"] [-p <port>] [-i <ip>] [-a<address>] [-s <sec>] [-H]
 
   OPTIONS
   -------
+  ----- pytest related
       - h : show this help
       - H : headless mode (default False)
       - s : seconds to sleep between widget manipulations
       - l : marker lvl (default 2)
+      - A : any other arguments to pass to pytest
       - m : run selected tests, see examples (if not specified runs all tests)
             Note that login and close are added automatically
     ---- address related
@@ -56,7 +58,7 @@ port_report=8001
 markers="all"
 all_markers='login frames bloch rock close'
 report_dir='report'
-while getopts ":l:a:p:s:m:rdHReCh" arg; do
+while getopts ":l:a:A:p:s:m:rdHReCh" arg; do
   case $arg in
     h) usage;;
     l)
@@ -71,6 +73,9 @@ while getopts ":l:a:p:s:m:rdHReCh" arg; do
       ;;
     m)
       markers="login $OPTARG close" #;echo "$markers"
+      ;;
+    A)
+      args=" "$OPTARG" "
       ;;
     i)
       report_dir='report_custom'
@@ -171,7 +176,7 @@ fi
 ########################################################################################
 #### start pytest
 ########################################################################################
-args+="--port=$port"
+args+=" --port=$port "
 if [ $address ];then args+=" --address=$address ";fi
 args+=" --lvl=$lvl "
 #### tried to use pytest markers originally but this fails due to some weird behaviour

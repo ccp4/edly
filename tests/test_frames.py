@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from subprocess import check_output
 from selenium_utils import*
 
+@pytest.mark.new
 @pytest.mark.lvl1
 def test_import_frames(chrome_driver,sec):
     if not chrome_driver.find_element("id", "import_menu_open_btn").is_displayed():
@@ -12,9 +13,9 @@ def test_import_frames(chrome_driver,sec):
 
     print(colors.green+"\nImport frames "+colors.yellow+frame+colors.black,end="")
     click(chrome_driver,'import_menu_frames_btn',sec)
-    click(chrome_driver,'import_frames_toggle_btn',sec)
 
     print(colors.green+",Select from local database"+colors.black,end="")
+    click(chrome_driver,'import_frames_toggle_btn',sec)
     write(chrome_driver,'search_local_frames',frame,sec,clear=True)
     click(chrome_driver,'li_frames_%s' %frame,sec,exec=False)
 
@@ -32,7 +33,6 @@ def test_import_frames(chrome_driver,sec):
 
     print(colors.green+",done"+colors.black)
     click(chrome_driver,'expand_import_menu',sec)
-
 
 
 @pytest.mark.lvl1
@@ -84,10 +84,17 @@ def test_frame_heatmap(chrome_driver,sec):
     select_by_text(chrome_driver,'heatmap_select','hot',sec)
 
 
+@pytest.mark.new
+@pytest.mark.lvl2
+def test_delete_frames(chrome_driver,sec):
+    print(colors.green+"\nDelete frames "+colors.black,end="")
+    click(chrome_driver,'import_menu_open_btn',sec)
+    click(chrome_driver,'remove_frames_btn',sec)
+    check_text(chrome_driver,'info_struct_frames','')
 
-################
+################################################################################
 #### zenodo bit
-################
+################################################################################
 # @pytest.mark.new
 @pytest.mark.lvl3
 def test_zenodo_entry(chrome_driver,sec):
