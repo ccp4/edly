@@ -289,6 +289,16 @@ angular.module('app').
     })
   }
 
+  $scope.remove_frames=function(){
+    $http.post('remove_frames',$scope.open_mol.name)
+    .then(function(response){
+      if (response.data.refresh){
+        $scope.get_structure_info($scope.open_mol.name);
+        $scope.dat=false;
+      }
+    })
+  }
+
   ////////////////////////////////////////
   // import processed data
   ////////////////////////////////////////
@@ -574,7 +584,7 @@ angular.module('app').
   $scope.local_frames={'name':'','filtered':[],'folders':[]}
   $scope.show_input_link=false;
   $scope.import_style = {open_struct:'',frames:'',dat:'',cif:''};
-  $scope.import_mode  ='frames';
+  $scope.import_mode  ='open_struct';
   $scope.import_style[$scope.import_mode]=sel_style;
   $scope.dat_type_files = {
       'xds'   : 'A single XDS_ASCII.HKL file ' ,

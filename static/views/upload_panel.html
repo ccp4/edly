@@ -41,7 +41,7 @@
     <!-- Open structure -->
     <!--/////////////////////////////////////  -->
     <div ng-show="import_mode=='open_struct'">
-
+      <!-- create button -->
       <div>
         <div style="font-size:16px" > Create new structure : </div>
         <div style="display:grid;justify-content: space-around;">
@@ -52,7 +52,7 @@
           </div>
         </div>
       </div>
-
+      <!--search bar  -->
       <div>
         <div style="font-size:16px" > Open existing folder :</div>
         <div style="margin-left:10px;margin-top:5px;">
@@ -64,7 +64,7 @@
           </span>
         </div>
       </div>
-
+      <!-- project name and refresh btn -->
       <div style="margin-top:10px;">
         <span>
           <span style="font-size:16px;font-weight:bold;margin-left:2px;"> Name : </span>
@@ -75,9 +75,18 @@
           <span class="popuptext" ng-show="popup['refresh_struct']">refresh info for this structure</span>
         </div>
       </div>
+      <!--project info  -->
       <div style="margin-left:10px;margin-top:5px;">
         <div> <span style="font-weight:bold;"> Cif            </span> : <div id="info_struct_cif"    ng-bind="open_mol.cif" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
-        <div> <span style="font-weight:bold;"> Frames         </span> : <div id="info_struct_frames" ng-bind="open_mol.exp" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
+        <div><div style="display: flex;">
+            <span style="font-weight:bold;"> Frames         </span> :
+            <div  ng-hide="open_mol.exp==''" id="remove_frames_btn"  style="cursor: pointer;background-color: #b71616;padding: 2px 3px 2px 3px;" class="btn-sm btn-primary popup" ng-click="remove_frames()" ng-mouseenter="showIt('remove_frames')" ng-mouseleave="hideIt('remove_frames')">
+              <span class="glyphicon glyphicon-remove" />
+              <span class="popuptext" ng-show="popup['remove_frames']">remove_frames from project</span>
+            </div>
+          </div>
+            <div id="info_struct_frames" ng-bind="open_mol.exp" style="margin:5px 10px 5px 10px;word-wrap:break-word;width:90%;"></div>
+        </div>
         <div> <span style="font-weight:bold;"> Processed data </span> : <div id="info_struct_dat"    ng-bind="open_mol.dat" style="margin:5px 10px 5px 10px;word-wrap:break-word;"></div>  </div>
       </div>
 
@@ -88,7 +97,7 @@
             <span style="margin-left:5px">Open structure</span>
             <span class="glyphicon glyphicon-import" style="margin-left:10px"/> <!-- float:right"/> -->
           </span>
-          <span  id="delete_struct_btn"  style="cursor: pointer;background-color: #b71616" class="btn-sm btn-primary popup" onclick="dialog_delete()" ng-mouseenter="showIt('delete_struct')" ng-mouseleave="hideIt('delete_struct')">
+          <span  id="delete_struct_btn"  style="cursor: pointer;background-color: #b71616;padding: 3px 5px 3px 5px;margin-left:8px;" class="btn-sm btn-primary popup" onclick="dialog_delete()" ng-mouseenter="showIt('delete_struct')" ng-mouseleave="hideIt('delete_struct')">
             <span class="glyphicon glyphicon-remove" />
             <span class="popuptext" ng-show="popup['delete_struct']">delete this structure</span>
           </span>

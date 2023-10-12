@@ -187,6 +187,19 @@ def load_frames():
         'folder':session['exp']['folder'],
         })
 
+@app.route('/remove_frames', methods=['POST'])
+def remove_frames():
+    mol = request.data.decode()  #;print(mol)
+    cmd='if [ -L {exp_path} ];then rm {exp_path};fi'.format(
+        exp_path = os.path.join(mol_path(session['mol']),'exp'));# print(cmd)
+    out=check_output(cmd,shell=True).decode().strip()    #;print(out)
+    refresh=mol==session['mol']
+    if refresh:
+        session['exp'] = init_frames(session['mol'],'exp')
+        session['dat']['exp']=False
+    return json.dumps({'refresh':refresh})
+
+
 ################
 #### import dats
 @app.route('/check_dat', methods=['POST'])

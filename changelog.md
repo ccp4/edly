@@ -1,5 +1,8 @@
 # Version log
 ## 0.0.7dev
+### Thu 12 Oct 13:11:11 BST 2023
+- issue#62 : delete frames
+  - simple new feature
 
 ### Wed 11 Oct 19:06:36 BST 2023
 - issue#63 : cancel download
