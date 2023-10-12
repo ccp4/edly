@@ -1,5 +1,8 @@
 # Version log
 ## 0.0.7dev
+### Thu 12 Oct 18:30:11 CEST 2023
+- tests:
+  - capturing browser console to the report folder *console.log* 
 ### Thu 12 Oct 13:11:11 BST 2023
 - issue#62 : delete frames
   - simple new feature

@@ -28,6 +28,16 @@ def test_delete_struct(chrome_driver,sec):
     sleep(2)
 
 @pytest.mark.new
-def test_close(chrome_driver):
+def test_close(chrome_driver,report):
     print(colors.green+"\nclosing browser. Good bye"+colors.black)
+    log_entries = chrome_driver.get_log("performance")
+    entries = chrome_driver.get_log('browser')
+
+    msg='\n'.join([entry['message'] for entry in entries
+        if entry['source']=='console-api'])
+    # print(msg)
+    if report:
+        with open(report,'w') as f :
+            f.write(msg)
+
     chrome_driver.close()

@@ -84,7 +84,7 @@ while getopts ":l:a:A:p:s:m:rdHReCh" arg; do
       ;;
     s)
       sleep=$OPTARG
-      args+="--sleep=$sleep"
+      args+=" --sleep=$sleep "
       ;;
     r)
       report_dir='report_rel'
@@ -123,7 +123,9 @@ if [ $do_report -eq 1 ];then
 
   report_log="$report_dir/run_tests.log"
   server_log="$report_dir/server.log"
-
+  console_log="$report_dir/console.log"
+  args+=" --report=$console_log "
+  
   cd $dir/..
   echo 'Launching server for reporting' >> "tests/$report_log"; tail -n1 "tests/$report_log"
   $env_bin/python3 serve.py -p $port &> "tests/$server_log" &
@@ -209,6 +211,7 @@ fi
 if [ $do_report -eq 1 ];then
   echo "Shutting down server used for pytest" >> $report_log; tail -n1 $report_log
   kill $server_pid
+  cat $pytest_log
   if [ $send_email -eq 1 ];then
     echo "Sending email to $email_address" >> $report_log; tail -n1 $report_log
     cmd="$env_bin/python3 email_report.py -f=$report_dir"

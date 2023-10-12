@@ -39,7 +39,7 @@ with open(os.path.join(folder,'run_tests.log'),'r') as f:
 msg.attach(MIMEText(body, "plain"))
 
 #### attachments
-for filename in ['server.log','pytest.log','report.html']:
+for filename in ['server.log','pytest.log','report.html','console.log']:
     with open(os.path.join(folder,filename), "rb") as attachment:
         part = MIMEBase("application", "octet-stream")
         part.set_payload(attachment.read())

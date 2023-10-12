@@ -9,6 +9,7 @@ def pytest_addoption(parser):
     parser.addoption('--ip'       ,action="store" ,default="localhost")
     parser.addoption('--address'  ,action="store" ,default='')
     parser.addoption('--sleep'    ,action="store" ,default=0.3)
+    parser.addoption('--report'   ,action='store' ,default="")#"console.log")
     parser.addoption('--headless' ,action='store_true',default=False)
 
     parser.addoption("--slow", action="store_true", default=False, help="run slow tests")
@@ -51,7 +52,7 @@ def pytest_collection_modifyitems(config, items):
 
     lvl = int(config.getoption("--lvl"))
     for item in items:
-        for i in range(1,3):
+        for i in range(1,5):
             if "lvl%d" %i in item.keywords:
                 reason="test level marked as lvl{test_level}>{lvl}".format(test_level=i,lvl=lvl)
                 item.add_marker(pytest.mark.skipif(lvl<i, reason=reason))
@@ -82,6 +83,8 @@ def chrome_driver(pytestconfig):
         options.add_argument('--headless')
     address=get_address(pytestconfig)
 
+    options.set_capability("goog:loggingPrefs", {"performance": "ALL", "browser": "ALL"})
+
     chrome_driver = webdriver.Chrome(options=options)
     # chrome_driver.set_network_conditions(offline=True,latency=5,throughput=500*1024)
     # print(address)
@@ -106,3 +109,7 @@ def sec(pytestconfig):
 @pytest.fixture(scope="package")
 def address(pytestconfig):
     return get_address(pytestconfig)
+
+@pytest.fixture(scope="package")
+def report(pytestconfig):
+    return pytestconfig.getoption('--report')
