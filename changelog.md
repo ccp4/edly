@@ -1,8 +1,18 @@
 # Version log
-## 0.0.7dev
+## 0.0.8dev
+
+## 0.0.7
+### Fri 13 Oct 13:01:43 CEST 2023
+- tests :
+  - test *solve_rock.py*
+  - fix pb `test_download` and `test_zenodo` when run with other tests
+  - added possibility to check the style of an element
+  - changed `elt.clear()` to execute_script as it would delete `input_rock_name`
+  - all tests passing with `--sleep=1`
+  - put short timers at some points but there are still failures when rocking on full speed mode
 ### Thu 12 Oct 18:30:11 CEST 2023
 - tests:
-  - capturing browser console to the report folder *console.log* 
+  - capturing browser console to the report folder *console.log*
 ### Thu 12 Oct 13:11:11 BST 2023
 - issue#62 : delete frames
   - simple new feature

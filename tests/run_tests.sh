@@ -9,7 +9,7 @@ function usage(){
       - h : show this help
       - H : headless mode (default False)
       - s : seconds to sleep between widget manipulations
-      - l : marker lvl (default 2)
+      - l : marker lvl (default 3)
       - A : any other arguments to pass to pytest
       - m : run selected tests, see examples (if not specified runs all tests)
             Note that login and close are added automatically
@@ -48,7 +48,7 @@ env_bin=$(realpath $dir/../.env/bin)
 date=$(date "+%y_%m_%d-%H_%M")
 
 args=
-lvl=2
+lvl=3
 address=
 do_report=0
 do_coverage=0
@@ -75,7 +75,7 @@ while getopts ":l:a:A:p:s:m:rdHReCh" arg; do
       markers="login $OPTARG close" #;echo "$markers"
       ;;
     A)
-      args=" "$OPTARG" "
+      args+=" "$OPTARG" "
       ;;
     i)
       report_dir='report_custom'
@@ -125,12 +125,12 @@ if [ $do_report -eq 1 ];then
   server_log="$report_dir/server.log"
   console_log="$report_dir/console.log"
   args+=" --report=$console_log "
-  
+
   cd $dir/..
   echo 'Launching server for reporting' >> "tests/$report_log"; tail -n1 "tests/$report_log"
   $env_bin/python3 serve.py -p $port &> "tests/$server_log" &
   server_pid=$!
-  html="--html=$dir/$report_dir/report.html --self-contained-html"
+  html="--html=$dir/$report_dir/report.html --self-contained-html --capture sys -rP -rF"
   cd $dir
 
   ##check the port is correct

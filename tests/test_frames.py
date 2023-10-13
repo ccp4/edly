@@ -2,20 +2,17 @@ import pytest
 from time import sleep
 from utils import glob_colors as colors
 from selenium.webdriver.common.keys import Keys
-from subprocess import check_output
 from selenium_utils import*
 
-@pytest.mark.new
+
 @pytest.mark.lvl1
 def test_import_frames(chrome_driver,sec):
-    if not chrome_driver.find_element("id", "import_menu_open_btn").is_displayed():
-        click(chrome_driver,'expand_import_menu',sec)
-
     print(colors.green+"\nImport frames "+colors.yellow+frame+colors.black,end="")
-    click(chrome_driver,'import_menu_frames_btn',sec)
+    select_frames(chrome_driver,sec)
+    if not chrome_driver.find_element("id", "search_local_frames").is_displayed():
+        click(chrome_driver,'import_frames_toggle_btn',sec)
 
     print(colors.green+",Select from local database"+colors.black,end="")
-    click(chrome_driver,'import_frames_toggle_btn',sec)
     write(chrome_driver,'search_local_frames',frame,sec,clear=True)
     click(chrome_driver,'li_frames_%s' %frame,sec,exec=False)
 
@@ -84,7 +81,6 @@ def test_frame_heatmap(chrome_driver,sec):
     select_by_text(chrome_driver,'heatmap_select','hot',sec)
 
 
-@pytest.mark.new
 @pytest.mark.lvl2
 def test_delete_frames(chrome_driver,sec):
     print(colors.green+"\nDelete frames "+colors.black,end="")
@@ -97,43 +93,17 @@ def test_delete_frames(chrome_driver,sec):
 ################################################################################
 # @pytest.mark.new
 @pytest.mark.lvl3
-def test_zenodo_entry(chrome_driver,sec):
-    search='lysozyme'
-    record='Electron diffraction datasets of hen egg-white lysozyme'
-    name="Lys_ED_Dataset_1.tar.gz"
-    data_folder="1250447_Lys_ED_Dataset_1/Lys_ED_Dataset_1"
-    if not chrome_driver.find_element("id", "import_menu_open_btn").is_displayed():
-        click(chrome_driver,'expand_import_menu',sec)
-
-    print(colors.green+",Select from zenodo"+colors.black,end="")
-    if not chrome_driver.find_element("id", "search_frames").is_displayed():
-        click(chrome_driver,'import_frames_toggle_btn',sec)
-    print(colors.green+",pick record : %s" %record+colors.black,end="")
-    write(chrome_driver,'search_frames',search,sec,clear=True)
-    click(chrome_driver,'li_zenodo_%s' %record,sec,exec=False)
-
-    print(colors.green+",pick first dataset"+colors.black,end="")
-    click(chrome_driver,'td_record_%s' %name,sec,exec=False)
-    check_text(chrome_driver,'td_frames_folder_%s' %data_folder,data_folder)
-    print(colors.green+",done"+colors.black)
-
-def remove_folder(data_folder):
-    #### delete folder and reload the page
-    folder_path='../static/database/%s' %data_folder
-    if os.path.exists(folder_path):
-        cmd="rm -rf %s" %folder_path
-        check_output(cmd,shell=True)
-
-# @pytest.mark.new
-@pytest.mark.lvl3
-def test_zenodo_download(chrome_driver,sec,address):
+def test_download_frames(chrome_driver,sec,address,port):
     #http://localhost:8020/frames_test.zip
     link="%s/frames_test.zip" %address
-    data_folder="localhost_8020_frames_test"
-    remove_folder(data_folder)
+    data_folder="localhost_%s_frames_test" %port
+    if remove_data_folder(data_folder):
+        chrome_driver.get(address)
 
     print(colors.green+"\nDownload_test "+colors.yellow+data_folder+colors.black,end="")
-    chrome_driver.get(address)
+    select_frames(chrome_driver,sec)
+    if not chrome_driver.find_element("id", "search_local_frames").is_displayed():
+        click(chrome_driver,'import_frames_toggle_btn',sec)
 
     print(colors.green+", Setting link"+colors.black,end="")
     if not chrome_driver.find_element("id", "input_download_link").is_displayed():
@@ -143,14 +113,37 @@ def test_zenodo_download(chrome_driver,sec,address):
 
     print(colors.green+", Downloading"+colors.black,end="")
     click(chrome_driver,'btn_download',sec,exec=False)
-    # sleep(0.1)
+    sleep(0.5)
 
     print(colors.green+", Cancelling download"+colors.black,end="")
     click(chrome_driver,'btn_cancel_download',sec,exec=False)
+    sleep(0.5)
 
     print(colors.green+", Re Downloading"+colors.black,end="")
     click(chrome_driver,'btn_download',sec,exec=False)
     check_text(chrome_driver,'td_frames_folder_%s' %data_folder,data_folder)
     print(colors.green+",download complete"+colors.black,end="")
+    remove_data_folder(data_folder)
 
-    # remove_folder(data_folder)
+# @pytest.mark.new
+@pytest.mark.lvl3
+def test_zenodo_entry(chrome_driver,sec):
+    i=1
+    search='lysozyme'
+    record='Electron diffraction datasets of hen egg-white lysozyme'
+    name="Lys_ED_Dataset_%d.tar.gz" %i
+    data_folder="1250447_Lys_ED_Dataset_%d/Lys_ED_Dataset_%d" %(i,i)
+
+    print(colors.green+"\nPick zenodo test "+colors.black,end="")
+    if not chrome_driver.find_element("id", "search_frames").is_displayed():
+        click(chrome_driver,'import_frames_toggle_btn',sec)
+
+    print(colors.green+",pick record : %s... " %record[:10]+colors.black,end="")
+    write(chrome_driver,'search_frames',search,sec,clear=True)
+    click(chrome_driver,'li_zenodo_%s' %record,sec,exec=False)
+
+    print(colors.green+",pick first dataset"+colors.black,end="")
+    click(chrome_driver,'td_record%s' %name,sec,exec=False)
+    if not chrome_driver.find_element("id", "btn_download").is_displayed():
+        check_text(chrome_driver,'td_frames_folder_%s' %data_folder,data_folder)
+    print(colors.green+",done"+colors.black)

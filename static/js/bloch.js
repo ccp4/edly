@@ -612,6 +612,7 @@ angular.module('app')
   }
 
   $scope.save_rock=function(){
+    $log.log('saving rock')
     if (!$scope.rock_names.includes($scope.rocks.name)){
       $http.post('save_rock',JSON.stringify({'rock_name':$scope.rocks.name}))
       .then(function(response){

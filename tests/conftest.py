@@ -102,9 +102,9 @@ def sec(pytestconfig):
     return sleep
 
 
-# @pytest.fixture(scope="package")
-# def port(pytestconfig):
-#     return pytestconfig.getoption('port')
+@pytest.fixture(scope="package")
+def port(pytestconfig):
+    return pytestconfig.getoption('port')
 
 @pytest.fixture(scope="package")
 def address(pytestconfig):
