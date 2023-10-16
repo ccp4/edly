@@ -27,6 +27,19 @@ proc_dat_files  = {
 p_open=lambda cmd:Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
 short_hash=lambda s:hashlib.shake_256(s.encode('utf-8')).hexdigest(5)
 
+def init_data_folder():
+    #create the tmp folder if accidentally deleted
+    sessions_dir=mol_path('tmp')
+    if not os.path.exists(sessions_dir):
+        print(colors.red,'%s not present. Creating dir.' %sessions_dir,colors.black)
+        out=check_output('mkdir %s' %sessions_dir,shell=True).decode()
+    dummy_dat=mol_path('empty_test')
+    if not os.path.exists(dummy_dat):
+        print(colors.red,'Creating dir %s for test purposes.' %dummy_dat,colors.black)
+        out=check_output('mkdir %s' %dummy_dat,shell=True).decode()
+
+
+
 def get_frames_fmt(path):
     '''return the type of frames in the folder if any '''
     fmts = readers.fmts
@@ -53,7 +66,7 @@ def get_local_frames_folder():
         print(colors.red,'Created frames_test folder in database.',colors.black)
 
     return local_frames_path
-local_frames_path = get_local_frames_folder()
+
 
 def check_proc_data(path):
     missing_files='?'
@@ -235,3 +248,9 @@ def normalize(s):
     s*=30
     # s = (s-s.min())/s.max()*30
     return s
+
+
+
+
+init_data_folder()
+local_frames_path = get_local_frames_folder()

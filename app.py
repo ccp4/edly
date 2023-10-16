@@ -507,7 +507,7 @@ def init_session():
 
     session['path'] = session_path
     session['id']   = id
-    session['mol']  = 'test'
+    session['mol']  = 'empty_test'
     session['mode'] = 'bloch'
     session['viewer_molecule'] = False;
 
