@@ -156,9 +156,10 @@ angular.module('app').
   }
 
   $scope.get_structure_info=function(mol){
-    $http.post('get_structure_info',JSON.stringify({'mol':mol}))
+    var data=JSON.stringify({'mol':mol})
+    $http.post('get_structure_info',data)
     .then(function(response){
-      // $log.log(response.data)
+      $log.log(response.data)
       $scope.open_mol=response.data;
     })
   }
