@@ -95,7 +95,7 @@ def chrome_driver(pytestconfig):
 
 @pytest.fixture(scope="package")
 def sec(pytestconfig):
-    sleep=int(pytestconfig.getoption('sleep'))
+    sleep=float(pytestconfig.getoption('sleep'))
     if pytestconfig.getoption('headless'):
         sleep=0
     print(sleep)

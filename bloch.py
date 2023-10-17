@@ -882,8 +882,8 @@ def init_bloch_panel():
     rock_names = [os.path.basename(s) for s in glob.glob(os.path.join(sim_path(session['mol']),'*'))]
 
     # print('cell_diag %1f Angstrom' %cell_diag)
-    if session['new'] :
-        print(colors.green+'new session'+colors.black)
+    if not session.get('bloch_modes') :
+        print(colors.green+'init bloch:new session'+colors.black)
         rock_args = {'u0':[0,0,1],'u1':[0.01,0,1],'nframes':3,'show':0}
         bloch_args={
             'keV':200,'u':[0,0,1],

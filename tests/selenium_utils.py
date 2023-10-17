@@ -155,8 +155,8 @@ def import_cif(chrome_driver,sec):
     click(chrome_driver,'info_struct_refresh_btn',sec)
     check_text(chrome_driver,'info_struct_cif',cif_file)
 
-    print(colors.green+"done"+colors.black)
     click(chrome_driver,'expand_import_menu',sec)
+    print(colors.green+", done. "+colors.black,end="")
 
 def check_cif(chrome_driver,sec):
     if not chrome_driver.find_element("id", "cif_file_div").is_displayed():

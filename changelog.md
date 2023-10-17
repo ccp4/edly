@@ -1,5 +1,8 @@
 # Version log
 ## 0.0.8dev
+### Tue 17 Oct 10:57:29 BST 2023
+- initialization bug fixes : changes to `init_bloch_panel`
+- tests : added *test_switch_structure*
 
 ## 0.0.7
 ### Fri 13 Oct 13:01:43 CEST 2023

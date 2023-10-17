@@ -958,28 +958,8 @@ angular.module('app')
   ////////////////////////////////////////////////////////////////////////////////////////////////
   // init stuffs
   ////////////////////////////////////////////////////////////////////////////////////////////////
-  // $scope.init=function(){
-  //   // wait for the main ctrl init to be over
-  //   $scope.init_done=false;
-  //   let initInterval = setInterval(function(){
-  //     $http.get('init_done')
-  //     .then(function(response) {
-  //       $scope.init_done=response.data;
-  //       if ($scope.init_done){
-  //         clearInterval(initInterval);
-  //         $log.log('main init complete')
-  //         $scope.init_bloch_panel();
-  //         }
-  //         else{
-  //           $log.log('waiting for main init to complete')
-  //         }
-  //       })
-  //     },200);
-  //   }
-
-  // $scope.init_bloch_panel=function(){
   $rootScope.$on('init_bloch_panel',
-    function(event,frame,init){
+    function(event,frame){
       $scope.frame = frame;
       $log.log('Starting init bloch panel');
       $scope.init_bloch_done=false;

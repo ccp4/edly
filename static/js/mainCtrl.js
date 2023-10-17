@@ -60,6 +60,8 @@ angular.module('app').
     // $log.log($scope.mode)
     $http.post('set_mode',val) //JSON.stringify({'val':val}))
     .then(function(response){
+      $scope.init_bloch_panel();
+      //// when frames are updated an update may be necessary
       if ($scope.changed==true){
         // $log.log($scope.mode,response.data)
         $scope.update();
@@ -157,6 +159,7 @@ angular.module('app').
 
   $scope.get_structure_info=function(mol){
     var data=JSON.stringify({'mol':mol})
+    $log.log('get_structure_info data : ',data)
     $http.post('get_structure_info',data)
     .then(function(response){
       $log.log(response.data)
@@ -567,10 +570,18 @@ angular.module('app').
         $scope.mode  = response.data.mode           //;$log.log('mode  : ',$scope.mode)
         $scope.modes = response.data.bloch_modes    //;$log.log('modes : ',$scope.modes)
         $scope.mode_style[$scope.mode]=sel_style;
-        $rootScope.$emit('init_bloch_panel',$scope.frame,0);
+        $scope.init_bloch_panel();
         if ($scope.structure==''){$scope.expand['importer']=true;}
     });
   }
+
+  $scope.init_bloch_panel = function(){
+    if ($scope.cif_file && $scope.mode=='bloch' && !$scope.init_bloch_done){
+      $rootScope.$emit('init_bloch_panel',$scope.frame);
+      $scope.init_bloch_done=true;
+    }
+  }
+
   $rootScope.$on('update',function(event,data={}){
     // $log.log(data)
     if ('frame' in data){
@@ -580,6 +591,7 @@ angular.module('app').
     $scope.update();
   })
   $scope.changed=true;
+  $scope.init_bloch_done=false;
   $scope.download={'zenodo':true,'link':'','info':'done','downloaded':false, 'downloading':false};
   $scope.zenodo={'record':'','records':''}
   $scope.local_frames={'name':'','filtered':[],'folders':[]}
