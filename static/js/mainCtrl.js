@@ -118,9 +118,10 @@ angular.module('app').
         $scope.show_error(response.data.msg,1)
       }
       else{
-        $log.log('ok')
+        $log.log('new_structure created')
         $scope.structures=response.data.structures;
         close_dialog();
+        $log.log($scope.new_project)
         $scope.set_structure($scope.new_project.name)
       }
     })
@@ -158,11 +159,12 @@ angular.module('app').
   }
 
   $scope.get_structure_info=function(mol){
-    var data=JSON.stringify({'mol':mol})
-    $log.log('get_structure_info data : ',data)
+    // $log.log('get_structure_info mol : ',mol)
+    var data=JSON.stringify({mol:mol})
+    // $log.log('get_structure_info data : ',data)
     $http.post('get_structure_info',data)
     .then(function(response){
-      $log.log(response.data)
+      // $log.log(response.data)
       $scope.open_mol=response.data;
     })
   }
@@ -298,7 +300,13 @@ angular.module('app').
     .then(function(response){
       if (response.data.refresh){
         $scope.get_structure_info($scope.open_mol.name);
-        $scope.dat=false;
+        $scope.dat.exp=false;
+        if ($scope.cif_file==true){
+          $scope.set_mode('bloch');
+        }
+        else{
+          $scope.set_mode('');
+        }
       }
     })
   }

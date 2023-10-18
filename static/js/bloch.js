@@ -555,15 +555,46 @@ angular.module('app')
   }
 
   $scope.save_rock_name=function(){
+    if (!$scope.rocks.name){
+      $scope.rocks.name='untitled';
+    }
     $scope.show_rock_name_select = false;
     $scope.rocks.active = $scope.rocks.name;
   }
 
+
+
+
   $scope.new_rock=function(new_name=false){
+    //// save currently simulated rocking curve
+    if ($scope.rock_state=='done' && !$scope.rocks.saved){
+      let dialog_promise = new Promise(function(resolve, reject){
+        let answer=dialog_save_rock();
+        resolve(answer);
+      });
+      $log.log('save prompt?')
+      dialog_promise.then(function(answer){
+        $log.log('dialog completed with yes answer : ',answer)
+        if (answer){
+          $scope.save_rock();
+        }
+        else{
+          $scope.set_new_rock(new_name);
+        }
+      });
+    }
+    else{
+      $scope.set_new_rock(new_name);
+    }
+  }
+
+  $scope.set_new_rock=function(new_name=false){
+    $scope.expand_bloch['load_rock']=false;
     $scope.rocks.saved     = false;
     $scope.rocks.show_info = false;
-    $scope.rock_state = 'init';
+    $scope.rock_state      = 'init';
     if (new_name){
+      $scope.rocks.name    ="";
       $scope.show_rock_name_select = true;
       $scope.rock = {'u0':'0,0,1','u1':'0,0.1,1.1','nframes':3};
     }
@@ -573,7 +604,7 @@ angular.module('app')
   $scope.delete_rock=function(){
     $http.post('delete_rock',JSON.stringify({'rock_name':$scope.rocks.select}))
     .then(function(response){
-      $scope.rock_names  = response.data.rocks_name
+      $scope.rock_names  = response.data.rock_names
       if ($scope.rocks.name==$scope.rocks.select){
         if (!$scope.rock_names.includes($scope.rocks.name) ){
           $scope.rocks.select = $scope.rock_names[0];
@@ -586,15 +617,18 @@ angular.module('app')
   $scope.load_rock=function(){
     // $log.log('rock select : ',$scope.rocks.select);
     $scope.rocks.name=$scope.rocks.select;
+    $scope.rocks.active=$scope.rocks.select;
     $http.post('load_rock',JSON.stringify({'rock_name':$scope.rocks.name}))
     .then(function(response){
       // $log.log(response.data);
       $scope.rock=response.data.rock;
+      $scope.show_rock_name_select=false;
       $scope.info.modes  = response.data.modes;
       $scope.exp_refl    = response.data.exp_refl;
       $scope.nbeams      = response.data.nbeams;
       $scope.rock_state  = 'done';
       $scope.rocks.saved = $scope.rock_names.includes($scope.rocks.name);
+      $scope.set_rock_saved();
       $scope.bloch_solve_set('done','green');
       $scope.set_rock_graphs()
       $scope.get_rock_sim(1);
@@ -612,7 +646,7 @@ angular.module('app')
   }
 
   $scope.save_rock=function(){
-    $log.log('saving rock')
+    $log.log('saving rock : ', $scope.rocks.name)
     if (!$scope.rock_names.includes($scope.rocks.name)){
       $http.post('save_rock',JSON.stringify({'rock_name':$scope.rocks.name}))
       .then(function(response){

@@ -1,5 +1,5 @@
 # If using gmail an app password must be set by the sender
 # This is done in the browser directly from the gmail account
-sender_email    = ronandrevon@gmail.com
-password        = tlrd hrci iwuo ffuc
+sender_email    = 
+password        = 
 receiver_email  = tarik.drevon@stfc.ac.uk

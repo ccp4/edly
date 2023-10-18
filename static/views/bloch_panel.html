@@ -229,8 +229,8 @@ Parameters Panel
           </div>
         </div>
         <!-- rock name -->
-        <div style="margin-left:5%;padding-top: 5px;padding-bottom: 5px;"> Name :
-            <span  id="rock_name_span"  ng-show="!show_rock_name_select" ng-bind="rocks.active" ng-click="new_rock(true)" style="cursor: pointer;font-weight:bold;"/>
+        <div style="margin-left:5%;padding-top: 5px;padding-bottom: 5px;"> <span id="rock_name_btn"  ng-click="new_rock(true)" style="cursor: pointer;" > Name</span>:
+            <span  id="rock_name_span"  ng-show="!show_rock_name_select" ng-bind="rocks.active" style="font-weight:bold;"/>
             <input id="rock_name_input" ng-show="show_rock_name_select" ng-model="rocks.name" ng-key-enter="save_rock_name()" ng-blur="save_rock_name()" class="long_input"  type="text">
             <a id="rock_name_popup" class="popup" style="display:none;">
               <span class="glyphicon glyphicon-exclamation-sign"/>

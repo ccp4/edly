@@ -614,6 +614,7 @@ def integrate_rock():
     if not session['bloch_modes']['integrated']:
         rock = load_rock()
         thicks=session['bloch']['thicks']
+        rock.set_beams_vs_thickness(thicks,v=1)
         rock.integrate();
         if session['dat']['pets']:
             # df_exp = load_pets().hkl

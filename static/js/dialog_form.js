@@ -98,5 +98,4 @@ function dialog_delete(){
     event.preventDefault();
     delete_structure();
   });
-
 };
