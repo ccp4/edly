@@ -1,5 +1,5 @@
 <!-- Frames panel -->
-<div class="panel bloch_panel" ng-show="!modes['molecule'] && max_frame>0">
+<div class="panel bloch_panel" ng-show="(max_frame>0 && mode=='frames') || (mode=='bloch' && dat['pets'])">
   <div class="row">
       <span style="padding-left: 5px;font-size:18px" > Frames : </span>
       <span class="popup glyphicon bloch_info" ng-class="{'glyphicon-plus-sign':!expand['frame_settings'],'glyphicon-minus-sign':expand['frame_settings']}" ng-click="expand['frame_settings']=!expand['frame_settings']" ng-mouseenter="popup['frame_settings']=true" ng-mouseleave="popup['frame_settings']=false" >

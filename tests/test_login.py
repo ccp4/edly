@@ -12,9 +12,9 @@ def test_login(chrome_driver,sec):
     submit_form(chrome_driver,'form_login')
     sleep(sec)
     check_text(chrome_driver,'span_expand_import_menu','Import menu')
-    print(colors.green+",done"+colors.black)
+    print(colors.green+",done. "+colors.black,end="")
 
-# @pytest.mark.new
+@pytest.mark.new
 @pytest.mark.lvl1
 def test_new_structure(chrome_driver,sec):
     print(colors.green+"\nCreating structure %s" %struct_test+colors.black,end="")
@@ -32,4 +32,4 @@ def test_new_structure(chrome_driver,sec):
     check_text(chrome_driver,'structure_panel_name',struct_test)
 
     # click(chrome_driver,'expand_import_menu',sec)
-    print(colors.green+",done"+colors.black)
+    print(colors.green+",done. "+colors.black)

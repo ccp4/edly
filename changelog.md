@@ -1,6 +1,19 @@
 # Version log
 ## 0.0.8dev
 
+### Wed 18 Oct 16:07:18 BST 2023
+- issue#64 : rocking curve
+  - fix slight integration issue
+  - save currently simulated rocking curve dialog prompt `dialog_save_rock`
+  - `rock_name` click location changed
+- tests :
+  - dialog save rock new test
+- remove some mathjax stuffs
+
+### Tue 17 Oct 10:57:29 BST 2023
+- initialization bug fixes : changes to `init_bloch_panel`
+- tests : added *test_switch_structure*
+
 ## 0.0.7
 ### Fri 13 Oct 13:01:43 CEST 2023
 - tests :

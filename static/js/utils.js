@@ -194,22 +194,20 @@ function open_file(link){
 // Mathjax
 ///////////////////////////////////////
 function update_formula(formula){
-  // window.MathJax = {
-  //   startup: {
-  //     ready: () => {
-  //       console.log('MathJax is loaded, but not yet initialized');
-  //       MathJax.startup.defaultReady();
-  //       console.log('MathJax is initialized, and the initial typeset is queued');
-  //     }
-  //   }
-  // };
-  var math = MathJax.Hub.getAllJax("formula")[0];
-
-  if (math){
-    MathJax.Hub.Queue(["Text",math,formula]);
+  var mathjax = window.MathJax;
+  if (mathjax){
+    var formula = mathjax.Hub.getAllJax("formula")[0];
+    if (formula){
+      // console.log('mathjax formula :', formula)
+      console.log('mathjax formula ok')
+      // window.MathJax.Hub.Queue(["Text",formula,formula]);
+    }
+    else{
+      console.log('formula not found')
+    }
   }
   else{
-    console.log('mathjax not init')
+    console.log('mathjax not present')
   }
 }
 
@@ -239,3 +237,51 @@ function focus(elt){
   // console.log('focus',elt);
   document.getElementById(elt).focus();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function dialog_save_rock(){
+  var answer='no';
+  var closed=false;
+  dialog = $( "#dialog_save_rock" ).dialog({
+    autoOpen: false,
+    height: 200,
+    width: 400,
+    modal: true,
+    buttons: {
+      "yes": function() {answer='yes';dialog.dialog( "close" );},
+      "no" : function() {answer='no' ;dialog.dialog( "close" );},
+    },
+    close: function() {
+      // console.log('close dialog save rock with answer : ',answer);
+      closed=true;
+    }
+  })
+
+  $( "#dialog_save_rock" ).dialog( "open" );
+
+  const condition = await new Promise((resolve, reject) => {
+    let intv=setInterval(() => {
+      console.log('waiting for rock save dialog to close');
+      if (closed) {
+        console.log('closed done');
+        clearInterval(intv);
+        resolve(); // Condition met, resolve the promise
+      }
+    }, 100);
+  });
+
+  await condition;
+  return answer=='yes';
+};

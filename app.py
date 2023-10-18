@@ -182,6 +182,7 @@ def load_frames():
     out=check_output(cmd,shell=True).decode().strip()    #;print(out)
     session['exp'] = init_frames(session['mol'],'exp')
     session['dat']['exp']=True
+
     return json.dumps({'dat':session['dat'],
         'nb_frames':session['exp']['nb_frames'],
         'folder':session['exp']['folder'],

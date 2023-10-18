@@ -4,17 +4,21 @@ from utils import glob_colors as colors
 from selenium.webdriver.common.keys import Keys
 from selenium_utils import*
 
+@pytest.mark.new
+def test_bloch_cif(chrome_driver,sec):
+    print(colors.green+"Check cif"+colors.black,end="")
+    check_cif(chrome_driver,sec)
+
 
 @pytest.mark.lvl1
 def test_bloch_single(chrome_driver,sec):
     print(colors.green+"\nTesting bloch single mode"+colors.black,end="")
-    print(colors.blue+", check cif"+colors.black,end="")
-    check_cif(chrome_driver,sec)
 
-    print(colors.blue+", bloch single "+colors.black,end="")
     click(chrome_driver,'bloch_tab',sec)
     check_text(chrome_driver,'mode_title_panel','Bloch solver')
     click(chrome_driver,'u_single',sec)
+
+    print(colors.blue+", edit mode"+colors.black,end="")
     click(chrome_driver,'u_edit',sec)
     write(chrome_driver,'u_input','0.1,0.2,1',sec,clear=True)
 

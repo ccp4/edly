@@ -94,6 +94,12 @@ def submit_form(d,id):
     elt=d.find_element("id", id);
     elt.submit()
 
+def click_elt_form(d,txt,sec):
+    btns=d.find_elements("class name",'ui-button')
+    btn=[b for b in btns if b.find_element("class name",'ui-button-text').text==txt][0]
+    btn.click()
+    sleep(sec)
+
 
 def select_by_text(d,id,text,sec):
     select=Select(d.find_element('id',id))
@@ -155,8 +161,8 @@ def import_cif(chrome_driver,sec):
     click(chrome_driver,'info_struct_refresh_btn',sec)
     check_text(chrome_driver,'info_struct_cif',cif_file)
 
-    print(colors.green+"done"+colors.black)
     click(chrome_driver,'expand_import_menu',sec)
+    print(colors.green+", done. "+colors.black,end="")
 
 def check_cif(chrome_driver,sec):
     if not chrome_driver.find_element("id", "cif_file_div").is_displayed():
