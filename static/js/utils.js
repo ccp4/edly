@@ -196,11 +196,11 @@ function open_file(link){
 function update_formula(formula){
   var mathjax = window.MathJax;
   if (mathjax){
-    var formula = mathjax.Hub.getAllJax("formula")[0];
-    if (formula){
+    var jax_formula = mathjax.Hub.getAllJax("formula")[0];
+    if (jax_formula){
       // console.log('mathjax formula :', formula)
       console.log('mathjax formula ok')
-      // window.MathJax.Hub.Queue(["Text",formula,formula]);
+      window.MathJax.Hub.Queue(["Text",jax_formula,formula]);
     }
     else{
       console.log('formula not found')

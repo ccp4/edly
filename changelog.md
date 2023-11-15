@@ -1,6 +1,10 @@
 # Version log
 ## 0.0.8dev
-
+### Wed 15 Nov 14:25:08 GMT 2023
+- mathjax update formula
+- issue#67 pixel range :
+  - added frame_folder flag to pets/dials for nxy
+- ED version:exp 7245da9
 ### Wed 18 Oct 16:07:18 BST 2023
 - issue#64 : rocking curve
   - fix slight integration issue

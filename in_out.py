@@ -160,9 +160,9 @@ def get_dat_types(mol):
 def load_dat_type(mol):
     dat_type = get_dat_type(mol)        #;print(dat_type)
     if dat_type=='dials':
-        pets_data[mol]=dials.Dials(dials_path(mol))
+        pets_data[mol]=dials.Dials(dials_path(mol),frame_folder='../exp')
     elif dat_type=='pets':
-        pets_data[mol]=pets.Pets(path=pets_path(mol),gen=False,dyn=0)
+        pets_data[mol]=pets.Pets(path=pets_path(mol),gen=False,dyn=0,frame_folder='../exp')
     elif dat_type=='xds':
         pets_data[mol]=xds.XDS(xds_path(mol))
     # print(list(pets_data.keys()))

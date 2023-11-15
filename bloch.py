@@ -80,7 +80,13 @@ def bloch_fig():
         df_pets = df_pets.loc[~(df_pets.hkl == str((0,0,0)))]
         pt_plot=df_pets[['px','py','qx','qy','I','hkl','F']].copy()
         px,py='qx','qy'
-        if is_px:px,py='px','py'
+        if is_px:
+            #### recalculate pixel location as sanity check of the hkl_to_pixels
+            # print(pt_plot[['hkl','px','py']][:5])
+            df_pxpy = pets.hkl_to_pixels(pt_plot['hkl'].tolist(),session['frame'])
+            # print(df_pxpy[:5])
+            pt_plot[['px','py']]=df_pxpy.values
+            px,py='px','py'
         pt_plot['Ix']=normalize(np.log10(np.maximum(abs(pt_plot['I']),1e-2)))
 
         fig.add_trace(go.Scatter(
@@ -126,7 +132,6 @@ def bloch_fig():
                 qr = qs/(pets.aper*np.sqrt(2))
                 rx = lambda r:r*ct+cx ;ry = lambda r:r*st+cy
 
-            # print('qs : ',qs)
             for q0,r0 in zip(qs,qr):
                 name='%.2f A' %(1/q0)
                 fig.add_trace(go.Scatter(
@@ -238,7 +243,11 @@ def update_bloch(fig=True):
     # b_args['thicks']=None
     session['b0_path'] = get_pkl(session['id'])
     b0 = load_b0()
-    b0.update(**b_args)
+    f_sw = None
+    if session['dat']['pets']:
+        pets=load_pets()
+        f_sw=lambda hkl:pets.sw(hkl,session['frame'])
+    b0.update(f_sw=f_sw,**b_args)
     # b0.save()
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
     bloch_args=b_args.copy()
@@ -1010,6 +1019,6 @@ def load_rock(rock_name=''):
 
 def load_pets():
     mol=session['mol']
-    if not mol in pets_data.keys():
+    if mol not in pets_data.keys():
         update_exp_data(mol)
     return pets_data[mol]
