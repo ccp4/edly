@@ -1,5 +1,11 @@
 # Version log
 ## 0.0.8dev
+### Thu  7 Dec 08:13:13 GMT 2023
+- added `load_pets` in bloch.py
+- initial addition of `rock_frames` to keep track of exp frames in rocking curve
+- custom calculation of excitation error from `ED_importer`
+- test_custom
+- ED_version  : 3930006
 ### Wed 15 Nov 14:25:08 GMT 2023
 - mathjax update formula
 - issue#67 pixel range :

@@ -260,7 +260,7 @@ Parameters Panel
             <tr><td class="td-in"> u0   </td><td class="td-in"> = </td>
               <td> <input id="rock_u0_input" class="long_input" ng-change="rock_reset()" ng-model="rock['u0']"  ></td>
               <td class="td-in" ng-show="dat['pets']">
-                <a class="btn-sm btn-primary popup" ng-click="set_rock_frame(0)" ng-mouseenter="showIt('rock_set_0')" ng-mouseleave="hideIt('rock_set_0')">
+                <a class="btn-sm btn-primary popup" id="rock_u0_btn"  ng-click="set_rock_frame(0)" ng-mouseenter="showIt('rock_set_0')" ng-mouseleave="hideIt('rock_set_0')">
                   <span class="glyphicon glyphicon-pushpin"/>
                   <span class="popuptext" style="" ng-show="popup['rock_set_0']"> Assign u0 to current experimental frame </span>
                 </a>
@@ -269,7 +269,7 @@ Parameters Panel
             <tr><td class="td-in"> u1   </td><td class="td-in"> = </td>
               <td> <input id="rock_u1_input" class="long_input"  ng-change="rock_reset()" ng-model="rock['u1']"  ></td>
               <td class="td-in" ng-show="dat['pets']">
-                <a class="btn-sm btn-primary popup" ng-click="set_rock_frame(1)" ng-mouseenter="showIt('rock_set_1')" ng-mouseleave="hideIt('rock_set_1')">
+                <a class="btn-sm btn-primary popup" id="rock_u1_btn" ng-click="set_rock_frame(1)" ng-mouseenter="showIt('rock_set_1')" ng-mouseleave="hideIt('rock_set_1')">
                   <span class="glyphicon glyphicon-pushpin"/>
                   <span class="popuptext" style="" ng-show="popup['rock_set_1']"> Assign u1 to current experimental frame </span>
                 </a>

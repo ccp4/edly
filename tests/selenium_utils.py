@@ -146,7 +146,7 @@ def select_frames(chrome_driver,sec):
     click(chrome_driver,'import_menu_frames_btn',sec)
 
 
-def import_cif(chrome_driver,sec):
+def import_cif(chrome_driver,sec,cif_path=cif_path):
     if not chrome_driver.find_element("id", "import_menu_open_btn").is_displayed():
         click(chrome_driver,'expand_import_menu',sec)
 

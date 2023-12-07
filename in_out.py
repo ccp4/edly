@@ -184,15 +184,21 @@ def select_dat_type(mol,dat_type):
     out = check_output(cmd,shell=True).decode().strip();print(out)
 
 
-def update_exp_data(mol):
-    dat_type=''
-    dat_types=get_dat_types(mol)
-    if len(dat_types):
-        #if data are available but no link is found,
-        #create one for the first available data
-        if not os.path.exists(dat_path(mol)):
-            select_dat_type(mol,dat_types[0])
-        dat_type=load_dat_type(mol)
+def update_exp_data(mol,dat_type=''):
+    ### this will need to be changed as 2 different projects working with different
+    ### dataset types would be interchanged
+    if not dat_type:
+        dat_types=get_dat_types(mol)
+        if len(dat_types):
+            dat_type=dat_types[0]
+        else:
+            print('no processed data available')
+    #if data are available but no link is found,
+    #create one for the first available data
+    if not os.path.exists(dat_path(mol)):
+        select_dat_type(mol,dat_type)
+    if mol not in pets_data.keys():
+        load_dat_type(mol)
     return dat_type
 
 def load_felix(session):

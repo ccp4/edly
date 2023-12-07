@@ -75,7 +75,7 @@ def bloch_fig():
     #### add exp data
     ########################
     if is_dat:
-        pets = pets_data[session['mol']]
+        pets = load_pets()
         df_pets = pets.rpl.loc[pets.rpl.eval('(F==%d) & (I>2)' %session['frame'])]
         df_pets = df_pets.loc[~(df_pets.hkl == str((0,0,0)))]
         pt_plot=df_pets[['px','py','qx','qy','I','hkl','F']].copy()
@@ -92,7 +92,7 @@ def bloch_fig():
         fig.add_trace(go.Scatter(
             x=pt_plot[px],y=pt_plot[py],marker_size=pt_plot['Ix'],
             name='I_exp',
-            visible=session['vis']['I_pets'],
+            visible=session['vis']['I_exp'],
             hovertext=['I_exp']*len(pt_plot),
             marker_symbol='square',marker_color='purple',
             customdata=np.array([pt_plot['I'].values, pt_plot['hkl'].to_numpy()]).T,
@@ -208,7 +208,8 @@ def bloch_rotation():
 @bloch.route('/get_u', methods=['POST'])
 def get_u_exp():
     frame = json.loads(request.data.decode())
-    u = pets_data[session['mol']].uvw0[frame-1]
+    pets = load_pets()
+    u = pets.uvw0[frame-1]
     return b_str(u,4)
 
 @bloch.route('/bloch_u', methods=['POST'])
@@ -221,8 +222,9 @@ def bloch_u():
     keV = session['bloch']['keV']
     # print(session['bloch_modes'])
     if session['bloch_modes']['u0']=='auto' and session['dat']['pets']:
-        keV = np.round(pets_data[session['mol']].keV) #;print('recover wavelength %.1f' %keV)
-        u = pets_data[session['mol']].uvw0[data['frame']-1]
+        pets = load_pets()
+        keV  = np.round(pets.keV) #;print('recover wavelength %.1f' %keV)
+        u = pets.uvw0[data['frame']-1]
     else:
         # print(data['bloch']['u'])
         u = b_arr(data['bloch']['u'],session['bloch']['u'])
@@ -282,7 +284,8 @@ def show_u():
         uvw = ut.get_uvw_cont(**r_args)
     else:
         if session['bloch_modes']['u0']=='auto':
-            uvw = pets_data[session['mol']].uvw0
+            pets = load_pets()
+            uvw = pets.uvw0
         else:
             uvw = np.array(b_arr(data['u'],session['bloch']['u']))[None,:]
 
@@ -321,7 +324,7 @@ def get_bloch_sim():
 @bloch.route('/get_rock_info', methods=['POST'])
 def get_rock_info():
     data        = json.loads(request.data.decode())#;print(data)
-    rock_name   = data['rock_name'];print(rock_name)
+    rock_name   = data['rock_name']#;print(rock_name)
     rock        = load_rock(rock_name)
     # print(rock)
     info = [[0,0,1],[0,1,0],3]
@@ -333,7 +336,7 @@ def get_rock_info():
 def delete_rock():
     data       = json.loads(request.data.decode())#;print(data)
     rock_name  = data['rock_name']
-    folder     ='static/data/%s/rocks/%s' %(session['mol'],rock_name);print(folder)
+    folder     ='static/data/%s/rocks/%s' %(session['mol'],rock_name)#;print(folder)
     check_output("rm -rf %s" %folder,shell=True,).decode()
     rock_names = [os.path.basename(s) for s in glob.glob(os.path.join(sim_path(session['mol']),'*'))]
     # print(rock_names)
@@ -421,7 +424,8 @@ def set_rock_frame():
         return ''
     else:
         frame = max(0,data['frame']-1)
-        uvw = pets_data[session['mol']].uvw0
+        pets= load_pets()
+        uvw = pets.uvw0
         if opt==0:
             e0 = uvw[frame]
             e1 = np.array(session['rock']['u1'])
@@ -444,7 +448,7 @@ def set_rock_frame():
 
 
         session['frame'] = frame
-        # print(session['rock_frames'])
+        print(session['rock_frames'])
         session['rock'].update({'u0':e0.tolist(),'u1':e1.tolist()})
         return json.dumps({'rock':get_session_data('rock')})
 
@@ -476,10 +480,18 @@ def get_rock(data):
 def solve_rock():
     Sargs = {k:session['bloch'][k] for k in ['keV','Nmax','Smax','thick']}
     Sargs['cif_file'] = session['crys']['cif_file']
-
+    # print(session['dat']['pets'])
+    if session['dat']['pets']:
+        pets=load_pets()
+        Sargs['f_sw']=pets.sw
     uvw  = ut.get_uvw_cont(**session['rock'])
+    frames=None
+    if session['rock_frames']:
+        rock_f = session['rock_frames']
+        frames = np.linspace(rock_f[0],rock_f[1],session['rock']['nframes'])
+    print(rock_f,frames)
     # print(session['rock'],uvw)
-    rock = bl.Bloch_cont(path=session['path'],tag='',uvw=uvw,Sargs=Sargs)
+    rock = bl.Bloch_cont(path=session['path'],tag='',uvw=uvw,Sargs=Sargs,frames=frames)
     session['rock_state'] = 'done'
     nbs = '%d-%d' %(rock.df.nbeams.min(),rock.df.nbeams.max())
 
@@ -864,7 +876,7 @@ def set_visible():
     data=json.loads(request.data.decode())
     key = data['key']
     session['time']=time.time()
-    session['vis'][key]=data['v']
+    session['vis'][key]=data['v'] #;print(session['vis'])
     return json.dumps({key:session['vis'][key]})
 
 
@@ -912,11 +924,10 @@ def init_bloch_panel():
             'integrated': False     ,
             }
         vis = {'I':True,
-            'Vga':'legendonly','Sw':'legendonly','I_pets':True,
+            'Vga':'legendonly','Sw':'legendonly','I_exp':True,
             'rings':True}
 
         session['bloch_modes'] = bloch_modes
-        # session['vis']      = {k:True for k in ['I','Vga','Sw','I_pets','rings']}
         session['theta_phi']   = [0,0]
         session['bloch']       = bloch_args
         session['rock']        = rock_args
@@ -1020,5 +1031,5 @@ def load_rock(rock_name=''):
 def load_pets():
     mol=session['mol']
     if mol not in pets_data.keys():
-        update_exp_data(mol)
+        update_exp_data(mol,dat_type=session['dat']['dat_type'])
     return pets_data[mol]
