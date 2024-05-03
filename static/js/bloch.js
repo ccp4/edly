@@ -711,11 +711,11 @@ angular.module('app')
         case 34:
           $scope.dtheta_phi*=2;break;
         case 69:
-          $scope.dtheta_phi*=2;break;
+          $scope.dtheta_phi*=10;break;
         case 33:
           $scope.dtheta_phi/=2;break;
         case 81:
-          $scope.dtheta_phi/=2;break;
+          $scope.dtheta_phi/=10;break;
         case 8:
           $scope.dtheta_phi=0.1;break;
         case 13:

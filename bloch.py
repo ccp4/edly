@@ -34,6 +34,7 @@ def bloch_fig():
     is_sim='df_G' in b0.__dict__
     if is_sim:
         toplot=b0.df_G[['px','py','I','Vga','Sw']].copy()
+        toplot.loc[str((0,0,0)),'I']=10*toplot.sort_values('I').I[-2]
         if not xm:
             xm = b0.df_G.q.max()#;print('xm set to ',xm)
         xr,yr=[-xm,xm],[xm,-xm]
@@ -51,9 +52,9 @@ def bloch_fig():
             'Vga':['Vx','green','triangle-up'],
             'Sw' :['Sx','red'  ,'diamond'    ],
         }
-        toplot['Ix']=normalize( np.log10(np.maximum(abs(toplot['I'])  ,1e-5)))
-        toplot['Vx']=normalize( np.log10(np.maximum(abs(toplot['Vga']),1e-5)))
-        toplot['Sx']=normalize(-np.log10(np.maximum(abs(toplot['Sw']) ,1e-5)))
+        toplot['Ix']=normalize( np.log10(np.maximum(abs(toplot['I'])  ,1e-5)),ms=30)
+        toplot['Vx']=normalize( np.log10(np.maximum(abs(toplot['Vga']),1e-5)),ms=30)
+        toplot['Sx']=normalize(-np.log10(np.maximum(abs(toplot['Sw']) ,1e-5)),ms=30)
         toplot.index.name='miller indices'
 
 
@@ -248,7 +249,9 @@ def update_bloch(fig=True):
     f_sw = None
     if session['dat']['pets']:
         pets=load_pets()
-        f_sw=lambda hkl:pets.sw(hkl,session['frame'])
+        # f_sw=lambda hkl:pets.sw(hkl,session['frame'])
+        f_sw=pets.sw
+        b0.frame=session['frame']
     b0.update(f_sw=f_sw,**b_args)
     # b0.save()
     session['theta_phi'] = list(ut.theta_phi_from_u(b_args['u']))
@@ -955,7 +958,7 @@ def init_bloch_panel():
 
     #### sanity checks on refresh
     rock_state=''
-    if len(glob.glob(os.path.join(session['path'],'u_*.pkl')))>0:
+    if len(glob.glob(os.path.join(session['path'],'u*.pkl')))>0:
         rock_state='done'
 
     if session['graph']=='rock' and not session['bloch']['u']=='rock':
@@ -1031,5 +1034,6 @@ def load_rock(rock_name=''):
 def load_pets():
     mol=session['mol']
     if mol not in pets_data.keys():
+        print(list(pets_data.keys()))
         update_exp_data(mol,dat_type=session['dat']['dat_type'])
     return pets_data[mol]

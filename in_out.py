@@ -247,11 +247,13 @@ def create_id():
     id=''.join([chars[s] for s in np.random.randint(0,len(chars),10)])
     return id
 
-def normalize(s):
+def normalize(s,ms=30):
     '''to use it as marker size data are positive and the mean should be around 30'''
     s+=-s.min()
-    s/=s.max()
-    s*=30
+    M=s.max()
+    if M>0:
+        s/=s.max()
+    s*=ms
     # s = (s-s.min())/s.max()*30
     return s
 
