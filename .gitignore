@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
 # C extensions
 *.so
 **/bower_components
@@ -21,6 +22,7 @@ database
 test/dat
 test/*
 tests/report*
+electron-diffraction
 
 # Distribution / packaging
 .Python

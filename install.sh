@@ -14,14 +14,16 @@ if [ $1 -eq dev ];then
   cd electron-diffraction
   pip install -e .
 else
-  .env/bin/pip install ccp4ED==1.1.0
+  .env/bin/pip install ccp4ED==1.5
 fi
 
-
+sudo apt-get install bower
+npm install -g bower
+# and the edly javascript dependencies
 cd edly
 bower install jquery angular angular-aria angular-touch angular-bootstrap bootstrap-css bootstrap angular-chart jquery-ui plotly MathJax
-cd static
-ln -s ../bower_components .
+# cd static
+# ln -s ../bower_components .
 
 
 ###
@@ -29,7 +31,7 @@ if [ $2 -eq test ];then
   pip install selenium
   #### Note :
   # Make sure the latest version of selenium running the latest version of chrome browser
-  # for example selenium==4.9.1 and chromedriver 114.0.5735.106 are compatible 
+  # for example selenium==4.9.1 and chromedriver 114.0.5735.106 are compatible
   # pip install selenium==4.9.1 pytest-html
   # if [ $(chromium.chromedriver --version | cut -d" " -f2) == "114.0.5735.106"];then
   #   echo ok
